@@ -84,6 +84,7 @@ declare -A commands
 menu_options=(
     "启用root用户"
     "启用SSH服务"
+    "设置nameserver"
     "允许root用户SSH登录"
     "获取当前主机网卡及IP地址信息"
     "配置APT镜像源"
@@ -106,6 +107,7 @@ menu_options=(
 commands=(
     ["启用root用户"]="enable_root_user"
     ["启用SSH服务"]="enable_ssh"
+    ["设置nameserver"]="config_nameserver"
     ["允许root用户SSH登录"]="root_ssh_login"
     ["获取当前主机网卡及IP地址信息"]="get_ip_addr"
     ["配置APT镜像源"]="config_apt_source"
@@ -163,6 +165,37 @@ enable_ssh() {
 
     # 显示 SSH 服务状态
     sudo systemctl status ssh
+}
+
+# 设置nameserver
+config_nameserver() {
+    # 定义新的名称服务器地址
+    nameservers=("114.114.114.114" "223.5.5.5" "1.1.1.1")
+
+    # 获取当前的名称服务器配置
+    current_nameservers=$(cat /etc/resolv.conf)
+
+    # 检查是否需要更改名称服务器
+    if [[ $current_nameservers == *"${nameservers[0]}"* && $current_nameservers == *"${nameservers[1]}"* ]]; then
+        echo "名称服务器已设置为 (${nameservers[*]})。"
+    else
+        # 备份当前的 resolv.conf 文件
+        sudo cp /etc/resolv.conf /etc/resolv.conf.backup
+
+        # 清空当前的 resolv.conf 文件
+        > /etc/resolv.conf
+
+        # 添加新的名称服务器
+        for ns in "${nameservers[@]}"; do
+            echo "nameserver $ns" >> /etc/resolv.conf
+        done
+
+        # 输出结果
+        echo "名称服务器已设置为 (${nameservers[*]})。"
+    fi
+
+    # 显示当前的 resolv.conf 配置
+    cat /etc/resolv.conf
 }
 
 # 允许root用户SSH登录
@@ -637,7 +670,7 @@ show_menu() {
     适配系统: Ubuntu / Debian / Kali (基于Debian)
     脚本作用: Linux 基础环境配置
     
-                    --- Made by mingy ---
+                --- Made by mingy ---
     '
     echo -e "${GREEN_LINE}"
     echo ">>> 请选择操作 >>> "
