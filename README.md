@@ -2,6 +2,19 @@
 
 Ubuntu / Debian / Kali Linux 基础环境配置脚本
 
+```
+ ─────────────────────────────────────────────────────
+
+    *************  LinuxEnvConfig  *************
+
+    适配系统: Ubuntu / Debian / Kali (基于Debian)
+    脚本作用: Linux 基础环境配置
+
+                --- Made by mingy ---
+
+ ─────────────────────────────────────────────────────
+```
+
 ## 功能
 
 1. 启用root用户
@@ -19,8 +32,12 @@ Ubuntu / Debian / Kali Linux 基础环境配置脚本
 13. 配置Docker为国内镜像
 14. 安装Docker-compose
 15. 卸载Docker-compose
-16. 安装Metasploit-framework
-17. 卸载Metasploit-framework
+16. 安装vulfocus
+17. 卸载vulfocus
+18. 安装灯塔ARL
+19. 卸载灯塔ARL
+20. 安装Metasploit-framework
+21. 卸载Metasploit-framework
 
 ## 使用
 
@@ -29,7 +46,7 @@ git clone https://gitee.com/yijingsec/LinuxEnvConfig.git
 
 cd LinuxEnvConfig
 
-bash LinuxEnvConfig.sh
+sudo bash LinuxEnvConfig.sh
 ```
 
 ![image](images/image.png)

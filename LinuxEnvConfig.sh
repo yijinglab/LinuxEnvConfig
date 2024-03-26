@@ -99,6 +99,10 @@ menu_options=(
     "配置Docker为国内镜像"
     "安装Docker-compose"
     "卸载Docker-compose"
+    "安装vulfocus"
+    "卸载vulfocus"
+    "安装灯塔ARL"
+    "卸载灯塔ARL"
     "安装Metasploit-framework"
     "卸载Metasploit-framework"
 
@@ -122,6 +126,10 @@ commands=(
     ["配置Docker为国内镜像"]="configure_docker_mirror"
     ["安装Docker-compose"]="install_docker_compose"
     ["卸载Docker-compose"]="remove_docker_compose"
+    ["安装vulfocus"]="install_vulfocus"
+    ["卸载vulfocus"]="remove_vulfocus"
+    ["安装灯塔ARL"]="install_arl"
+    ["卸载灯塔ARL"]="remove_arl"
     ["安装Metasploit-framework"]="install_metasploit"
     ["卸载Metasploit-framework"]="remove_metasploit"
 )
@@ -669,6 +677,96 @@ remove_docker_compose() {
     echo "开始卸载 docker-compose"
     sudo rm -rf /usr/local/bin/docker-compose
     echo "卸载 docker-compose 完成"
+}
+
+# 安装vulfocus
+install_vulfocus() {
+    # 接收用户输入作为host_ip
+    echo "开始安装vulfocus"
+    read -p "输入启动vulfocus的主机地址: " host_ip
+    # 检查是否输入了IP地址
+    if [ -z "$host_ip" ]; then
+        echo "请输入正确的IP地址"
+        exit 1
+    fi
+
+    # 安装vulfocus
+    sudo docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/vulfocus:latest
+    sudo docker run -d -p 88:80 --name vulfocus --restart always -v /var/run/docker.sock:/var/run/docker.sock -e VUL_IP=$host_ip registry.cn-hangzhou.aliyuncs.com/mingy123/vulfocus:latest
+    echo "安装vulfocus完成"
+
+    # 打印访问信息
+    echo "Vulfocus 服务已启动。"
+    echo "访问地址: http://$host_ip:88"
+    echo "默认用户: admin"
+    echo "默认密码: admin"
+}
+
+# 卸载vulfocus
+remove_vulfocus() {
+    echo "开始卸载vulfocus"
+    sudo docker stop vulfocus
+    sudo docker rm vulfocus
+    echo "卸载vulfocus完成"
+}
+
+# 安装灯塔ARL
+install_arl() {
+    echo "开始安装灯塔ARL"
+    read -p "输入启动灯塔ARL的主机地址: " host_ip
+    # 检查是否输入了IP地址
+    if [ -z "$host_ip" ]; then
+        echo "请输入正确的IP地址"
+        exit 1
+    fi
+
+    echo "创建 docker_arl 目录"
+    sudo mkdir -p /opt/docker_arl
+    echo "创建 arl_db 卷"
+    sudo docker volume create arl_db
+
+    # 获取最新版本的 ARL 下载链接并下载
+    # sudo curl -Ls "https://gitee.com/yijingsec/ARL/releases/download/$(curl -s https://gitee.com/api/v5/repos/yijingsec/ARL/releases/latest | grep -E -o '\"tag_name\":\"([^\"]+)\"' | awk -F\" '{print $4}')/docker.zip" -o /opt/docker_arl/docker.zip && cd /opt/docker_arl && unzip -o docker.zip
+
+    local latest_tag_name=$(curl -s https://gitee.com/api/v5/repos/yijingsec/ARL/releases/latest | grep -E -o '"tag_name":"([^\"]+)"' | awk -F\" '{print $4}')
+    echo "发现最新版本: $latest_tag_name"
+    echo "下载 ARL 压缩包..."
+    local download_url="https://gitee.com/yijingsec/ARL/releases/download/$latest_tag_name/docker.zip"
+    curl -Ls "$download_url" -o /opt/docker_arl/docker.zip
+
+    # 解压 ARL 压缩包
+    cd /opt/docker_arl
+    unzip -o docker.zip
+
+    # 启动 ARL 服务
+    echo "启动 ARL 服务..."
+    sudo docker compose up -d
+    
+    # 检查命令是否成功执行
+    if [ $? -eq 0 ]; then
+        echo "ARL 服务已启动。"
+        echo "访问地址: https://$host_ip:5003"
+        echo "默认用户: admin"
+        echo "默认密码: arlpass"
+    else
+        echo "ARL 服务启动失败, 请重试"
+        exit 1
+    fi
+}
+
+# 卸载灯塔ARL
+remove_arl() {
+    echo "开始卸载ARL"
+    cd /opt/docker_arl
+    sudo docker compose down
+    echo "删除 arl_db 卷"
+    sudo docker volume rm arl_db
+    cd ~
+    sudo rm -rf /opt/docker_arl
+    echo "删除 arl 镜像"
+    sudo docker rmi tophant/arl
+    sudo docker rmi rabbitmq:3.8.19-management-alpine
+    sudo docker rmi mongo:4.0.27
 }
 
 # 安装Metasploit-framework
