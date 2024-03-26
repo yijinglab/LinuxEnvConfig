@@ -88,8 +88,8 @@ menu_options=(
     "允许root用户SSH登录"
     "获取当前主机网卡及IP地址信息"
     "配置APT镜像源"
-    # "安装OpenJDK8"
-    # "删除当前JDK环境"
+    "安装OpenJDK"
+    "删除当前JDK环境"
     # "安装Python3.8"
     # "卸载Python3.8"
     "安装Miniconda3"
@@ -111,8 +111,8 @@ commands=(
     ["允许root用户SSH登录"]="root_ssh_login"
     ["获取当前主机网卡及IP地址信息"]="get_ip_addr"
     ["配置APT镜像源"]="config_apt_source"
-    # ["安装OpenJDK8"]="install_openjdk8"
-    # ["删除当前JDK环境"]="remove_jdk"
+    ["安装OpenJDK"]="install_openjdk"
+    ["删除当前JDK环境"]="remove_jdk"
     # ["安装Python3.8"]="install_python38"
     # ["卸载Python3.8"]="remove_python38"
     ["安装Miniconda3"]="install_miniconda3"
@@ -221,22 +221,54 @@ get_ip_addr() {
     done
 }
 
-# 安装OpenJDK8
-install_openjdk8() {
-    # 设置JDK下载链接（以OpenJDK为例）
-    JDK_URL="https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u292-b10/OpenJDK8U-jdk_x64_linux_hotspot_8u292b10.tar.gz"
-
+# 安装OpenJDK
+install_openjdk() {
+    echo "安装OpenJDK"
+    echo "选择想要安装的OpenJDK版本: "
+    # 输入数字，选择想要安装的不同openjdk版本
+    echo "1. OpenJDK 8 LTS"
+    echo "2. OpenJDK 11 LTS"
+    echo "3. OpenJDK 17 LTS"
+    echo "4. OpenJDK 21 LTS"
+    echo "5. 退出"
+    read -p "请输入序号: " version
+    case $version in
+        1)
+            echo "安装OpenJDK 8 LTS"
+            JDK_URL="https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u402-b06/OpenJDK8U-jdk_x64_linux_hotspot_8u402b06.tar.gz"
+            ;;
+        2)
+            echo "安装OpenJDK 11 LTS"
+            JDK_URL="https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.22%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.22_7.tar.gz"
+            ;;
+        3)
+            echo "安装OpenJDK 17 LTS"
+            JDK_URL="https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.10%2B7/OpenJDK17U-jdk_x64_linux_hotspot_17.0.10_7.tar.gz"
+            ;;
+        4)
+            echo "安装OpenJDK 21 LTS"
+            JDK_URL="https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2%2B13/OpenJDK21U-jdk_x64_linux_hotspot_21.0.2_13.tar.gz"
+            ;;
+        5)
+            echo "退出"
+            exit 0
+            ;;
+        *)
+            echo "输入的序号无效"
+            exit 1
+            ;;
+    esac
     # 设置解压目录
     JDK_DIR="/usr/lib/jvm"
 
     # 下载JDK
     echo "Downloading JDK..."
     num=$RANDOM
-    wget $JDK_URL -O jdk-$num.tar.gz
+    wget "$JDK_URL" -O jdk-$num.tar.gz
 
     # 检查是否下载成功
     if [ $? -ne 0 ]; then
-        echo "Failed to download JDK."
+        echo "下载OpenJDK失败。"
         exit 1
     fi
 
@@ -246,12 +278,12 @@ install_openjdk8() {
 
     # 检查解压是否成功
     if [ $? -ne 0 ]; then
-        echo "Failed to unpack JDK."
+        echo "解压OpenJDK失败。"
         exit 1
     fi
 
     # 配置Java和Javac
-    echo "Configuring Java and Javac..."
+    echo "配置Java和Javac..."
 
     # 移动解压后的JDK到JDK目录
     mv $JDK_DIR/jdk* $JDK_DIR/
@@ -265,14 +297,14 @@ install_openjdk8() {
 
     # 检查update-alternatives是否成功
     if [ $? -ne 0 ]; then
-        echo "Failed to configure Java and Javac."
+        echo "未能成功配置Java和Javac。"
         exit 1
     fi
 
     # 清理下载的源码压缩包
     rm -f jdk-$num.tar.gz
 
-    echo "JDK has been successfully installed and configured."
+    echo "OpenJDK已成功安装和配置。"
 }
 
 # 删除当前JDK环境

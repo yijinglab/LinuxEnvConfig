@@ -10,15 +10,17 @@ Ubuntu / Debian / Kali Linux 基础环境配置脚本
 4. 允许root用户SSH登录
 5. 获取当前主机网卡及IP地址信息
 6. 配置APT镜像源
-7. 安装Miniconda3
-8. 卸载Miniconda3
-9. 安装Docker
-10. 卸载Docker
-11. 配置Docker为国内镜像
-12. 安装Docker-compose
-13. 卸载Docker-compose
-14. 安装Metasploit-framework
-15. 卸载Metasploit-framework
+7. 安装OpenJDK
+8. 删除当前JDK环境
+9. 安装Miniconda3
+10. 卸载Miniconda3
+11. 安装Docker
+12. 卸载Docker
+13. 配置Docker为国内镜像
+14. 安装Docker-compose
+15. 卸载Docker-compose
+16. 安装Metasploit-framework
+17. 卸载Metasploit-framework
 
 ## 使用
 
