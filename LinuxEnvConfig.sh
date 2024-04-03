@@ -243,19 +243,23 @@ install_openjdk() {
     case $version in
         1)
             echo "安装OpenJDK 8 LTS"
-            JDK_URL="https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u402-b06/OpenJDK8U-jdk_x64_linux_hotspot_8u402b06.tar.gz"
+            JDK_VER="jdk8u402-b06"
+            JDK_URL="https://github.com/adoptium/temurin8-binaries/releases/download/$JDK_VER/OpenJDK8U-jdk_x64_linux_hotspot_8u402b06.tar.gz"
             ;;
         2)
             echo "安装OpenJDK 11 LTS"
-            JDK_URL="https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.22%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.22_7.tar.gz"
+            JDK_VER="jdk-11.0.22+7"
+            JDK_URL="https://github.com/adoptium/temurin11-binaries/releases/download/$JDK_VER/OpenJDK11U-jdk_x64_linux_hotspot_11.0.22_7.tar.gz"
             ;;
         3)
             echo "安装OpenJDK 17 LTS"
-            JDK_URL="https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.10%2B7/OpenJDK17U-jdk_x64_linux_hotspot_17.0.10_7.tar.gz"
+            JDK_VER="jdk-17.0.10+7"
+            JDK_URL="https://github.com/adoptium/temurin17-binaries/releases/download/$JDK_VER/OpenJDK17U-jdk_x64_linux_hotspot_17.0.10_7.tar.gz"
             ;;
         4)
             echo "安装OpenJDK 21 LTS"
-            JDK_URL="https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2%2B13/OpenJDK21U-jdk_x64_linux_hotspot_21.0.2_13.tar.gz"
+            JDK_VER="jdk-21.0.2+13"
+            JDK_URL="https://github.com/adoptium/temurin21-binaries/releases/download/$JDK_VER/OpenJDK21U-jdk_x64_linux_hotspot_21.0.2_13.tar.gz"
             ;;
         5)
             echo "退出"
@@ -294,14 +298,14 @@ install_openjdk() {
     echo "配置Java和Javac..."
 
     # 移动解压后的JDK到JDK目录
-    mv $JDK_DIR/jdk* $JDK_DIR/
+    # mv $JDK_DIR/jdk* $JDK_DIR/
 
     # 设置Java和Javac的替代选项
-    sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/jdk*/bin/java 2
-    sudo update-alternatives --set java /usr/lib/jvm/jdk*/bin/java
+    sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/$JDK_VER/bin/java 2
+    sudo update-alternatives --set java /usr/lib/jvm/$JDK_VER/bin/java
 
-    sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/jdk*/bin/javac 2
-    sudo update-alternatives --set javac /usr/lib/jvm/jdk*/bin/javac
+    sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/$JDK_VER/bin/javac 2
+    sudo update-alternatives --set javac /usr/lib/jvm/$JDK_VER/bin/javac
 
     # 检查update-alternatives是否成功
     if [ $? -ne 0 ]; then
@@ -322,7 +326,7 @@ remove_jdk() {
 
     # 检查JDK目录是否存在
     if [ -d "$JDK_DIR" ]; then
-        echo "JDK found at $JDK_DIR."
+        echo "在 $JDK_DIR 找到JDK。"
 
         # 移除Java和Javac的配置
         update-alternatives --remove java /usr/bin/java
@@ -330,9 +334,9 @@ remove_jdk() {
 
         # 删除JDK目录
         sudo rm -rf "$JDK_DIR"
-        echo "JDK has been uninstalled."
+        echo "JDK已被卸载。"
     else
-        echo "No JDK found, or JDK installation path could not be determined."
+        echo "找不到JDK, 或者无法确定JDK安装路径。"
         exit 1
     fi
 }
