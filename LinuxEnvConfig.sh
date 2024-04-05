@@ -512,8 +512,8 @@ config_apt_source() {
     elif [[ "$(lsb_release -cs)" == "kali-rolling" ]]; then
         sudo mv /etc/apt/sources.list /etc/apt/sources.list.bak
         sudo tee /etc/apt/sources.list <<-'EOF'
-deb https://mirrors.tuna.tsinghua.edu.cn/kali kali-rolling main non-free contrib
-# deb-src https://mirrors.tuna.tsinghua.edu.cn/kali kali-rolling main non-free contrib
+deb https://mirrors.tuna.tsinghua.edu.cn/kali kali-rolling main contrib non-free non-free-firmware
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/kali kali-rolling main contrib non-free non-free-firmware
 EOF
     else
         echo "不支持的系统版本, 请手动配置apt源"
