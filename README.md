@@ -38,6 +38,8 @@ Ubuntu / Debian / Kali Linux 基础环境配置脚本
 19. 卸载灯塔ARL
 20. 安装Metasploit-framework
 21. 卸载Metasploit-framework
+22. 安装Viper
+23. 卸载Viper
 
 ## 使用
 

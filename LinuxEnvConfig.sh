@@ -105,6 +105,8 @@ menu_options=(
     "卸载灯塔ARL"
     "安装Metasploit-framework"
     "卸载Metasploit-framework"
+    "安装Viper"
+    "卸载Viper"
 
 )
 
@@ -132,6 +134,8 @@ commands=(
     ["卸载灯塔ARL"]="remove_arl"
     ["安装Metasploit-framework"]="install_metasploit"
     ["卸载Metasploit-framework"]="remove_metasploit"
+    ["安装Viper"]="install_viper"
+    ["卸载Viper"]="remove_viper"
 )
 
 # 启用root用户
@@ -625,7 +629,7 @@ remove_miniconda3() {
 check_docker() {
     which docker > /dev/null 2>&1
 
-    if [ $? == 0 ] then
+    if [ $? == 0 ]; then
         echo "Docker 已安装"
         service docker start > /dev/null 2>&1
         systemctl start docker > /dev/null 2>&1
@@ -812,6 +816,57 @@ remove_metasploit() {
     sudo apt remove metasploit-framework -y
 }
 
+# 安装Viper
+install_viper() {
+    # 检查Docker是否安装
+    echo "开始安装灯塔ARL"
+    check_docker
+    read -p "输入启动Viper的主机地址: " host_ip
+    # 检查是否输入了IP地址
+    if [ -z "$host_ip" ]; then
+        echo "请输入正确的IP地址"
+        exit 1
+    fi
+
+    mkdir -p /root/VIPER && cd /root/VIPER && rm -f docker-compose.* > /dev/null 2>&1
+
+    tee docker-compose.yml <<-'EOF'
+version: "3"
+services:
+  viper:
+    image: registry.cn-shenzhen.aliyuncs.com/toys/viper:latest
+    container_name: viper-c
+    network_mode: "host"
+    restart: always
+    volumes:
+      - ${PWD}/loot:/root/.msf4/loot
+      - ${PWD}/db:/root/viper/Docker/db
+      - ${PWD}/module:/root/viper/Docker/module
+      - ${PWD}/log:/root/viper/Docker/log
+      - ${PWD}/nginxconfig:/root/viper/Docker/nginxconfig
+    command: ["VIPER_PASSWORD"]
+EOF
+
+    read -p "输入VIPER密码: " VIPER_PASSWORD
+    sed -i "s/VIPER_PASSWORD/$VIPER_PASSWORD/g" docker-compose.yml
+    cd /root/VIPER && docker compose up -d
+    echo "正在等待系统启动"
+    sleep 15
+    echo "访问地址: https://$host_ip:60000 登录到服务器"
+    echo "用户名: root"
+    echo "密  码: $VIPER_PASSWORD"
+    echo "安装Viper完成"
+}
+
+# 卸载Viper
+remove_viper() {
+    echo "开始卸载Viper"
+    cd /root/VIPER && docker compose down
+    cd ~ && rm -rf /root/VIPER
+    echo "卸载Viper完成"
+}
+
+# 显示菜单
 show_menu() {
     clear
     YELLOW="\e[33m"
@@ -842,6 +897,7 @@ show_menu() {
     done
 }
 
+# 处理用户选择
 handle_choice() {
     local choice=$1
     # 检查输入是否为空
