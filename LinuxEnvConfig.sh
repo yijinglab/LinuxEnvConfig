@@ -622,6 +622,19 @@ remove_miniconda3() {
     echo "卸载 mimiconda3 完成"
 }
 
+check_docker() {
+    which docker > /dev/null 2>&1
+
+    if [ $? == 0 ] then
+        echo "Docker 已安装"
+        service docker start > /dev/null 2>&1
+        systemctl start docker > /dev/null 2>&1
+    else
+        echo "Docker 未安装，开始安装"
+        install_docker
+    fi
+}
+
 # 安装Docker
 install_docker() {
     echo "开始安装 docker"
@@ -695,6 +708,9 @@ install_vulfocus() {
         exit 1
     fi
 
+    # 检查Docker是否安装
+    check_docker
+
     # 安装vulfocus
     sudo docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/vulfocus:latest
     sudo docker run -d -p 88:80 --name vulfocus --restart always -v /var/run/docker.sock:/var/run/docker.sock -e VUL_IP=$host_ip registry.cn-hangzhou.aliyuncs.com/mingy123/vulfocus:latest
@@ -724,6 +740,9 @@ install_arl() {
         echo "请输入正确的IP地址"
         exit 1
     fi
+
+    # 检查Docker是否安装
+    check_docker
 
     echo "创建 docker_arl 目录"
     sudo mkdir -p /opt/docker_arl
