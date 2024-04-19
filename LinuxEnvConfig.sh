@@ -109,6 +109,8 @@ menu_options=(
     "卸载Viper"
     "安装CTFd"
     "卸载CTFd"
+    "安装AWVS"
+    "卸载AWVS"
 )
 
 commands=(
@@ -139,6 +141,8 @@ commands=(
     ["卸载Viper"]="remove_viper"
     ["安装CTFd"]="install_ctfd"
     ["卸载CTFd"]="remove_ctfd"
+    ["安装AWVS"]="install_awvs"
+    ["卸载AWVS"]="remove_awvs"
 )
 
 # 启用root用户
@@ -875,7 +879,6 @@ install_ctfd() {
     check_docker
     echo "开始安装CTFd"
     read -p "输入启动CTFd的主机地址: " host_ip
-    read -p "输入启动CTFd的主机端口: " host_port
     # 检查是否输入了IP地址
     if [ -z "$host_ip" ]; then
         echo "请输入正确的IP地址"
@@ -896,13 +899,69 @@ install_ctfd() {
 # 卸载CTFd
 remove_ctfd() {
     echo "开始卸载CTFd"
-    docker stop ctfd && docker rm ctfd
+    docker rm ctfd -f
+    if [ $? -ne 0 ]; then
+        echo "删除容器失败，请检查容器是否启动"
+        exit 1
+    fi
     rm -rf /opt/CTFd
     read -p "是否要删除镜像? (y/n)" yn
     if [[ $yn == "y" || $yn == "Y" ]]; then
         docker rmi ctfd/ctfd
     fi
     echo "卸载CTFd完成"
+}
+
+# 安装AWVS
+install_avws() {
+    # 检查Docker是否安装
+    check_docker
+    echo "开始安装AWVS"
+    read -p "输入启动AWVS的主机地址: " host_ip
+    # 检查是否输入了IP地址
+    if [ -z "$host_ip" ]; then
+        echo "请输入正确的IP地址"
+        exit 1
+    fi
+
+    read -p "输入启动AWVS的主机端口: " host_port
+    if [ -z "$host_port" ]; then
+        echo "请输入正确的端口号"
+        exit 1
+    fi
+    docker pull registry.cn-shanghai.aliyuncs.com/yijingsec/awvs:latest
+    if [ $? -ne 0 ]; then
+        echo "拉取镜像失败，请检查网络连接"
+        exit 1
+    fi
+    echo "正在启动AWVS"
+    docker run -dit -p $host_port:3443 --name yijingsec-awvs --cap-add LINUX_IMMUTABLE registry.cn-shanghai.aliyuncs.com/yijingsec/awvs:latest
+    while true; do
+        sleep 3
+        docker ps | grep "yijingsec-awvs" > /dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            echo "容器启动成功"
+            break
+        fi
+    done
+    echo "访问地址: https://$host_ip:$host_port"
+    echo "默认用户: admin@admin.com"
+    echo "默认密码: Admin123"
+}
+
+# 卸载AWVS
+remove_awvs() {
+    echo "开始卸载AWVS"
+    docker rm yijingsec-awvs -f
+    if [ $? -ne 0 ]; then
+        echo "删除容器失败，请检查容器是否启动"
+        exit 1
+    fi
+    read -p "是否要删除镜像? (y/n)" yn
+    if [[ $yn == "y" || $yn == "Y" ]]; then
+        docker rmi registry.cn-shanghai.aliyuncs.com/yijingsec/awvs:latest
+    fi
+    echo "卸载AWVS完成"
 }
 
 # 显示菜单
