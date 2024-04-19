@@ -107,7 +107,8 @@ menu_options=(
     "卸载Metasploit-framework"
     "安装Viper"
     "卸载Viper"
-
+    "安装CTFd"
+    "卸载CTFd"
 )
 
 commands=(
@@ -136,6 +137,8 @@ commands=(
     ["卸载Metasploit-framework"]="remove_metasploit"
     ["安装Viper"]="install_viper"
     ["卸载Viper"]="remove_viper"
+    ["安装CTFd"]="install_ctfd"
+    ["卸载CTFd"]="remove_ctfd"
 )
 
 # 启用root用户
@@ -864,6 +867,42 @@ remove_viper() {
     cd /root/VIPER && docker compose down
     cd ~ && rm -rf /root/VIPER
     echo "卸载Viper完成"
+}
+
+# 安装CTFd
+install_ctfd() {
+    # 检查Docker是否安装
+    check_docker
+    echo "开始安装CTFd"
+    read -p "输入启动CTFd的主机地址: " host_ip
+    read -p "输入启动CTFd的主机端口: " host_port
+    # 检查是否输入了IP地址
+    if [ -z "$host_ip" ]; then
+        echo "请输入正确的IP地址"
+        exit 1
+    fi
+
+    read -p "输入启动CTFd的主机端口: " host_port
+    if [ -z "$host_port" ]; then
+        echo "请输入正确的端口号"
+        exit 1
+    fi
+
+    mkdir -p /opt/CTFd && cd /opt/CTFd
+    docker run --name ctfd -dit -p $host_port:8000 -v /opt/CTFd:/ ctfd/ctfd
+    echo "访问地址: https://$host_ip:$host_port"
+}
+
+# 卸载CTFd
+remove_ctfd() {
+    echo "开始卸载CTFd"
+    docker stop ctfd && docker rm ctfd
+    rm -rf /opt/CTFd
+    read -p "是否要删除镜像? (y/n)" yn
+    if [[ $yn == "y" || $yn == "Y" ]]; then
+        docker rmi ctfd/ctfd
+    fi
+    echo "卸载CTFd完成"
 }
 
 # 显示菜单

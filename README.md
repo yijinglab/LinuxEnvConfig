@@ -40,6 +40,8 @@ Ubuntu / Debian / Kali Linux 基础环境配置脚本
 21. 卸载Metasploit-framework
 22. 安装Viper
 23. 卸载Viper
+24. 安装CTFd
+25. 卸载CTFd
 
 ## 使用
 
