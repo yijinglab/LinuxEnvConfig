@@ -664,7 +664,7 @@ install_docker() {
         sudo apt-get update
         sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     elif [[ "$(lsb_release -cs)" == "kali-rolling" ]]; then
-        echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian bookworm stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/debian bookworm stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
         curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
         sudo apt update
         sudo apt install -y docker-ce docker-ce-cli containerd.io
@@ -684,6 +684,8 @@ remove_docker() {
     # 删除 Docker 数据目录
     sudo rm -rf /var/lib/docker
     sudo rm -rf /var/lib/containerd
+    sudo rm -rf /etc/apt/keyrings/docker.gpg
+    sudo rm -rf /etc/apt/sources.list.d/docker.list
 
     # 清理残留的配置文件
     sudo rm -rf /etc/docker
