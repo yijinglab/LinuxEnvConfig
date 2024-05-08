@@ -489,9 +489,9 @@ EOF
 config_apt_source_version(){
     local version=$1
     echo "apt源配置"
-    sudo mv /etc/apt/sources.list /etc/apt/sources.list.bak
+    sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
     # sudo sed -i 's/^deb .*$/#&/g' /etc/apt/sources.list
-    sudo tee /etc/apt/sources.list <<-'EOF'
+    sudo tee /etc/apt/sources.list <<-EOF
 # 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释
 deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ $version main restricted universe multiverse
 # deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ $version main restricted universe multiverse
@@ -499,7 +499,6 @@ deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ $version-updates main restricte
 # deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ $version-updates main restricted universe multiverse
 deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ $version-backports main restricted universe multiverse
 # deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ $version-backports main restricted universe multiverse
-
 deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ $version-security main restricted universe multiverse
 # deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ $version-security main restricted universe multiverse
 EOF
