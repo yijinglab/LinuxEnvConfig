@@ -799,10 +799,13 @@ remove_arl() {
     sudo docker volume rm arl_db
     cd ~
     sudo rm -rf /opt/docker_arl
-    echo "删除 arl 镜像"
-    sudo docker rmi tophant/arl
-    sudo docker rmi rabbitmq:3.8.19-management-alpine
-    sudo docker rmi mongo:4.0.27
+    read -p "是否要删除镜像? (y/n)" yn
+    if [[ $yn == "y" || $yn == "Y" ]]; then
+        sudo docker rmi registry.cn-hangzhou.aliyuncs.com/mingy123/arl:latest
+        sudo docker rmi registry.cn-hangzhou.aliyuncs.com/mingy123/rabbitmq:3.8.19-management-alpine
+        sudo docker rmi registry.cn-hangzhou.aliyuncs.com/mingy123/mongo:4.0.27
+    fi
+    echo "卸载ARL完成"
 }
 
 # 安装Metasploit-framework
