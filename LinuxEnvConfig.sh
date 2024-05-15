@@ -88,6 +88,7 @@ menu_options=(
     "允许root用户SSH登录"
     "获取当前主机网卡及IP地址信息"
     "配置APT镜像源"
+    "安装OracleJDK"
     "安装OpenJDK"
     "删除当前JDK环境"
     # "安装Python3.8"
@@ -120,6 +121,7 @@ commands=(
     ["允许root用户SSH登录"]="root_ssh_login"
     ["获取当前主机网卡及IP地址信息"]="get_ip_addr"
     ["配置APT镜像源"]="config_apt_source"
+    ["安装OracleJDK"]="install_oracle_jdk"
     ["安装OpenJDK"]="install_openjdk"
     ["删除当前JDK环境"]="remove_jdk"
     # ["安装Python3.8"]="install_python38"
@@ -240,37 +242,40 @@ get_ip_addr() {
     done
 }
 
-# 安装OpenJDK
-install_openjdk() {
-    echo "安装OpenJDK"
-    echo "选择想要安装的OpenJDK版本: "
-    # 输入数字，选择想要安装的不同openjdk版本
-    echo "1. OpenJDK 8 LTS"
-    echo "2. OpenJDK 11 LTS"
-    echo "3. OpenJDK 17 LTS"
-    echo "4. OpenJDK 21 LTS"
-    echo "5. 退出"
+# 安装Oracle JDK
+install_oracle_jdk() {
+    echo "安装Oracle JDK"
+    echo "选择想要安装的OracleJDK版本: "
+    echo "1. Oracle JDK 8 LTS"
+    echo "2. Oracle JDK 11 LTS"
+    echo "3. Oracle JDK 17 LTS"
+    echo "4. Oracle JDK 21 LTS"
+    echo "4. 退出"
     read -p "请输入序号: " version
     case $version in
         1)
-            echo "安装OpenJDK 8 LTS"
-            JDK_VER="jdk8u402-b06"
-            JDK_URL="https://github.com/adoptium/temurin8-binaries/releases/download/$JDK_VER/OpenJDK8U-jdk_x64_linux_hotspot_8u402b06.tar.gz"
+            echo "安装Oracle JDK 8 LTS"
+            JDK_VER="jdk1.8.0_381"
+            JDK_NAME="jdk-8u381-linux-x64.tar.gz"
+            JDK_URL="https://d6.injdk.cn/oraclejdk/8/jdk-8u381-linux-x64.tar.gz"
             ;;
         2)
-            echo "安装OpenJDK 11 LTS"
-            JDK_VER="jdk-11.0.22+7"
-            JDK_URL="https://github.com/adoptium/temurin11-binaries/releases/download/$JDK_VER/OpenJDK11U-jdk_x64_linux_hotspot_11.0.22_7.tar.gz"
+            echo "安装Oracle JDK 11 LTS"
+            JDK_VER="jdk-11.0.21"
+            JDK_NAME="jdk-11.0.21_linux-x64_bin.tar.gz"
+            JDK_URL="https://d6.injdk.cn/oraclejdk/11/jdk-11.0.21_linux-x64_bin.tar.gz"
             ;;
         3)
-            echo "安装OpenJDK 17 LTS"
-            JDK_VER="jdk-17.0.10+7"
-            JDK_URL="https://github.com/adoptium/temurin17-binaries/releases/download/$JDK_VER/OpenJDK17U-jdk_x64_linux_hotspot_17.0.10_7.tar.gz"
+            echo "安装Oracle JDK 17 LTS"
+            JDK_VER="jdk-17.0.9"
+            JDK_NAME="jdk-17.0.9_linux-x64_bin.tar.gz"
+            JDK_URL="https://d6.injdk.cn/oraclejdk/17/jdk-17_linux-x64_bin.tar.gz"
             ;;
         4)
-            echo "安装OpenJDK 21 LTS"
-            JDK_VER="jdk-21.0.2+13"
-            JDK_URL="https://github.com/adoptium/temurin21-binaries/releases/download/$JDK_VER/OpenJDK21U-jdk_x64_linux_hotspot_21.0.2_13.tar.gz"
+            echo "安装Oracle JDK 21 LTS"
+            JDK_VER="jdk-21.0.1"
+            JDK_NAME="jdk-21.0.1_linux-x64_bin.tar.gz"
+            JDK_URL="https://d6.injdk.cn/oraclejdk/21/jdk-21_linux-x64_bin.tar.gz"
             ;;
         5)
             echo "退出"
@@ -281,23 +286,167 @@ install_openjdk() {
             exit 1
             ;;
     esac
+
+    # 下载JDK
+    if [ -f $JDK_NAME ]; then
+        echo "已存在 {$JDK_NAME} 文件, 无需下载。"
+    else
+        echo "下载 $JDK_NAME ..."
+        wget -q --show-progress "$JDK_URL"
+        
+        # 检查是否下载成功
+        if [ $? -ne 0 ]; then
+            echo "下载Oracle JDK失败。"
+            rm -f {$JDK_NAME}
+            exit 1
+        fi
+    fi
+
     # 设置解压目录
     JDK_DIR="/usr/lib/jvm"
 
-    # 下载JDK
-    echo "Downloading JDK..."
-    num=$RANDOM
-    wget "$JDK_URL" -O jdk-$num.tar.gz
+    if [ ! -d "$JDK_DIR" ]; then
+        echo "创建 ${JDK_DIR} 目录..."
+        sudo mkdir -p "${JDK_DIR}"
 
-    # 检查是否下载成功
-    if [ $? -ne 0 ]; then
-        echo "下载OpenJDK失败。"
-        exit 1
+        if [ $? -eq 0 ]; then
+            echo "目录创建成功。"
+        else
+            echo "目录创建失败。"
+        fi
     fi
 
     # 解压JDK
     echo "Unpacking JDK..."
-    sudo tar -xzf jdk-$num.tar.gz -C $JDK_DIR
+    sudo tar -xzf $JDK_NAME -C $JDK_DIR
+
+    # 检查解压是否成功
+    if [ $? -ne 0 ]; then
+        echo "解压Oracle JDK失败。"
+        exit 1
+    fi
+
+    # 配置Java和Javac
+    echo "配置Java和Javac..."
+
+    # 移动解压后的JDK到JDK目录
+    # mv $JDK_DIR/jdk* $JDK_DIR/
+
+    # 设置Java和Javac的替代选项
+    sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/${JDK_VER}/bin/java 2
+    sudo update-alternatives --set java /usr/lib/jvm/${JDK_VER}/bin/java
+
+    sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/${JDK_VER}/bin/javac 2
+    sudo update-alternatives --set javac /usr/lib/jvm/${JDK_VER}/bin/javac
+
+    # 检查update-alternatives是否成功
+    if [ $? -ne 0 ]; then
+        echo "未能成功配置Java和Javac。"
+        exit 1
+    fi
+
+    echo "Oracle JDK已成功安装和配置。"
+}
+
+# 安装OpenJDK
+install_openjdk() {
+    echo "安装OpenJDK"
+    echo "选择想要安装的OpenJDK版本: "
+    # 输入数字，选择想要安装的不同openjdk版本
+    echo "1. OpenJDK 11 LTS"
+    echo "2. OpenJDK 17 LTS"
+    echo "3. OpenJDK 21 LTS"
+    echo "4. 退出"
+    read -p "请输入序号: " version
+    # case $version in
+    #     1)
+    #         echo "安装OpenJDK 8 LTS"
+    #         JDK_VER="jdk8u402-b06"
+    #         JDK_URL="https://github.com/adoptium/temurin8-binaries/releases/download/$JDK_VER/OpenJDK8U-jdk_x64_linux_hotspot_8u402b06.tar.gz"
+    #         ;;
+    #     2)
+    #         echo "安装OpenJDK 11 LTS"
+    #         JDK_VER="jdk-11.0.22+7"
+    #         JDK_URL="https://github.com/adoptium/temurin11-binaries/releases/download/$JDK_VER/OpenJDK11U-jdk_x64_linux_hotspot_11.0.22_7.tar.gz"
+    #         ;;
+    #     3)
+    #         echo "安装OpenJDK 17 LTS"
+    #         JDK_VER="jdk-17.0.10+7"
+    #         JDK_URL="https://github.com/adoptium/temurin17-binaries/releases/download/$JDK_VER/OpenJDK17U-jdk_x64_linux_hotspot_17.0.10_7.tar.gz"
+    #         ;;
+    #     4)
+    #         echo "安装OpenJDK 21 LTS"
+    #         JDK_VER="jdk-21.0.2+13"
+    #         JDK_URL="https://github.com/adoptium/temurin21-binaries/releases/download/$JDK_VER/OpenJDK21U-jdk_x64_linux_hotspot_21.0.2_13.tar.gz"
+    #         ;;
+    #     5)
+    #         echo "退出"
+    #         exit 0
+    #         ;;
+    #     *)
+    #         echo "输入的序号无效"
+    #         exit 1
+    #         ;;
+    # esac
+
+    case $version in
+        1)
+            echo "安装OpenJDK 11 LTS"
+            JDK_VER="11.0.2"
+            JDK_URL="https://mirrors.huaweicloud.com/openjdk/${JDK_VER}/openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
+            ;;
+        2)
+            echo "安装OpenJDK 17 LTS"
+            JDK_VER="17.0.2"
+            JDK_URL="https://mirrors.huaweicloud.com/openjdk/${JDK_VER}/openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
+            ;;
+        3)
+            echo "安装OpenJDK 21 LTS"
+            JDK_VER="21.0.1"
+            JDK_URL="https://mirrors.huaweicloud.com/openjdk/${JDK_VER}/openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
+            ;;
+        4)
+            echo "退出"
+            exit 0
+            ;;
+        *)
+            echo "输入的序号无效"
+            exit 1
+            ;;
+    esac
+
+    # 下载JDK
+    if [ -f "openjdk-${JDK_VER}_linux-x64_bin.tar.gz" ]; then
+        echo "已存在openjdk-${JDK_VER}_linux-x64_bin.tar.gz文件, 无需下载。"
+    else
+        echo "下载OpenJDK..."
+        wget -q --show-progress $JDK_URL
+        
+        # 检查是否下载成功
+        if [ $? -ne 0 ]; then
+            echo "下载OpenJDK失败。"
+            rm -f openjdk-${JDK_VER}_linux-x64_bin.tar.gz
+            exit 1
+        fi
+    fi
+
+    # 设置解压目录
+    JDK_DIR="/usr/lib/jvm"
+
+    if [ ! -d "$JDK_DIR" ]; then
+        echo "创建 ${JDK_DIR} 目录..."
+        sudo mkdir -p "${JDK_DIR}"
+
+        if [ $? -eq 0 ]; then
+            echo "目录创建成功。"
+        else
+            echo "目录创建失败。"
+        fi
+    fi
+
+    # 解压JDK
+    echo "Unpacking JDK..."
+    sudo tar -xzf openjdk-${JDK_VER}_linux-x64_bin.tar.gz -C ${JDK_DIR}
 
     # 检查解压是否成功
     if [ $? -ne 0 ]; then
@@ -312,21 +461,17 @@ install_openjdk() {
     # mv $JDK_DIR/jdk* $JDK_DIR/
 
     # 设置Java和Javac的替代选项
-    sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/$JDK_VER/bin/java 2
-    sudo update-alternatives --set java /usr/lib/jvm/$JDK_VER/bin/java
+    sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/jdk-${JDK_VER}/bin/java 2
+    sudo update-alternatives --set java /usr/lib/jvm/jdk-${JDK_VER}/bin/java
 
-    sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/$JDK_VER/bin/javac 2
-    sudo update-alternatives --set javac /usr/lib/jvm/$JDK_VER/bin/javac
+    sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/jdk-${JDK_VER}/bin/javac 2
+    sudo update-alternatives --set javac /usr/lib/jvm/jdk-${JDK_VER}/bin/javac
 
     # 检查update-alternatives是否成功
     if [ $? -ne 0 ]; then
         echo "未能成功配置Java和Javac。"
         exit 1
     fi
-
-    # 清理下载的源码压缩包
-    rm -f jdk-$num.tar.gz
-
     echo "OpenJDK已成功安装和配置。"
 }
 
@@ -342,6 +487,10 @@ remove_jdk() {
         # 移除Java和Javac的配置
         update-alternatives --remove java /usr/bin/java
         update-alternatives --remove javac /usr/bin/javac
+
+        # 配置默认的Java和Javac版本
+        echo 0 | sudo update-alternatives --config java 2>&1 >/dev/null
+        echo 0 | sudo update-alternatives --config javac 2>&1 >/dev/null
 
         # 删除JDK目录
         sudo rm -rf "$JDK_DIR"
