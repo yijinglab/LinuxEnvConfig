@@ -154,7 +154,7 @@ enable_root_user() {
     echo
 
     # 使用chpasswd命令设置root用户的新密码
-    echo "root:$new_password" | sudo chpasswd
+    echo "root:${new_password}" | sudo chpasswd
 
     # 检查命令是否成功执行
     if [ $? -eq 0 ]; then
@@ -236,8 +236,8 @@ root_ssh_login() {
 get_ip_addr() {
     echo "[+] 获取当前主机网卡及IP地址信息"
     ip -4 addr show | awk '/:/ {print $0}' | awk '{print $2}' | grep -v lo | while read -r ifname; do
-        ip -4 addr show "$ifname" | awk '/inet/ {print $2}' | while read -r ipaddr; do
-            echo "- $ifname $ipaddr"
+        ip -4 addr show "${ifname}" | awk '/inet/ {print $2}' | while read -r ipaddr; do
+            echo "- ${ifname} ${ipaddr}"
         done
     done
 }
@@ -747,11 +747,11 @@ remove_miniconda3() {
     
     # 删除文件和目录
     for file in "${files[@]}"; do
-        sudo rm -rf "$file"
+        sudo rm -rf "${file}"
         if [ $? -eq 0 ]; then
-            echo "已成功删除 $file"
+            echo "已成功删除 ${file}"
         else
-            echo "删除 $file 失败"
+            echo "删除 ${file} 失败"
             exit 1
         fi
     done
@@ -762,19 +762,19 @@ remove_miniconda3() {
     
     for config in "${config_files[@]}"; do
         # 检查配置文件是否存在
-        if [ -f "$HOME/$config" ]; then
+        if [ -f "${HOME}/${config}" ]; then
             # 使用sed命令删除配置文件中的conda初始化代码
-            sudo sed -i "/$CONDA_INIT_START/,/$CONDA_INIT_END/d" "$HOME/$config"
+            sudo sed -i "/${CONDA_INIT_START}/,/${CONDA_INIT_END}/d" "${HOME}/${config}"
             
             # 检查sed命令是否成功执行
             if [ $? -eq 0 ]; then
-                echo "已成功移除 $config 中的conda初始化代码。"
+                echo "已成功移除 ${config} 中的conda初始化代码。"
             else
-                echo "移除 $config 中的conda初始化代码失败。"
+                echo "移除 ${config} 中的conda初始化代码失败。"
                 exit 1
             fi
         else
-            echo "未找到 $config 文件。"
+            echo "未找到 ${config} 文件。"
         fi
     done
 
@@ -805,9 +805,9 @@ install_docker() {
         local repo_name=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
         # 设置 Docker 软件源
         sudo install -d /etc/apt/keyrings
-        sudo curl -fsSL https://download.docker.com/linux/$repo_name/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        sudo curl -fsSL https://download.docker.com/linux/${repo_name}/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
         sudo chmod a+r /etc/apt/keyrings/docker.gpg
-        sudo echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/$repo_name "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        sudo echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/${repo_name} "$(. /etc/os-release && echo "${VERSION_CODENAME}")" stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
         # 更新软件包列表并安装 Docker
         sudo apt-get update
         sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
@@ -848,7 +848,7 @@ install_docker_compose() {
     sudo curl -L "https://gitee.com/yijingsec/compose/releases/download/$(curl -s https://gitee.com/api/v5/repos/yijingsec/compose/releases/latest | grep -E -o '\"tag_name\":\"([^\"]+)\"' | awk -F\" '{print $4}')/docker-compose-$(uname -s | tr A-Z a-z)-$(uname -m)" -o /usr/local/bin/docker-compose
     sudo chmod +x /usr/local/bin/docker-compose
     echo "安装 docker-compose 版本："
-    docker-compose --version
+    sudo docker-compose --version
 }
 
 # 卸载Docker-compose
@@ -858,13 +858,31 @@ remove_docker_compose() {
     echo "卸载 docker-compose 完成"
 }
 
+# 检查 docker compose 命令
+check_docker_compose() {
+    # 检查docker compose子命令是否存在
+    if docker compose >/dev/null 2>&1; then
+        echo "docker compose 子命令存在。"
+        COMPOSE_CMD="docker compose"
+        # 检查docker-compose命令是否存在
+    elif command -v docker-compose >/dev/null 2>&1; then
+        echo "docker-compose 命令存在。"
+        COMPOSE_CMD="docker-compose"
+    else
+        echo "docker-compose 命令不存在"
+        # 安装docker-compose
+        install_docker_compose
+        COMPOSE_CMD="docker-compose"
+    fi
+}
+
 # 安装vulfocus
 install_vulfocus() {
     # 接收用户输入作为host_ip
     echo "开始安装vulfocus"
     read -p "输入启动vulfocus的主机地址: " host_ip
     # 检查是否输入了IP地址
-    if [ -z "$host_ip" ]; then
+    if [ -z "${host_ip}" ]; then
         echo "请输入正确的IP地址"
         exit 1
     fi
@@ -874,12 +892,12 @@ install_vulfocus() {
 
     # 安装vulfocus
     sudo docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/vulfocus:latest
-    sudo docker run -d -p 88:80 --name vulfocus --restart always -v /var/run/docker.sock:/var/run/docker.sock -e VUL_IP=$host_ip registry.cn-hangzhou.aliyuncs.com/mingy123/vulfocus:latest
+    sudo docker run -d -p 88:80 --name vulfocus --restart always -v /var/run/docker.sock:/var/run/docker.sock -e VUL_IP=${host_ip} registry.cn-hangzhou.aliyuncs.com/mingy123/vulfocus:latest
     echo "安装vulfocus完成"
 
     # 打印访问信息
     echo "Vulfocus 服务已启动。"
-    echo "访问地址: http://$host_ip:88"
+    echo "访问地址: http://${host_ip}:88"
     echo "默认用户: admin"
     echo "默认密码: admin"
 }
@@ -897,7 +915,7 @@ install_arl() {
     echo "开始安装灯塔ARL"
     read -p "输入启动灯塔ARL的主机地址: " host_ip
     # 检查是否输入了IP地址
-    if [ -z "$host_ip" ]; then
+    if [ -z "${host_ip}" ]; then
         echo "请输入正确的IP地址"
         exit 1
     fi
@@ -914,10 +932,10 @@ install_arl() {
     # sudo curl -Ls "https://gitee.com/yijingsec/ARL/releases/download/$(curl -s https://gitee.com/api/v5/repos/yijingsec/ARL/releases/latest | grep -E -o '\"tag_name\":\"([^\"]+)\"' | awk -F\" '{print $4}')/docker.zip" -o /opt/docker_arl/docker.zip && cd /opt/docker_arl && unzip -o docker.zip
 
     local latest_tag_name=$(curl -s https://gitee.com/api/v5/repos/yijingsec/ARL/releases/latest | grep -E -o '"tag_name":"([^\"]+)"' | awk -F\" '{print $4}')
-    echo "发现最新版本: $latest_tag_name"
+    echo "发现最新版本: ${latest_tag_name}"
     echo "下载 ARL 压缩包..."
-    local download_url="https://gitee.com/yijingsec/ARL/releases/download/$latest_tag_name/docker.zip"
-    curl -Ls "$download_url" -o /opt/docker_arl/docker.zip
+    local download_url="https://gitee.com/yijingsec/ARL/releases/download/${latest_tag_name}/docker.zip"
+    curl -Ls "${download_url}" -o /opt/docker_arl/docker.zip
 
     # 解压 ARL 压缩包
     cd /opt/docker_arl
@@ -925,12 +943,17 @@ install_arl() {
 
     # 启动 ARL 服务
     echo "启动 ARL 服务..."
-    sudo docker compose up -d
-    
+    check_docker_compose
+    sudo $COMPOSE_CMD up -d
+
+    # 等待 ARL 服务启动
+    echo "等待 ARL 服务启动..."
+    sleep 5
+
     # 检查命令是否成功执行
     if [ $? -eq 0 ]; then
         echo "ARL 服务已启动。"
-        echo "访问地址: https://$host_ip:5003"
+        echo "访问地址: https://${host_ip}:5003"
         echo "默认用户: admin"
         echo "默认密码: arlpass"
     else
@@ -943,7 +966,9 @@ install_arl() {
 remove_arl() {
     echo "开始卸载ARL"
     cd /opt/docker_arl
-    sudo docker compose down
+    check_docker_compose
+    echo "停止 ARL 服务..."
+    sudo $COMPOSE_CMD down
     echo "删除 arl_db 卷"
     sudo docker volume rm arl_db
     cd ~
@@ -983,7 +1008,7 @@ install_viper() {
     check_docker
     read -p "输入启动Viper的主机地址: " host_ip
     # 检查是否输入了IP地址
-    if [ -z "$host_ip" ]; then
+    if [ -z "${host_ip}" ]; then
         echo "请输入正确的IP地址"
         exit 1
     fi
@@ -1008,21 +1033,25 @@ services:
 EOF
 
     read -p "输入VIPER密码: " VIPER_PASSWORD
-    sed -i "s/VIPER_PASSWORD/$VIPER_PASSWORD/g" docker-compose.yml
-    cd /root/VIPER && docker compose up -d
+    sed -i "s/VIPER_PASSWORD/${VIPER_PASSWORD}/g" docker-compose.yml
+    cd /root/VIPER
+    check_docker_compose
+    sudo $COMPOSE_CMD up -d
     echo "正在等待系统启动"
     sleep 15
-    echo "访问地址: https://$host_ip:60000 登录到服务器"
+    echo "访问地址: https://${host_ip}:60000 登录到服务器"
     echo "用户名: root"
-    echo "密  码: $VIPER_PASSWORD"
+    echo "密  码: ${VIPER_PASSWORD}"
     echo "安装Viper完成"
 }
 
 # 卸载Viper
 remove_viper() {
     echo "开始卸载Viper"
-    cd /root/VIPER && docker compose down
-    cd ~ && rm -rf /root/VIPER
+    cd /root/VIPER
+    check_docker_compose
+    sudo $COMPOSE_CMD down
+    cd ~ && sudo rm -rf /root/VIPER
     echo "卸载Viper完成"
 }
 
@@ -1033,20 +1062,20 @@ install_ctfd() {
     echo "开始安装CTFd"
     read -p "输入启动CTFd的主机地址: " host_ip
     # 检查是否输入了IP地址
-    if [ -z "$host_ip" ]; then
+    if [ -z "${host_ip}" ]; then
         echo "请输入正确的IP地址"
         exit 1
     fi
 
     read -p "输入启动CTFd的主机端口: " host_port
-    if [ -z "$host_port" ]; then
+    if [ -z "${host_port}" ]; then
         echo "请输入正确的端口号"
         exit 1
     fi
 
     mkdir -p /opt/CTFd && cd /opt/CTFd
-    docker run --name ctfd -dit -p $host_port:8000 -v /opt/CTFd:/ ctfd/ctfd
-    echo "访问地址: https://$host_ip:$host_port"
+    docker run --name ctfd -dit -p "${host_port}:8000" -v /opt/CTFd:/ ctfd/ctfd
+    echo "访问地址: https://${host_ip}:${host_port}"
 }
 
 # 卸载CTFd
@@ -1072,13 +1101,13 @@ install_avws() {
     echo "开始安装AWVS"
     read -p "输入启动AWVS的主机地址: " host_ip
     # 检查是否输入了IP地址
-    if [ -z "$host_ip" ]; then
+    if [ -z "${host_ip}" ]; then
         echo "请输入正确的IP地址"
         exit 1
     fi
 
     read -p "输入启动AWVS的主机端口: " host_port
-    if [ -z "$host_port" ]; then
+    if [ -z "${host_port}" ]; then
         echo "请输入正确的端口号"
         exit 1
     fi
@@ -1088,7 +1117,7 @@ install_avws() {
         exit 1
     fi
     echo "正在启动AWVS"
-    docker run -dit -p $host_port:3443 --name yijingsec-awvs --cap-add LINUX_IMMUTABLE registry.cn-shanghai.aliyuncs.com/yijingsec/awvs:latest
+    docker run -dit -p ${host_port}:3443 --name yijingsec-awvs --cap-add LINUX_IMMUTABLE registry.cn-shanghai.aliyuncs.com/yijingsec/awvs:latest
     while true; do
         sleep 3
         docker ps | grep "yijingsec-awvs" > /dev/null 2>&1
@@ -1097,7 +1126,7 @@ install_avws() {
             break
         fi
     done
-    echo "访问地址: https://$host_ip:$host_port"
+    echo "访问地址: https://${host_ip}:${host_port}"
     echo "默认用户: admin@admin.com"
     echo "默认密码: Admin123"
 }
