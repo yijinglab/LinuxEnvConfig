@@ -805,7 +805,7 @@ install_docker() {
         local repo_name=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
         # 设置 Docker 软件源
         sudo install -d /etc/apt/keyrings
-        sudo curl -fsSL https://download.docker.com/linux/${repo_name}/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        sudo curl -fsSL https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/${repo_name}/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
         sudo chmod a+r /etc/apt/keyrings/docker.gpg
         sudo echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/${repo_name} "$(. /etc/os-release && echo "${VERSION_CODENAME}")" stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
         # 更新软件包列表并安装 Docker
