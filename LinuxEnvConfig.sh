@@ -801,21 +801,65 @@ install_docker() {
     sudo apt-get update
     # 安装依赖包
     sudo apt-get install apt-transport-https ca-certificates curl gnupg -y
+
     if [[ "$(lsb_release -is)" == "Ubuntu" ]] || [[ "$(lsb_release -is)" == "Debian" ]]; then
         local repo_name=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
+
+        echo "检测到系统为 ${repo_name}"
+        echo "请选择要使用的镜像源: "
+        echo "1. 清华大学 TUNA 镜像站"
+        echo "2. 中国科学技术大学 USTC 镜像站"
+        read -p "请输入选择(1 或 2): " source_choice
+
+        # 根据用户选择设置 Docker 软件源
+        if [[ "$source_choice" == "1" ]]; then
+            echo "选择使用清华大学 TUNA 镜像站"
+            local mirror_url="https://mirrors.tuna.tsinghua.edu.cn"
+        elif [[ "$source_choice" == "2" ]]; then
+            echo "选择使用中国科学技术大学 USTC 镜像站"
+            local mirror_url="https://mirrors.ustc.edu.cn"
+        else
+            echo "输入错误，退出安装"
+            return 1
+        fi
+
         # 设置 Docker 软件源
         sudo install -d /etc/apt/keyrings
-        sudo curl -fsSL https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/${repo_name}/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        sudo curl -fsSL "${mirror_url}/docker-ce/linux/${repo_name}/gpg" | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
         sudo chmod a+r /etc/apt/keyrings/docker.gpg
-        sudo echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/${repo_name} "$(. /etc/os-release && echo "${VERSION_CODENAME}")" stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        sudo echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] ${mirror_url}/docker-ce/linux/${repo_name} "$(. /etc/os-release && echo "${VERSION_CODENAME}")" stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
         # 更新软件包列表并安装 Docker
         sudo apt-get update
         sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     elif [[ "$(lsb_release -cs)" == "kali-rolling" ]]; then
-        echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/debian bookworm stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-        curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        # 针对 Kali Rolling 的特定安装逻辑
+        echo "检测到系统为 Kali Rolling"
+        echo "请选择要使用的镜像源: "
+        echo "1. 清华大学 TUNA 镜像站"
+        echo "2. 中国科学技术大学 USTC 镜像站"
+        read -p "请输入选择(1 或 2): " source_choice
+
+        # 根据用户选择设置 Docker 软件源
+        if [[ "$source_choice" == "1" ]]; then
+            echo "选择使用清华大学 TUNA 镜像站"
+            local mirror_url="https://mirrors.tuna.tsinghua.edu.cn"
+        elif [[ "$source_choice" == "2" ]]; then
+            echo "选择使用中国科学技术大学 USTC 镜像站"
+            local mirror_url="https://mirrors.ustc.edu.cn"
+        else
+            echo "输入错误，退出安装"
+            return 1
+        fi
+        
+        curl -fsSL ${mirror_url}/docker-ce/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        sudo chmod a+r /etc/apt/keyrings/docker.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] ${mirror_url}/docker-ce/linux/debian/ bookworm stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
         sudo apt update
         sudo apt install -y docker-ce docker-ce-cli containerd.io
+    else
+        echo "当前系统版本不支持"
+        return 1
     fi
 
     # 验证 Docker 是否安装成功
