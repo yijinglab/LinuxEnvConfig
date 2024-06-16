@@ -112,6 +112,8 @@ menu_options=(
     "卸载CTFd"
     "安装AWVS"
     "卸载AWVS"
+    "安装ocr_api_server"
+    "卸载ocr_api_server"
 )
 
 commands=(
@@ -145,6 +147,8 @@ commands=(
     ["卸载CTFd"]="remove_ctfd"
     ["安装AWVS"]="install_awvs"
     ["卸载AWVS"]="remove_awvs"
+    ["安装ocr_api_server"]="install_ocr_api_server"
+    ["卸载ocr_api_server"]="remove_ocr_api_server"
 )
 
 # 启用root用户
@@ -1188,6 +1192,70 @@ remove_awvs() {
         docker rmi registry.cn-shanghai.aliyuncs.com/yijingsec/awvs:latest
     fi
     echo "卸载AWVS完成"
+}
+
+# 检查输入是否是有效的IPv4地址
+validate_ip() {
+    local ip="$1"
+    # 正则表达式匹配IPv4地址
+    local regex='^([0-9]{1,3}\.){3}[0-9]{1,3}$'
+
+    if [[ $ip =~ $regex ]]; then
+        # 进一步检查每个八位组是否在0-255之间
+        IFS='.' read -r -a octets <<< "$ip"
+        for octet in "${octets[@]}"; do
+            if ((octet > 255 || octet < 0)); then
+                echo "错误: IP地址中的每个部分必须在0到255之间。"
+                return 1
+            fi
+        done
+        return 0
+    else
+        echo "错误: 请输入正确的IP地址格式。"
+        return 1
+    fi
+}
+
+# 安装ocr_api_server
+install_ocr_api_server() {
+    # 接收用户输入作为host_ip
+    echo "开始安装ocr_api_server"
+    read -p "输入启动ocr_api_server的主机地址: " host_ip
+    
+    # 检查是否输入了IP地址
+    if validate_ip $host_ip; then
+        echo "你的IP地址为: $host_ip"
+    else
+        return 1
+    fi
+
+    # 检查Docker是否安装
+    check_docker
+
+    # 安装ocr_api_server
+    sudo docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/ocr_api_server:latest
+    sudo docker run -d -p 9898:9898 --name ocr_api_server registry.cn-hangzhou.aliyuncs.com/mingy123/ocr_api_server:latest
+    sleep 5
+    # 打印访问信息
+    echo "ocr_api_server 服务已启动。"
+    echo "访问地址: http://${host_ip}:9898/ping"
+    echo "访问后响应 pong, 表明服务启动成功。"
+}
+
+# 卸载ocr_api_server
+remove_ocr_api_server() {
+    echo "开始卸载ocr_api_server"
+    sudo docker rm -f ocr_api_server
+    if [ $? -ne 0 ]; then
+        echo "删除容器失败"
+        exit 1
+    fi
+
+    read -p "是否要删除镜像? (y/n)" yn
+    if [[ $yn == "y" || $yn == "Y" ]]; then
+        docker rmi registry.cn-shanghai.aliyuncs.com/yijingsec/ocr_api_server:latest
+    fi
+    echo "卸载ocr_api_server完成"
 }
 
 # 显示菜单

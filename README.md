@@ -45,6 +45,8 @@ Ubuntu / Debian / Kali Linux 基础环境配置脚本
 26. 卸载CTFd
 27. 安装AWVS
 28. 卸载AWVS
+29. 安装ocr_api_server
+30. 卸载ocr_api_server
 
 ## 使用
 
