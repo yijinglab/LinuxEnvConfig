@@ -1074,11 +1074,11 @@ services:
     network_mode: "host"
     restart: always
     volumes:
-      - ${PWD}/loot:/root/.msf4/loot
-      - ${PWD}/db:/root/viper/Docker/db
-      - ${PWD}/module:/root/viper/Docker/module
-      - ${PWD}/log:/root/viper/Docker/log
-      - ${PWD}/nginxconfig:/root/viper/Docker/nginxconfig
+      - /root/VIPER/loot:/root/.msf4/loot
+      - /root/VIPER/db:/root/viper/Docker/db
+      - /root/VIPER/module:/root/viper/Docker/module
+      - /root/VIPER/log:/root/viper/Docker/log
+      - /root/VIPER/nginxconfig:/root/viper/Docker/nginxconfig
     command: ["VIPER_PASSWORD"]
 EOF
 
