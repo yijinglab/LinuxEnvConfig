@@ -106,9 +106,7 @@ menu_options=(
     "卸载灯塔ARL"
     "安装Metasploit-framework"
     "卸载Metasploit-framework"
-    "安装Viper"
-    "更新Viper"
-    "卸载Viper"
+    "Viper"
     "安装CTFd"
     "卸载CTFd"
     "安装AWVS"
@@ -142,9 +140,7 @@ commands=(
     ["卸载灯塔ARL"]="remove_arl"
     ["安装Metasploit-framework"]="install_metasploit"
     ["卸载Metasploit-framework"]="remove_metasploit"
-    ["安装Viper"]="install_viper"
-    ["更新Viper"]="update_viper"
-    ["卸载Viper"]="remove_viper"
+    ["Viper"]="config_viper"
     ["安装CTFd"]="install_ctfd"
     ["卸载CTFd"]="remove_ctfd"
     ["安装AWVS"]="install_awvs"
@@ -1051,6 +1047,45 @@ remove_metasploit() {
     sudo apt remove metasploit-framework -y
 }
 
+# 配置Viper
+config_viper() {
+    echo "请选择操作: "
+    echo "1. 安装Viper"
+    echo "2. 更新Viper版本"
+    echo "3. 更新Viper密码"
+    echo "4. 启动Viper"
+    echo "5. 关闭Viper"
+    echo "6. 卸载Viper"
+    echo "7. 返回主菜单"
+    read -p "请输入选择(1-6): " viper_choice
+    case $viper_choice in
+        1)
+            install_viper
+            ;;
+        2)
+            update_viper_version
+            ;;
+        3)
+            update_viper_password
+            ;;
+        4)
+            start_viper
+            ;;
+        5)
+            stop_viper
+            ;;
+        6)
+            remove_viper
+            ;;
+        7)
+            echo "退出到主菜单"
+            ;;
+        *)
+            echo "无效的选择"
+            ;;
+    esac
+}
+
 # 安装Viper
 install_viper() {
     # 检查Docker是否安装
@@ -1095,14 +1130,47 @@ EOF
     echo "安装Viper完成"
 }
 
-# 更新Viper
-update_viper() {
+# 更新Viper版本
+update_viper_version() {
     echo "开始更新Viper"
     cd /root/VIPER
     check_docker_compose
+    sudo $COMPOSE_CMD down
+    rm -rf ./db/*
+    rm -f ./module/*
     sudo $COMPOSE_CMD pull
     sudo $COMPOSE_CMD up -d
     echo "更新Viper完成"
+}
+
+# 更新Viper密码
+update_viper_password() {
+    echo "开始更新Viper密码"
+    cd /root/VIPER
+    read -p "输入VIPER密码: " VIPER_PASSWORD
+    sed -i "s/VIPER_PASSWORD/${VIPER_PASSWORD}/g" docker-compose.yml
+    check_docker_compose
+    sudo $COMPOSE_CMD down
+    sudo $COMPOSE_CMD up -d
+    echo "更新Viper密码完成"
+}
+
+# 启动Viper
+start_viper() {
+    echo "开始启动Viper"
+    cd /root/VIPER
+    check_docker_compose
+    sudo $COMPOSE_CMD start
+    echo "启动Viper完成"
+}
+
+# 关闭Viper
+stop_viper() {
+    echo "开始关闭Viper"
+    cd /root/VIPER
+    check_docker_compose
+    sudo $COMPOSE_CMD stop
+    echo "关闭Viper完成"
 }
 
 # 卸载Viper
