@@ -64,7 +64,7 @@ Warn() {
     echo -e "${aCOLOUR[3]}$1$COLOUR_RESET"
 }
 
-GreyStart() {``
+GreyStart() {
     echo -e "${aCOLOUR[2]}\c"
 }
 
