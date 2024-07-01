@@ -107,6 +107,7 @@ menu_options=(
     "安装Metasploit-framework"
     "卸载Metasploit-framework"
     "安装Viper"
+    "更新Viper"
     "卸载Viper"
     "安装CTFd"
     "卸载CTFd"
@@ -142,6 +143,7 @@ commands=(
     ["安装Metasploit-framework"]="install_metasploit"
     ["卸载Metasploit-framework"]="remove_metasploit"
     ["安装Viper"]="install_viper"
+    ["更新Viper"]="update_viper"
     ["卸载Viper"]="remove_viper"
     ["安装CTFd"]="install_ctfd"
     ["卸载CTFd"]="remove_ctfd"
@@ -1091,6 +1093,16 @@ EOF
     echo "用户名: root"
     echo "密  码: ${VIPER_PASSWORD}"
     echo "安装Viper完成"
+}
+
+# 更新Viper
+update_viper() {
+    echo "开始更新Viper"
+    cd /root/VIPER
+    check_docker_compose
+    sudo $COMPOSE_CMD pull
+    sudo $COMPOSE_CMD up -d
+    echo "更新Viper完成"
 }
 
 # 卸载Viper
