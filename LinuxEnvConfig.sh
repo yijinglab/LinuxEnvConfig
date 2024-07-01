@@ -64,7 +64,7 @@ Warn() {
     echo -e "${aCOLOUR[3]}$1$COLOUR_RESET"
 }
 
-GreyStart() {
+GreyStart() {``
     echo -e "${aCOLOUR[2]}\c"
 }
 
@@ -82,72 +82,133 @@ declare -a menu_options
 declare -A commands
 
 menu_options=(
-    "启用root用户"
-    "启用SSH服务"
-    "设置nameserver"
-    "允许root用户SSH登录"
-    "获取当前主机网卡及IP地址信息"
-    "配置APT镜像源"
-    "安装OracleJDK"
-    "安装OpenJDK"
-    "删除当前JDK环境"
+    "基础配置"
+    # "启用root用户"
+    # "启用ssh服务"
+    # "设置nameserver"
+    # "允许root用户ssh登录"
+    # "获取当前主机网卡及IP地址信息"
+    "配置 APT"
+    "配置 JDK"
+    # "安装OracleJDK"
+    # "安装OpenJDK"
+    # "删除当前JDK环境"
     # "安装Python3.8"
     # "卸载Python3.8"
-    "安装Miniconda3"
-    "卸载Miniconda3"
-    "安装Docker"
-    "卸载Docker"
-    "配置Docker为国内镜像"
-    "安装Docker-compose"
-    "卸载Docker-compose"
-    "安装vulfocus"
-    "卸载vulfocus"
-    "安装灯塔ARL"
-    "卸载灯塔ARL"
-    "安装Metasploit-framework"
-    "卸载Metasploit-framework"
-    "Viper"
-    "安装CTFd"
-    "卸载CTFd"
-    "安装AWVS"
-    "卸载AWVS"
-    "安装ocr_api_server"
-    "卸载ocr_api_server"
+    "配置 Miniconda3"
+    # "安装Miniconda3"
+    # "卸载Miniconda3"
+    "配置 Docker"
+    # "安装Docker"
+    # "卸载Docker"
+    # "配置Docker为国内镜像"
+    "配置 Docker-compose"
+    # "安装Docker-compose"
+    # "卸载Docker-compose"
+    "配置 Vulfocus"
+    # "安装vulfocus"
+    # "卸载vulfocus"
+    "配置 ARL"
+    # "安装灯塔ARL"
+    # "卸载灯塔ARL"
+    "配置 Metasploit-framework"
+    # "安装Metasploit-framework"
+    # "卸载Metasploit-framework"
+    "配置 Viper"
+    # "安装Viper"
+    # "卸载Viper"
+    "配置 CTFd"
+    # "安装CTFd"
+    # "卸载CTFd"
+    "配置 AWVS"
+    # "安装AWVS"
+    # "卸载AWVS"
+    "配置 ocr_api_server"
+    # "安装ocr_api_server"
+    # "卸载ocr_api_server"
 )
 
 commands=(
-    ["启用root用户"]="enable_root_user"
-    ["启用SSH服务"]="enable_ssh"
-    ["设置nameserver"]="config_nameserver"
-    ["允许root用户SSH登录"]="root_ssh_login"
-    ["获取当前主机网卡及IP地址信息"]="get_ip_addr"
-    ["配置APT镜像源"]="config_apt_source"
-    ["安装OracleJDK"]="install_oracle_jdk"
-    ["安装OpenJDK"]="install_openjdk"
-    ["删除当前JDK环境"]="remove_jdk"
+    ["基础配置"]="basic_config"
+    # ["启用root用户"]="enable_root_user"
+    # ["启用SSH服务"]="enable_ssh"
+    # ["设置nameserver"]="config_nameserver"
+    # ["允许root用户SSH登录"]="root_ssh_login"
+    # ["获取当前主机网卡及IP地址信息"]="get_ip_addr"
+    ["配置 APT"]="config_apt_source"
+    ["配置 JDK"]="config_jdk"
+    # ["安装OracleJDK"]="install_oracle_jdk"
+    # ["安装OpenJDK"]="install_openjdk"
+    # ["删除当前JDK环境"]="remove_jdk"
     # ["安装Python3.8"]="install_python38"
     # ["卸载Python3.8"]="remove_python38"
-    ["安装Miniconda3"]="install_miniconda3"
-    ["卸载Miniconda3"]="remove_miniconda3"
-    ["安装Docker"]="install_docker"
-    ["卸载Docker"]="remove_docker"
-    ["配置Docker为国内镜像"]="configure_docker_mirror"
-    ["安装Docker-compose"]="install_docker_compose"
-    ["卸载Docker-compose"]="remove_docker_compose"
-    ["安装vulfocus"]="install_vulfocus"
-    ["卸载vulfocus"]="remove_vulfocus"
-    ["安装灯塔ARL"]="install_arl"
-    ["卸载灯塔ARL"]="remove_arl"
-    ["安装Metasploit-framework"]="install_metasploit"
-    ["卸载Metasploit-framework"]="remove_metasploit"
-    ["Viper"]="config_viper"
-    ["安装CTFd"]="install_ctfd"
-    ["卸载CTFd"]="remove_ctfd"
-    ["安装AWVS"]="install_awvs"
-    ["卸载AWVS"]="remove_awvs"
-    ["安装ocr_api_server"]="install_ocr_api_server"
-    ["卸载ocr_api_server"]="remove_ocr_api_server"
+    ["配置 Miniconda3"]="config_miniconda3"
+    # ["安装Miniconda3"]="install_miniconda3"
+    # ["卸载Miniconda3"]="remove_miniconda3"
+    ["配置 Docker"]="config_docker"
+    # ["安装Docker"]="install_docker"
+    # ["卸载Docker"]="remove_docker"
+    # ["配置Docker为国内镜像"]="configure_docker_mirror"
+    ["配置 Docker-compose"]="config_docker_compose"
+    # ["安装Docker-compose"]="install_docker_compose"
+    # ["卸载Docker-compose"]="remove_docker_compose"
+    ["配置 Vulfocus"]="config_vulfocus"
+    # ["安装vulfocus"]="install_vulfocus"
+    # ["卸载vulfocus"]="remove_vulfocus"
+    ["配置 ARL"]="config_arl"
+    # ["安装灯塔ARL"]="install_arl"
+    # ["卸载灯塔ARL"]="remove_arl"
+    ["配置 Metasploit-framework"]="config_metasploit"
+    # ["安装Metasploit-framework"]="install_metasploit"
+    # ["卸载Metasploit-framework"]="remove_metasploit"
+    ["配置 Viper"]="config_viper"
+    # ["安装Viper"]="install_viper"
+    # ["卸载Viper"]="remove_viper"
+    ["配置 CTFd"]="config_ctfd"
+    # ["安装CTFd"]="install_ctfd"
+    # ["卸载CTFd"]="remove_ctfd"
+    ["配置 AWVS"]="config_awvs"
+    # ["安装AWVS"]="install_awvs"
+    # ["卸载AWVS"]="remove_awvs"
+    ["配置 ocr_api_server"]="config_ocr_api_server"
+    # ["安装ocr_api_server"]="install_ocr_api_server"
+    # ["卸载ocr_api_server"]="remove_ocr_api_server"
 )
+
+# 基础配置
+basic_config() {
+    echo "请选择操作: "
+    echo "1. 启用root用户"
+    echo "2. 启用ssh服务"
+    echo "3. 设置nameserver"
+    echo "4. 允许root用户ssh登录"
+    echo "5. 获取当前主机网卡及IP地址信息"
+    echo "6. 返回主菜单"
+    read -p "请输入选择(1-6): " choice
+    case $choice in
+        1)
+            enable_root_user
+            ;;
+        2)
+            enable_ssh
+            ;;
+        3)
+            config_nameserver
+            ;;
+        4)
+            root_ssh_login
+            ;;
+        5)
+            get_ip_addr
+            ;;
+        6)
+            echo "退出到主菜单"
+            ;;
+        *)
+            echo "无效的选择"
+            ;;
+    esac
+}
 
 # 启用root用户
 enable_root_user() {
@@ -244,6 +305,33 @@ get_ip_addr() {
     done
 }
 
+# 配置JDK
+config_jdk() {
+    echo "请选择操作: "
+    echo "1. 安装 OracleJDK"
+    echo "2. 安装 OpenJDK"
+    echo "3. 删除当前JDK环境"
+    echo "4. 返回主菜单"
+    read -p "请输入选择(1-4): " choice
+    case $choice in
+        1)
+            install_oracle_jdk
+            ;;
+        2)
+            install_openjdk
+            ;;
+        3)
+            remove_jdk
+            ;;
+        4)
+            echo "退出到主菜单"
+            ;;
+        *)
+            echo "无效的选择"
+            ;;
+    esac
+}
+
 # 安装Oracle JDK
 install_oracle_jdk() {
     echo "安装Oracle JDK"
@@ -252,7 +340,7 @@ install_oracle_jdk() {
     echo "2. Oracle JDK 11 LTS"
     echo "3. Oracle JDK 17 LTS"
     echo "4. Oracle JDK 21 LTS"
-    echo "4. 退出"
+    echo "5. 返回主菜单"
     read -p "请输入序号: " version
     case $version in
         1)
@@ -260,35 +348,39 @@ install_oracle_jdk() {
             JDK_VER="jdk1.8.0_381"
             JDK_NAME="jdk-8u381-linux-x64.tar.gz"
             JDK_URL="https://d6.injdk.cn/oraclejdk/8/jdk-8u381-linux-x64.tar.gz"
+            check_oracle_jdk
             ;;
         2)
             echo "安装Oracle JDK 11 LTS"
             JDK_VER="jdk-11.0.21"
             JDK_NAME="jdk-11.0.21_linux-x64_bin.tar.gz"
             JDK_URL="https://d6.injdk.cn/oraclejdk/11/jdk-11.0.21_linux-x64_bin.tar.gz"
+            check_oracle_jdk
             ;;
         3)
             echo "安装Oracle JDK 17 LTS"
             JDK_VER="jdk-17.0.9"
             JDK_NAME="jdk-17.0.9_linux-x64_bin.tar.gz"
             JDK_URL="https://d6.injdk.cn/oraclejdk/17/jdk-17_linux-x64_bin.tar.gz"
+            check_oracle_jdk
             ;;
         4)
             echo "安装Oracle JDK 21 LTS"
             JDK_VER="jdk-21.0.1"
             JDK_NAME="jdk-21.0.1_linux-x64_bin.tar.gz"
             JDK_URL="https://d6.injdk.cn/oraclejdk/21/jdk-21_linux-x64_bin.tar.gz"
+            check_oracle_jdk
             ;;
         5)
-            echo "退出"
-            exit 0
+            echo "退出到主菜单"
             ;;
         *)
             echo "输入的序号无效"
-            exit 1
             ;;
     esac
+}
 
+check_oracle_jdk() {
     # 下载JDK
     if [ -f $JDK_NAME ]; then
         echo "已存在 {$JDK_NAME} 文件, 无需下载。"
@@ -350,6 +442,7 @@ install_oracle_jdk() {
     echo "Oracle JDK已成功安装和配置。"
 }
 
+
 # 安装OpenJDK
 install_openjdk() {
     echo "安装OpenJDK"
@@ -358,7 +451,7 @@ install_openjdk() {
     echo "1. OpenJDK 11 LTS"
     echo "2. OpenJDK 17 LTS"
     echo "3. OpenJDK 21 LTS"
-    echo "4. 退出"
+    echo "4. 返回到主菜单"
     read -p "请输入序号: " version
     # case $version in
     #     1)
@@ -396,27 +489,30 @@ install_openjdk() {
             echo "安装OpenJDK 11 LTS"
             JDK_VER="11.0.2"
             JDK_URL="https://mirrors.huaweicloud.com/openjdk/${JDK_VER}/openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
+            check_openjdk
             ;;
         2)
             echo "安装OpenJDK 17 LTS"
             JDK_VER="17.0.2"
             JDK_URL="https://mirrors.huaweicloud.com/openjdk/${JDK_VER}/openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
+            check_openjdk
             ;;
         3)
             echo "安装OpenJDK 21 LTS"
             JDK_VER="21.0.1"
             JDK_URL="https://mirrors.huaweicloud.com/openjdk/${JDK_VER}/openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
+            check_openjdk
             ;;
         4)
-            echo "退出"
-            exit 0
+            echo "退出到主菜单"
             ;;
         *)
             echo "输入的序号无效"
-            exit 1
             ;;
     esac
+}
 
+check_openjdk() {
     # 下载JDK
     if [ -f "openjdk-${JDK_VER}_linux-x64_bin.tar.gz" ]; then
         echo "已存在openjdk-${JDK_VER}_linux-x64_bin.tar.gz文件, 无需下载。"
@@ -476,6 +572,7 @@ install_openjdk() {
     fi
     echo "OpenJDK已成功安装和配置。"
 }
+
 
 # 删除当前JDK环境
 remove_jdk() {
@@ -637,6 +734,7 @@ EOF
     Show 0 "docker 国内镜像地址配置完毕!"
 }
 
+# 配置APT源
 config_apt_source_version(){
     local version=$1
     echo "apt源配置"
@@ -682,6 +780,29 @@ EOF
     echo "配置完成"
 }
 
+# 配置Miniconda3
+config_miniconda3() {
+    echo "请选择操作: "
+    echo "1. 安装 Miniconda3"
+    echo "2. 卸载 Miniconda3"
+    echo "3. 返回主菜单"
+    read -p "请输入选择(1-3): " choice
+    case $choice in
+        1)
+            install_miniconda3
+            ;;
+        2)
+            remove_miniconda3
+            ;;
+        3)
+            echo "退出到主菜单"
+            ;;
+        *)
+            echo "无效的选择"
+            ;;
+    esac
+}
+
 # 安装Miniconda3
 install_miniconda3() {
     echo "开始安装 Miniconda3"
@@ -725,6 +846,7 @@ custom_channels:
   pytorch: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
   simpleitk: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
 EOF
+
     echo "conda 镜像源配置完成"
 
     # 更新 conda
@@ -796,6 +918,33 @@ check_docker() {
     fi
 }
 
+# 配置Docker
+config_docker() {
+    echo "请选择操作: "
+    echo "1. 安装 Docker"
+    echo "2. 卸载 Docker"
+    echo "3. 配置 Docker国内镜像"
+    echo "4. 返回主菜单"
+    read -p "请输入选择(1-3): " choice
+    case $choice in
+        1)
+            install_docker
+            ;;
+        2)
+            remove_docker
+            ;;
+        3)
+            configure_docker_mirror
+            ;;
+        4)
+            echo "退出到主菜单"
+            ;;
+        *)
+            echo "无效的选择"
+            ;;
+    esac
+}
+
 # 安装Docker
 install_docker() {
     echo "开始安装 docker"
@@ -811,13 +960,13 @@ install_docker() {
         echo "请选择要使用的镜像源: "
         echo "1. 清华大学 TUNA 镜像站"
         echo "2. 中国科学技术大学 USTC 镜像站"
-        read -p "请输入选择(1 或 2): " source_choice
+        read -p "请输入选择(1 或 2): " choice
 
         # 根据用户选择设置 Docker 软件源
-        if [[ "$source_choice" == "1" ]]; then
+        if [[ "$choice" == "1" ]]; then
             echo "选择使用清华大学 TUNA 镜像站"
             local mirror_url="https://mirrors.tuna.tsinghua.edu.cn"
-        elif [[ "$source_choice" == "2" ]]; then
+        elif [[ "$choice" == "2" ]]; then
             echo "选择使用中国科学技术大学 USTC 镜像站"
             local mirror_url="https://mirrors.ustc.edu.cn"
         else
@@ -840,13 +989,13 @@ install_docker() {
         echo "请选择要使用的镜像源: "
         echo "1. 清华大学 TUNA 镜像站"
         echo "2. 中国科学技术大学 USTC 镜像站"
-        read -p "请输入选择(1 或 2): " source_choice
+        read -p "请输入选择(1 或 2): " choice
 
         # 根据用户选择设置 Docker 软件源
-        if [[ "$source_choice" == "1" ]]; then
+        if [[ "$choice" == "1" ]]; then
             echo "选择使用清华大学 TUNA 镜像站"
             local mirror_url="https://mirrors.tuna.tsinghua.edu.cn"
-        elif [[ "$source_choice" == "2" ]]; then
+        elif [[ "$choice" == "2" ]]; then
             echo "选择使用中国科学技术大学 USTC 镜像站"
             local mirror_url="https://mirrors.ustc.edu.cn"
         else
@@ -888,6 +1037,30 @@ remove_docker() {
     echo "Docker 已卸载."
 }
 
+# 配置Docker-compose
+config_docker_compose() {
+    echo "请选择操作: "
+    echo "1. 安装 Docker-compose"
+    echo "2. 卸载 Docker-compose"
+    echo "3. 返回主菜单"
+    read -p "请输入选择(1-3): " choice
+
+    case $choice in
+        1)
+            install_docker_compose
+            ;;
+        2)
+            remove_docker_compose
+            ;;
+        3)
+            echo "退出到主菜单"
+            ;;
+        *)
+            echo "无效的选择"
+            ;;
+    esac
+}
+
 # 安装Docker-compose
 install_docker_compose() {
     echo "开始安装 docker-compose"
@@ -922,6 +1095,30 @@ check_docker_compose() {
     fi
 }
 
+# 配置vulfocus
+config_vulfocus() {
+    echo "请选择操作: "
+    echo "1. 安装 Vulfocus"
+    echo "2. 卸载 Vulfocus"
+    echo "3. 返回主菜单"
+    read -p "请输入选择(1-3): " choice
+
+    case $choice in
+        1)
+            install_vulfocus
+            ;;
+        2)
+            remove_vulfocus
+            ;;
+        3)
+            echo "退出到主菜单"
+            ;;
+        *)
+            echo "无效的选择."
+            ;;
+    esac
+}
+
 # 安装vulfocus
 install_vulfocus() {
     # 接收用户输入作为host_ip
@@ -954,6 +1151,30 @@ remove_vulfocus() {
     sudo docker stop vulfocus
     sudo docker rm vulfocus
     echo "卸载vulfocus完成"
+}
+
+# 配置ARL
+config_arl() {
+    echo "请选择操作: "
+    echo "1. 安装 ARL"
+    echo "2. 卸载 ARL"
+    echo "3. 返回主菜单"
+    read -p "请输入选择(1-3): " choice
+
+    case $choice in
+        1)
+            install_arl
+            ;;
+        2)
+            remove_arl
+            ;;
+        3)
+            echo "退出到主菜单"
+            ;;
+        *)
+            echo "无效的选择"
+            ;;
+    esac
 }
 
 # 安装灯塔ARL
@@ -1028,6 +1249,30 @@ remove_arl() {
     echo "卸载ARL完成"
 }
 
+# 配置Metasploit-framework
+config_metasploit() {
+    echo "请选择操作: "
+    echo "1. 安装 Metasploit-framework"
+    echo "2. 卸载 Metasploit-framework"
+    echo "3. 返回主菜单"
+    read -p "请输入选择(1-3): " choice
+
+    case $choice in
+        1)
+            install_metasploit
+            ;;
+        2)
+            remove_metasploit
+            ;;
+        3)
+            echo "退出到主菜单"
+            ;;
+        *)
+            echo "无效的选择"
+            ;;
+    esac
+}
+
 # 安装Metasploit-framework
 install_metasploit() {
     # 配置 apt 镜像源
@@ -1050,15 +1295,15 @@ remove_metasploit() {
 # 配置Viper
 config_viper() {
     echo "请选择操作: "
-    echo "1. 安装Viper"
-    echo "2. 更新Viper版本"
-    echo "3. 更新Viper密码"
-    echo "4. 启动Viper"
-    echo "5. 关闭Viper"
-    echo "6. 卸载Viper"
+    echo "1. 安装 Viper"
+    echo "2. 更新 Viper 版本"
+    echo "3. 更新 Viper 密码"
+    echo "4. 启动 Viper"
+    echo "5. 关闭 Viper"
+    echo "6. 卸载 Viper"
     echo "7. 返回主菜单"
-    read -p "请输入选择(1-6): " viper_choice
-    case $viper_choice in
+    read -p "请输入选择(1-7): " choice
+    case $choice in
         1)
             install_viper
             ;;
@@ -1183,6 +1428,30 @@ remove_viper() {
     echo "卸载Viper完成"
 }
 
+# 配置CTFd
+config_ctfd() {
+    echo "请选择操作: "
+    echo "1. 安装 CTFd"
+    echo "2. 卸载 CTFd"
+    echo "3. 返回主菜单"
+    read -p "请输入选择(1-3): " choice
+
+    case $choice in
+        1)
+            install_ctfd
+            ;;
+        2)
+            remove_ctfd
+            ;;
+        3)
+            echo "退出到主菜单"
+            ;;
+        *)
+            echo "无效的选择"
+            ;;
+    esac
+}
+
 # 安装CTFd
 install_ctfd() {
     # 检查Docker是否安装
@@ -1222,8 +1491,32 @@ remove_ctfd() {
     echo "卸载CTFd完成"
 }
 
+# 配置AWVS
+config_awvs() {
+    echo "请选择操作: "
+    echo "1. 安装 AWVS"
+    echo "2. 卸载 AWVS"
+    echo "3. 返回主菜单"
+    read -p "请输入选择(1-3): " choice
+
+    case $choice in
+        1)
+            install_awvs
+            ;;
+        2)
+            remove_awvs
+            ;;
+        3)
+            echo "退出到主菜单"
+            ;;
+        *)
+            echo "无效的选择"
+            ;;
+    esac
+}
+
 # 安装AWVS
-install_avws() {
+install_awvs() {
     # 检查Docker是否安装
     check_docker
     echo "开始安装AWVS"
@@ -1294,6 +1587,30 @@ validate_ip() {
         echo "错误: 请输入正确的IP地址格式。"
         return 1
     fi
+}
+
+# 配置ocr_api_server
+config_ocr_api_server() {
+    echo "请选择操作: "
+    echo "1. 安装 ocr_api_server"
+    echo "2. 卸载 ocr_api_server"
+    echo "3. 返回主菜单"
+    read -p "请输入选择(1-3): " choice
+
+    case $choice in
+        1)
+            install_ocr_api_server
+            ;;
+        2)
+            remove_ocr_api_server
+            ;;
+        3)
+            echo "退出到主菜单"
+            ;;
+        *)
+            echo "无效的选择"
+            ;;
+    esac
 }
 
 # 安装ocr_api_server

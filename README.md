@@ -15,39 +15,6 @@ Ubuntu / Debian / Kali Linux 基础环境配置脚本
  ─────────────────────────────────────────────────────
 ```
 
-## 功能
-
-1. 启用root用户
-2. 启用SSH服务
-3. 设置nameserver
-4. 允许root用户SSH登录
-5. 获取当前主机网卡及IP地址信息
-6. 配置APT镜像源
-7. 安装OracleJDK
-8. 安装OpenJDK
-9. 删除当前JDK环境
-10. 安装Miniconda3
-11. 卸载Miniconda3
-12. 安装Docker
-13. 卸载Docker
-14. 配置Docker为国内镜像
-15. 安装Docker-compose
-16. 卸载Docker-compose
-17. 安装vulfocus
-18. 卸载vulfocus
-19. 安装灯塔ARL
-20. 卸载灯塔ARL
-21. 安装Metasploit-framework
-22. 卸载Metasploit-framework
-23. 安装Viper
-24. 卸载Viper
-25. 安装CTFd
-26. 卸载CTFd
-27. 安装AWVS
-28. 卸载AWVS
-29. 安装ocr_api_server
-30. 卸载ocr_api_server
-
 ## 使用
 
 ```bash
@@ -59,3 +26,119 @@ sudo bash LinuxEnvConfig.sh
 ```
 
 ![image](images/image.png)
+
+## 功能
+
+1. 基础配置
+2. 配置 APT
+3. 配置 JDK
+4. 配置 Miniconda3
+5. 配置 Docker
+6. 配置 Docker-compose
+7. 配置 Vulfocus
+8. 配置 ARL
+9. 配置 Metasploit-framework
+10. 配置 Viper
+11. 配置 CTFd
+12. 配置 AWVS
+13. 配置 ocr_api_server
+
+### 基础配置
+
+1. 启用root用户
+2. 启用ssh服务
+3. 设置nameserver
+4. 允许root用户ssh登录
+5. 获取当前主机网卡及IP地址信息
+6. 返回主菜单
+
+### 配置 APT
+
+
+### 配置 JDK
+
+1. 安装 OracleJDK
+2. 安装 OpenJDK
+3. 删除当前JDK环境
+4. 返回主菜单
+
+#### 安装 OracleJDK
+
+1. Oracle JDK 8 LTS
+2. Oracle JDK 11 LTS
+3. Oracle JDK 17 LTS
+4. Oracle JDK 21 LTS
+5. 返回主菜单
+
+#### 安装 OpenJDK
+
+1. OpenJDK 11 LTS
+2. OpenJDK 17 LTS
+3. OpenJDK 21 LTS
+4. 返回主菜单
+
+### 配置 Miniconda3
+
+1. 安装 Miniconda3
+2. 卸载 Miniconda3
+3. 返回主菜单
+
+### 配置 Docker
+
+1. 安装 Docker
+2. 卸载 Docker
+3. 配置 Docker国内镜像
+4. 返回主菜单
+
+### 配置 Docker-compose
+
+1. 安装 Docker-compose
+2. 卸载 Docker-compose
+3. 返回主菜单
+
+### 配置 Vulfocus
+
+1. 安装 Vulfocus
+2. 卸载 Vulfocus
+3. 返回主菜单
+
+### 配置 ARL
+
+1. 安装 ARL
+2. 卸载 ARL
+3. 返回主菜单
+
+### 配置 Metasploit-framework
+
+1. 安装 Metasploit-framework
+2. 卸载 Metasploit-framework
+3. 返回主菜单
+
+### 配置 Viper
+
+1. 安装 Viper
+2. 更新 Viper版本
+3. 更新 Viper密码
+4. 启动 Viper
+5. 关闭 Viper
+6. 卸载 Viper
+7. 返回主菜单
+
+### 配置 CTFd
+
+1. 安装 CTFd
+2. 卸载 CTFd
+3. 返回主菜单
+
+### 配置 AWVS
+
+1. 安装 AWVS
+2. 卸载 AWVS
+3. 返回主菜单
+
+### 配置 ocr_api_server
+
+1. 安装 ocr_api_server
+2. 卸载 ocr_api_server
+3. 返回主菜单
+
