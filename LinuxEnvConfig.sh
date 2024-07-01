@@ -1334,7 +1334,7 @@ config_viper() {
 # 安装Viper
 install_viper() {
     # 检查Docker是否安装
-    echo "开始安装灯塔ARL"
+    echo "开始安装Viper"
     check_docker
     read -p "输入启动Viper的主机地址: " host_ip
     # 检查是否输入了IP地址
