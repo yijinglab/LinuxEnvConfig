@@ -433,6 +433,15 @@ check_oracle_jdk() {
     sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/${JDK_VER}/bin/javac 2
     sudo update-alternatives --set javac /usr/lib/jvm/${JDK_VER}/bin/javac
 
+    sudo update-alternatives --install /usr/bin/keytool keytool /usr/lib/jvm/${JDK_VER}/bin/keytool 2
+    sudo update-alternatives --set keytool /usr/lib/jvm/${JDK_VER}/bin/keytool
+
+    sudo update-alternatives --install /usr/bin/jar jar /usr/lib/jvm/${JDK_VER}/bin/jar 2
+    sudo update-alternatives --set jar /usr/lib/jvm/${JDK_VER}/bin/jar
+
+    sudo update-alternatives --install /usr/bin/jarsigner jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner 2
+    sudo update-alternatives --set jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner
+
     # 检查update-alternatives是否成功
     if [ $? -ne 0 ]; then
         echo "未能成功配置Java和Javac。"
@@ -565,6 +574,15 @@ check_openjdk() {
     sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/jdk-${JDK_VER}/bin/javac 2
     sudo update-alternatives --set javac /usr/lib/jvm/jdk-${JDK_VER}/bin/javac
 
+    sudo update-alternatives --install /usr/bin/keytool keytool /usr/lib/jvm/${JDK_VER}/bin/keytool 2
+    sudo update-alternatives --set keytool /usr/lib/jvm/${JDK_VER}/bin/keytool
+
+    sudo update-alternatives --install /usr/bin/jar jar /usr/lib/jvm/${JDK_VER}/bin/jar 2
+    sudo update-alternatives --set jar /usr/lib/jvm/${JDK_VER}/bin/jar
+
+    sudo update-alternatives --install /usr/bin/jarsigner jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner 2
+    sudo update-alternatives --set jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner
+
     # 检查update-alternatives是否成功
     if [ $? -ne 0 ]; then
         echo "未能成功配置Java和Javac。"
@@ -586,10 +604,16 @@ remove_jdk() {
         # 移除Java和Javac的配置
         update-alternatives --remove java /usr/bin/java
         update-alternatives --remove javac /usr/bin/javac
+        update-alternatives --remove javac /usr/bin/keytool
+        update-alternatives --remove javac /usr/bin/jar
+        update-alternatives --remove javac /usr/bin/jarsigner
 
         # 配置默认的Java和Javac版本
         echo 0 | sudo update-alternatives --config java 2>&1 >/dev/null
         echo 0 | sudo update-alternatives --config javac 2>&1 >/dev/null
+        echo 0 | sudo update-alternatives --config keytool 2>&1 >/dev/null
+        echo 0 | sudo update-alternatives --config jar 2>&1 >/dev/null
+        echo 0 | sudo update-alternatives --config jarsigner 2>&1 >/dev/null
 
         # 删除JDK目录
         sudo rm -rf "$JDK_DIR"
