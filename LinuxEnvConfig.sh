@@ -118,6 +118,7 @@ menu_options=(
     # "安装Viper"
     # "卸载Viper"
     "配置 Empire"
+    "配置 Starkiller"
     "配置 CTFd"
     # "安装CTFd"
     # "卸载CTFd"
@@ -166,6 +167,7 @@ commands=(
     # ["安装Viper"]="install_viper"
     # ["卸载Viper"]="remove_viper"
     ["配置 Empire"]="config_empire"
+    ["配置 Starkiller"]="config_starkiller"
     ["配置 CTFd"]="config_ctfd"
     # ["安装CTFd"]="install_ctfd"
     # ["卸载CTFd"]="remove_ctfd"
@@ -1558,6 +1560,130 @@ remove_empire() {
         docker rmi registry.cn-hangzhou.aliyuncs.com/mingy123/empire:latest
     fi
     echo "卸载Empire完成"
+}
+
+# 配置 Starkiller
+config_starkiller() {
+    echo "请选择操作: "
+    echo "1. 安装 Starkiller"
+    echo "2. 更新 Starkiller"
+    echo "3. 关闭 Starkiller"
+    echo "4. 启动 Starkiller"
+    echo "5. 卸载 Starkiller"
+    echo "6. 返回主菜单"
+    read -p "请输入选择(1-6): " choice
+    case $choice in
+        1)
+            install_starkiller
+            ;;
+        2)
+            update_starkiller
+            ;;
+        3)
+            stop_starkiller
+            ;;
+        4)
+            start_starkiller
+            ;;
+        5)
+            remove_starkiller
+            ;;
+        6)
+            echo "退出到主菜单"
+            ;;
+        *)
+            echo "无效的选择"
+            ;;
+    esac
+}
+
+# 安装 Starkiller
+install_starkiller() {
+    echo "安装Starkiller开始"
+    read -p "输入启动Starkiller的主机地址: " host_ip
+    # 检查是否输入了IP地址
+    if [ -z "${host_ip}" ]; then
+        echo "请输入正确的IP地址"
+        exit 1
+    fi
+    echo "更新APT源"
+    apt update
+    echo "安装Node.js和NPM"
+    apt install nodejs npm -y
+    echo "安装Yarn包管理器"
+    npm install --global yarn
+    echo "下载Starkille项目"
+    git clone https://gitee.com/yijingsec/Starkiller.git /opt/Starkiller
+    cd /opt/Starkiller
+    echo "安装依赖"
+    yarn
+    echo "启动Starkiller开始"
+    nohup yarn run serve --host >/dev/null 2>&1 &
+    echo "启动Starkiller完成"
+    echo "服务地址: http://${host_ip}:4173"
+    echo "默认用户: empireadmin"
+    echo "默认密码: password123"
+}
+
+# 更新 Starkiller
+update_starkiller() {
+    echo "更新Starkiller开始"
+    cd /opt/Starkiller
+    git pull
+    yarn
+    if [ $? -eq 0 ]; then
+        echo "更新Starkiller完成"
+    else
+        echo "更新Starkiller失败"
+    fi
+}
+
+# 关闭 Starkiller
+stop_starkiller() {
+    echo "关闭Starkiller开始"
+    pid=$(ps aux |grep "yarn run serve --host" | grep -v "grep" | awk -F" " '{print $2}')
+    if [ -n "$pid" ]; then
+        kill -9 $pid
+        echo "关闭Starkiller完成"
+    else
+        echo "Starkiller未运行"
+    fi
+}
+
+# 启动 Starkiller
+start_starkiller() {
+    echo "启动Starkiller开始"
+    read -p "输入启动Starkiller的主机地址: " host_ip
+    # 检查是否输入了IP地址
+    if [ -z "${host_ip}" ]; then
+        echo "请输入正确的IP地址"
+        exit 1
+    fi
+    pid=$(ps aux |grep "yarn run serve --host" | grep -v "grep" | awk -F" " '{print $2}')
+    if [ -n "$pid" ]; then
+        echo "Starkiller已经启动, 进程ID为: $pid"
+    else
+        cd /opt/Starkiller
+        nohup yarn run serve --host >/dev/null 2>&1 &
+        echo "启动Starkiller完成"
+    fi
+    echo "服务地址: http://${host_ip}:4173"
+    echo "默认用户: empireadmin"
+    echo "默认密码: password123"
+}
+
+# 卸载 Starkiller
+remove_starkiller() {
+    echo "卸载Starkiller开始"
+    if [ -d "/opt/Starkiller" ]; then
+        echo "Starkiller已安装, 开始卸载"
+        stop_starkiller
+        rm -rf /opt/Starkiller
+        echo "卸载Starkiller完成"
+    else
+        echo "Starkiller未安装, 请先安装"
+        exit 0
+    fi
 }
 
 # 配置CTFd
