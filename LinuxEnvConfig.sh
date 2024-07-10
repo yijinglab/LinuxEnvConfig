@@ -117,6 +117,7 @@ menu_options=(
     "配置 Viper"
     # "安装Viper"
     # "卸载Viper"
+    "配置 Empire"
     "配置 CTFd"
     # "安装CTFd"
     # "卸载CTFd"
@@ -164,6 +165,7 @@ commands=(
     ["配置 Viper"]="config_viper"
     # ["安装Viper"]="install_viper"
     # ["卸载Viper"]="remove_viper"
+    ["配置 Empire"]="config_empire"
     ["配置 CTFd"]="config_ctfd"
     # ["安装CTFd"]="install_ctfd"
     # ["卸载CTFd"]="remove_ctfd"
@@ -1452,6 +1454,112 @@ remove_viper() {
     echo "卸载Viper完成"
 }
 
+# 配置Viper
+config_empire() {
+    echo "请选择操作: "
+    echo "1. 安装 Empire"
+    echo "2. 更新 Empire"
+    echo "3. 关闭 Empire"
+    echo "4. 启动 Empire"
+    echo "5. 卸载 Empire"
+    echo "6. 返回主菜单"
+    read -p "请输入选择(1-6): " choice
+    case $choice in
+        1)
+            install_empire
+            ;;
+        2)
+            update_empire
+            ;;
+        3)
+            stop_empire
+            ;;
+        4)
+            start_empire
+            ;;
+        5)
+            remove_empire
+            ;;
+        6)
+            echo "退出到主菜单"
+            ;;
+        *)
+            echo "无效的选择"
+            ;;
+    esac
+}
+
+# 安装empire
+install_empire() {
+    echo "开始安装 Empire"
+    check_docker
+    read -p "输入启动 Empire 的主机地址: " host_ip
+    if [ -z "${host_ip}" ]; then
+        echo "请输入正确的IP地址"
+        exit 0
+    fi
+    echo "开始拉取Empire镜像"
+    docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/empire:latest
+    if [ $? -eq 0 ]; then
+        echo "Empire镜像拉取完毕"
+    else
+        echo "Empire镜像拉取失败"
+        exit 0
+    fi
+    docker run -dit --name ps-empire -p 6000-6010:6000-6010 -p 1337:1337 -p 5000:5000 registry.cn-hangzhou.aliyuncs.com/mingy123/empire:latest
+    if [ $? -eq 0 ]; then
+        echo "Empire容器启动成功"
+    else
+        echo "Empire容器启动失败"
+        exit 0
+    fi
+    echo "服务端: http://${host_ip}:1337"
+    echo "用户名: empireadmin"
+    echo "密  码: password123"
+}
+
+# 更新Empire
+update_empire() {
+    echo "开始更新Empire"
+    docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/empire:latest
+    if [ $? -eq 0 ]; then
+        echo "Empire镜像更新完毕"
+    else
+        echo "Empire镜像更新失败"
+        exit 0
+    fi
+    docker stop ps-empire
+    docker rm ps-empire -f
+    echo "完成Empire更新"
+}
+
+# 关闭Empire
+stop_empire() {
+    echo "关闭Empire开始"
+    docker stop ps-empire
+    echo "关闭Empire完成"
+}
+
+# 启动Empire
+start_empire() {
+    echo "启动Empire开始"
+    docker start ps-empire
+    echo "启动Empire完成"
+}
+
+# 卸载Empire
+remove_empire() {
+    echo "卸载Empire开始"
+    docker stop ps-empire
+    docker rm ps-empire -f
+    echo "删除Empire容器完成"
+    read -p "是否要删除镜像? (y/n)" yn
+    if [[ $yn == "y" || $yn == "Y" ]]; then
+        docker rmi registry.cn-hangzhou.aliyuncs.com/mingy123/empire:latest
+    fi
+    echo "卸载Empire完成"
+}
+
 # 配置CTFd
 config_ctfd() {
     echo "请选择操作: "
@@ -1744,7 +1852,7 @@ handle_choice() {
 while true; do
     show_menu
     read -p ">>> 请输入选项的序号(输入q退出) >>> " choice
-    if [[ $choice == 'q' ]]; then
+    if [[ $choice == 'q' || $choice == 'Q' ]]; then
         break
     fi
     handle_choice $choice

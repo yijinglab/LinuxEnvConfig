@@ -39,9 +39,10 @@ sudo bash LinuxEnvConfig.sh
 8. 配置 ARL
 9. 配置 Metasploit-framework
 10. 配置 Viper
-11. 配置 CTFd
-12. 配置 AWVS
-13. 配置 ocr_api_server
+11. 配置 Empire
+12. 配置 CTFd
+13. 配置 AWVS
+14. 配置 ocr_api_server
 
 ### 基础配置
 
@@ -123,6 +124,15 @@ sudo bash LinuxEnvConfig.sh
 5. 关闭 Viper
 6. 卸载 Viper
 7. 返回主菜单
+
+### 配置 Empire
+
+1. 安装 Empire
+2. 更新 Empire
+3. 启动 Empire
+4. 关闭 Empire
+5. 卸载 Empire
+6. 返回主菜单
 
 ### 配置 CTFd
 
