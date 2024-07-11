@@ -1677,6 +1677,7 @@ start_starkiller() {
         else
             echo "启动Starkiller失败"
         fi
+    fi
 }
 
 # 卸载 Starkiller
