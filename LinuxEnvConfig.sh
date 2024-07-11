@@ -1508,7 +1508,7 @@ install_empire() {
         echo "Empire镜像拉取失败"
         exit 0
     fi
-    docker run -dit --name ps-empire -p 6000-6010:6000-6010 -p 1337:1337 -p 5000:5000 registry.cn-hangzhou.aliyuncs.com/mingy123/empire:latest
+    docker run -d --name ps-empire -p 6000-6010:6000-6010 -p 1337:1337 -p 5000:5000 registry.cn-hangzhou.aliyuncs.com/mingy123/empire:latest
     if [ $? -eq 0 ]; then
         echo "Empire容器启动成功"
     else
@@ -1606,19 +1606,24 @@ install_starkiller() {
         echo "请输入正确的IP地址"
         exit 1
     fi
-    echo "更新APT源"
-    apt update
-    echo "安装Node.js和NPM"
-    apt install nodejs npm -y
-    echo "安装Yarn包管理器"
-    npm install --global yarn
-    echo "下载Starkille项目"
-    git clone https://gitee.com/yijingsec/Starkiller.git /opt/Starkiller
-    cd /opt/Starkiller
-    echo "安装依赖"
-    yarn
-    echo "启动Starkiller开始"
-    nohup yarn run serve --host >/dev/null 2>&1 &
+
+    echo "开始拉取Starkiller镜像"
+    docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/starkiller:latest
+    if [ $? -eq 0 ]; then
+        echo "拉取Starkiller镜像完毕"
+    else
+        echo "拉取Starkiller镜像失败"
+        exit 0
+    fi
+
+    docker run -d --name ps-starkiller -p 4173:4173 registry.cn-hangzhou.aliyuncs.com/mingy123/starkiller:latest
+    if [ $? -eq 0 ]; then
+        echo "启动Starkiller容器成功"
+    else
+        echo "启动Starkiller容器失败"
+        exit 0
+    fi
+    
     echo "启动Starkiller完成"
     echo "服务地址: http://${host_ip}:4173"
     echo "默认用户: empireadmin"
@@ -1628,12 +1633,13 @@ install_starkiller() {
 # 更新 Starkiller
 update_starkiller() {
     echo "更新Starkiller开始"
-    cd /opt/Starkiller
-    git pull
-    yarn
+    echo "开始拉取最新Starkiller镜像"
+    docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/starkiller:latest
     if [ $? -eq 0 ]; then
-        echo "更新Starkiller完成"
+        echo "拉取最新Starkiller镜像成功"
+        echo "更新Starkiller成功"
     else
+        echo "拉取最新Starkiller镜像失败"
         echo "更新Starkiller失败"
     fi
 }
@@ -1641,12 +1647,11 @@ update_starkiller() {
 # 关闭 Starkiller
 stop_starkiller() {
     echo "关闭Starkiller开始"
-    pid=$(ps aux |grep "yarn run serve --host" | grep -v "grep" | awk -F" " '{print $2}')
-    if [ -n "$pid" ]; then
-        kill -9 $pid
+    docker stop ps-starkiller
+    if [ $? -eq 0 ]; then
         echo "关闭Starkiller完成"
     else
-        echo "Starkiller未运行"
+        echo "关闭Starkiller失败"
     fi
 }
 
@@ -1659,30 +1664,35 @@ start_starkiller() {
         echo "请输入正确的IP地址"
         exit 1
     fi
-    pid=$(ps aux |grep "yarn run serve --host" | grep -v "grep" | awk -F" " '{print $2}')
-    if [ -n "$pid" ]; then
-        echo "Starkiller已经启动, 进程ID为: $pid"
+    docker ps --format "{{.Names}}" | grep 'ps-starkiller'
+    if [ $? -eq 0 ]; then
+        echo "Starkiller已经启动"
     else
-        cd /opt/Starkiller
-        nohup yarn run serve --host >/dev/null 2>&1 &
-        echo "启动Starkiller完成"
-    fi
-    echo "服务地址: http://${host_ip}:4173"
-    echo "默认用户: empireadmin"
-    echo "默认密码: password123"
+        docker start ps-starkiller
+        if [ $? -eq 0 ]; then
+            echo "启动Starkiller完成"
+            echo "服务地址: http://${host_ip}:4173"
+            echo "默认用户: empireadmin"
+            echo "默认密码: password123"
+        else
+            echo "启动Starkiller失败"
+        fi
 }
 
 # 卸载 Starkiller
 remove_starkiller() {
     echo "卸载Starkiller开始"
-    if [ -d "/opt/Starkiller" ]; then
-        echo "Starkiller已安装, 开始卸载"
-        stop_starkiller
-        rm -rf /opt/Starkiller
+    docker rm ps-starkiller -f
+    if [ $? -eq 0 ]; then
+        echo "删除Starkiller容器完成"
+        read -p "是否要删除镜像? (y/n)" yn
+        if [[ $yn == "y" || $yn == "Y" ]]; then
+            docker rmi registry.cn-hangzhou.aliyuncs.com/mingy123/starkiller:latest
+        fi
+        echo "删除Starkiller镜像完成"
         echo "卸载Starkiller完成"
     else
-        echo "Starkiller未安装, 请先安装"
-        exit 0
+        echo "卸载Starkiller失败"
     fi
 }
 
