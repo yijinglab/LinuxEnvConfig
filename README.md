@@ -40,9 +40,11 @@ sudo bash LinuxEnvConfig.sh
 9. 配置 Metasploit-framework
 10. 配置 Viper
 11. 配置 Empire
-12. 配置 CTFd
-13. 配置 AWVS
-14. 配置 ocr_api_server
+12. 配置 Starkiller
+13. 配置 HFish
+14. 配置 CTFd
+15. 配置 AWVS
+16. 配置 ocr_api_server
 
 ### 基础配置
 
@@ -133,6 +135,25 @@ sudo bash LinuxEnvConfig.sh
 4. 关闭 Empire
 5. 卸载 Empire
 6. 返回主菜单
+
+### Starkiller
+
+1. 安装 Starkiller
+2. 更新 Starkiller
+3. 关闭 Starkiller
+4. 启动 Starkiller
+5. 卸载 Starkiller
+6. 返回主菜单
+
+### 配置 HFish
+
+1. 安装 HFish
+2. 更新 HFish
+3. 关闭 HFish
+4. 启动 HFish
+5. 卸载 HFish
+6. 获取数据库信息
+7. 返回主菜单
 
 ### 配置 CTFd
 

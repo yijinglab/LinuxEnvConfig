@@ -119,6 +119,7 @@ menu_options=(
     # "卸载Viper"
     "配置 Empire"
     "配置 Starkiller"
+    "配置 HFish"
     "配置 CTFd"
     # "安装CTFd"
     # "卸载CTFd"
@@ -168,6 +169,7 @@ commands=(
     # ["卸载Viper"]="remove_viper"
     ["配置 Empire"]="config_empire"
     ["配置 Starkiller"]="config_starkiller"
+    ["配置 HFish"]="config_hfish"
     ["配置 CTFd"]="config_ctfd"
     # ["安装CTFd"]="install_ctfd"
     # ["卸载CTFd"]="remove_ctfd"
@@ -1695,6 +1697,183 @@ remove_starkiller() {
     else
         echo "卸载Starkiller失败"
     fi
+}
+
+# 配置 HFish
+config_hfish() {
+echo "请选择操作: "
+    echo "1. 安装 HFish"
+    echo "2. 更新 HFish"
+    echo "3. 关闭 HFish"
+    echo "4. 启动 HFish"
+    echo "5. 卸载 HFish"
+    echo "6. 获取数据库信息"
+    echo "7. 返回主菜单"
+    read -p "请输入选择(1-7): " choice
+    case $choice in
+        1)
+            install_hfish
+            ;;
+        2)
+            update_hfish
+            ;;
+        3)
+            stop_hfish
+            ;;
+        4)
+            start_hfish
+            ;;
+        5)
+            remove_hfish
+            ;;
+        6)
+            get_hfish_db_info
+            ;;
+        7)
+            echo "退出到主菜单"
+            ;;
+        *)
+            echo "无效的选择"
+            ;;
+    esac
+}
+
+# 安装 HFish
+install_hfish() {
+    # 检查Docker是否安装
+    echo "开始安装HFish"
+    check_docker
+    read -p "输入启动HFish的主机地址: " host_ip
+    # 检查是否输入了IP地址
+    if [ -z "${host_ip}" ]; then
+        echo "请输入正确的IP地址"
+        exit 1
+    fi
+
+    mkdir -p /opt/hfish && cd /opt/hfish && rm -f docker-compose.* > /dev/null 2>&1
+
+    tee docker-compose.yml <<-'EOF'
+version: '3'
+services:
+  hfish:
+    image: registry.cn-hangzhou.aliyuncs.com/mingy123/hfish-server:latest
+    container_name: hfish
+    volumes:
+      - /opt/hfish:/usr/share/hfish
+    network_mode: host
+    privileged: true
+    # restart: always
+    depends_on:
+      - mysql
+  mysql:
+    container_name: mysql8
+    image: registry.cn-hangzhou.aliyuncs.com/mingy123/mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+EOF
+
+    # read -p "输入MySQL数据库密码(回车默认为123456): " MYSQL_PASSWORD
+    # sed -i "s/123456/${MYSQL_PASSWORD}/g" docker-compose.yml
+    cd /opt/hfish
+    check_docker_compose
+    sudo $COMPOSE_CMD up -d
+    echo "正在等待系统启动"
+    sleep 3
+    if command -v jq >/dev/null 2>&1; then
+        MySQL_IP=$(docker network inspect hfish_default | jq -r '.[].Containers | to_entries[] | select(.value.Name == "mysql8") | .value.IPv4Address' | awk -F/ '{print $1}')
+    else
+        echo "jq命令不存在, 开始安装jq"
+        apt install jq
+        MySQL_IP=$(docker network inspect hfish_default | jq -r '.[].Containers | to_entries[] | select(.value.Name == "mysql8") | .value.IPv4Address' | awk -F/ '{print $1}')
+    fi
+    echo "访问地址: https://${host_ip}:4433/web 登录到服务器"
+    echo "用户名: admin"
+    echo "密  码: HFish"
+    echo "MySQL IP 地 址: ${MySQL_IP}"
+    echo "MySQL 端 口 号: 3306"
+    echo "MySQL 数据库名: hfish"
+    echo "MySQL 用 户 名: root"
+    echo "MySQL 密    码: 123456"
+
+    echo "安装HFish完成"
+}
+
+# 更新 HFish
+update_hfish() {
+    echo "更新HFish开始"
+    echo "开始拉取最新HFish镜像"
+    docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/hfish-server:latest
+    if [ $? -eq 0 ]; then
+        echo "拉取最新HFish镜像成功"
+        echo "更新HFish成功"
+    else
+        echo "拉取最新HFish镜像失败"
+        echo "更新HFish失败"
+    fi
+}
+
+# 关闭 HFish
+stop_hfish() {
+    echo "关闭HFish开始"
+    cd /opt/hfish
+    check_docker_compose
+    sudo $COMPOSE_CMD stop
+    if [ $? -eq 0 ]; then
+        echo "关闭HFish完成"
+    else
+        echo "关闭HFish失败"
+    fi
+}
+
+# 启动 HFish
+start_hfish() {
+    echo "启动HFish开始"
+    read -p "输入启动HFish的主机地址: " host_ip
+    # 检查是否输入了IP地址
+    if [ -z "${host_ip}" ]; then
+        echo "请输入正确的IP地址"
+        exit 1
+    fi
+    cd /opt/hfish
+    check_docker_compose
+    sudo $COMPOSE_CMD start
+    if [ $? -eq 0 ]; then
+        echo "启动HFish完成"
+        echo "访问地址: https://${host_ip}:4433/web 登录到服务器"
+        echo "用户名: admin"
+        echo "密  码: HFish2021"
+    fi
+}
+
+# 卸载 HFish
+remove_hfish() {
+    echo "卸载HFish开始"
+    cd /opt/hfish
+    check_docker_compose
+    sudo $COMPOSE_CMD down
+    if [ $? -eq 0 ]; then
+        rm -rf /opt/hfish
+        read -p "是否要删除镜像? (y/n)" yn
+        if [[ $yn == "y" || $yn == "Y" ]]; then
+            docker rmi registry.cn-hangzhou.aliyuncs.com/mingy123/hfish-server:latest
+            docker rmi registry.cn-hangzhou.aliyuncs.com/mingy123/mysql:8.0
+        fi
+        echo "卸载HFish完成"
+    else
+        echo "卸载HFish失败"
+    fi
+}
+
+# 获取HFish数据库配置信息
+get_hfish_db_info() {
+    echo "HFish数据库信息如下: "
+    MySQL_IP=$(docker network inspect hfish_default | jq -r '.[].Containers | to_entries[] | select(.value.Name == "mysql8") | .value.IPv4Address' | awk -F/ '{print $1}')
+    echo "MySQL IP 地 址: ${MySQL_IP}"
+    echo "MySQL 端 口 号: 3306"
+    echo "MySQL 数据库名: hfish"
+    echo "MySQL 用 户 名: root"
+    echo "MySQL 密    码: 123456"
 }
 
 # 配置CTFd
