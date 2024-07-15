@@ -41,10 +41,11 @@ sudo bash LinuxEnvConfig.sh
 10. 配置 Viper
 11. 配置 Empire
 12. 配置 Starkiller
-13. 配置 HFish
-14. 配置 CTFd
-15. 配置 AWVS
-16. 配置 ocr_api_server
+13. 配置 Dnscat2
+14. 配置 HFish
+15. 配置 CTFd
+16. 配置 AWVS
+17. 配置 ocr_api_server
 
 ### 基础配置
 
@@ -136,7 +137,7 @@ sudo bash LinuxEnvConfig.sh
 5. 卸载 Empire
 6. 返回主菜单
 
-### Starkiller
+### 配置 Starkiller
 
 1. 安装 Starkiller
 2. 更新 Starkiller
@@ -144,6 +145,13 @@ sudo bash LinuxEnvConfig.sh
 4. 启动 Starkiller
 5. 卸载 Starkiller
 6. 返回主菜单
+
+### 配置 Dnscat2
+
+1. 安装 Dnscat2
+2. 启动 Dnscat2 (直连模式)
+3. 启动 Dnscat2 (中继模式)
+4. 返回主菜单
 
 ### 配置 HFish
 

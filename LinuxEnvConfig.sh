@@ -119,6 +119,7 @@ menu_options=(
     # "卸载Viper"
     "配置 Empire"
     "配置 Starkiller"
+    "配置 Dnscat2"
     "配置 HFish"
     "配置 CTFd"
     # "安装CTFd"
@@ -169,6 +170,7 @@ commands=(
     # ["卸载Viper"]="remove_viper"
     ["配置 Empire"]="config_empire"
     ["配置 Starkiller"]="config_starkiller"
+    ["配置 Dnscat2"]="config_dnscat2"
     ["配置 HFish"]="config_hfish"
     ["配置 CTFd"]="config_ctfd"
     # ["安装CTFd"]="install_ctfd"
@@ -1874,6 +1876,65 @@ get_hfish_db_info() {
     echo "MySQL 数据库名: hfish"
     echo "MySQL 用 户 名: root"
     echo "MySQL 密    码: 123456"
+}
+
+# 配置 Dnscat2
+config_dnscat2() {
+    echo "请选择操作: "
+    echo "1. 安装 Dnscat2"
+    echo "2. 启动 Dnscat2 (直连模式)"
+    echo "3. 启动 Dnscat2 (中继模式)"
+    echo "4. 返回主菜单"
+    read -p "请输入选择(1-4): " choice
+
+    case $choice in
+        1)
+            install_dnscat2
+            ;;
+        2)
+            start_dnscat2_direct_mode
+            ;;
+        3)
+            start_dnscat2_relay_mode
+            ;;
+        4)
+            echo "退出到主菜单"
+            ;;
+        *)
+            echo "无效的选择"
+            ;;
+    esac
+}
+
+# 安装dnscat2
+install_dnscat2() {
+    echo "安装Dnscat2开始"
+    docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/dnscat2:v0.07
+    if [ $? -eq 0 ]; then
+        echo "拉取最新Dnscat2镜像成功"
+        echo "安装Dnscat2成功"
+        echo "请继续选择配置Dnscat2, 启动Dnscat2"
+    else
+        echo "拉取最新Dnscat2镜像失败"
+        echo "安装Dnscat2失败"
+    fi
+}
+
+# 启动dnscat2直连模式
+start_dnscat2_direct_mode() {
+    echo "启动Dnscat2(直连模式)开始"
+    docker run -it --name dnscat2 --rm -p 53:53/udp registry.cn-hangzhou.aliyuncs.com/mingy123/dnscat2:v0.07 server
+}
+
+# 启动Dnscat2中继模式
+start_dnscat2_relay_mode() {
+    echo "启动Dnscat2(中继模式)开始"
+    read -p "输入启动Dnscat2的子域名: " subdomain
+    if [ -z "${subdomain}" ]; then
+        echo "请输入正确的子域名"
+        exit 1
+    fi
+    docker run -it --name dnscat2 --rm -p 53:53/udp registry.cn-hangzhou.aliyuncs.com/mingy123/dnscat2:v0.07 server "${subdomain}"
 }
 
 # 配置CTFd
