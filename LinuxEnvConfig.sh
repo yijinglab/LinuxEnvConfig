@@ -83,104 +83,42 @@ declare -A commands
 
 menu_options=(
     "基础配置"
-    # "启用root用户"
-    # "启用ssh服务"
-    # "设置nameserver"
-    # "允许root用户ssh登录"
-    # "获取当前主机网卡及IP地址信息"
     "配置 APT"
     "配置 JDK"
-    # "安装OracleJDK"
-    # "安装OpenJDK"
-    # "删除当前JDK环境"
-    # "安装Python3.8"
-    # "卸载Python3.8"
     "配置 Miniconda3"
-    # "安装Miniconda3"
-    # "卸载Miniconda3"
     "配置 Docker"
-    # "安装Docker"
-    # "卸载Docker"
-    # "配置Docker为国内镜像"
     "配置 Docker-compose"
-    # "安装Docker-compose"
-    # "卸载Docker-compose"
     "配置 Vulfocus"
-    # "安装vulfocus"
-    # "卸载vulfocus"
     "配置 ARL"
-    # "安装灯塔ARL"
-    # "卸载灯塔ARL"
     "配置 Metasploit-framework"
-    # "安装Metasploit-framework"
-    # "卸载Metasploit-framework"
     "配置 Viper"
-    # "安装Viper"
-    # "卸载Viper"
     "配置 Empire"
     "配置 Starkiller"
     "配置 Dnscat2"
     "配置 HFish"
     "配置 CTFd"
-    # "安装CTFd"
-    # "卸载CTFd"
     "配置 AWVS"
-    # "安装AWVS"
-    # "卸载AWVS"
     "配置 ocr_api_server"
-    # "安装ocr_api_server"
-    # "卸载ocr_api_server"
 )
 
 commands=(
     ["基础配置"]="basic_config"
-    # ["启用root用户"]="enable_root_user"
-    # ["启用SSH服务"]="enable_ssh"
-    # ["设置nameserver"]="config_nameserver"
-    # ["允许root用户SSH登录"]="root_ssh_login"
-    # ["获取当前主机网卡及IP地址信息"]="get_ip_addr"
     ["配置 APT"]="config_apt_source"
     ["配置 JDK"]="config_jdk"
-    # ["安装OracleJDK"]="install_oracle_jdk"
-    # ["安装OpenJDK"]="install_openjdk"
-    # ["删除当前JDK环境"]="remove_jdk"
-    # ["安装Python3.8"]="install_python38"
-    # ["卸载Python3.8"]="remove_python38"
     ["配置 Miniconda3"]="config_miniconda3"
-    # ["安装Miniconda3"]="install_miniconda3"
-    # ["卸载Miniconda3"]="remove_miniconda3"
     ["配置 Docker"]="config_docker"
-    # ["安装Docker"]="install_docker"
-    # ["卸载Docker"]="remove_docker"
-    # ["配置Docker为国内镜像"]="configure_docker_mirror"
     ["配置 Docker-compose"]="config_docker_compose"
-    # ["安装Docker-compose"]="install_docker_compose"
-    # ["卸载Docker-compose"]="remove_docker_compose"
     ["配置 Vulfocus"]="config_vulfocus"
-    # ["安装vulfocus"]="install_vulfocus"
-    # ["卸载vulfocus"]="remove_vulfocus"
     ["配置 ARL"]="config_arl"
-    # ["安装灯塔ARL"]="install_arl"
-    # ["卸载灯塔ARL"]="remove_arl"
     ["配置 Metasploit-framework"]="config_metasploit"
-    # ["安装Metasploit-framework"]="install_metasploit"
-    # ["卸载Metasploit-framework"]="remove_metasploit"
     ["配置 Viper"]="config_viper"
-    # ["安装Viper"]="install_viper"
-    # ["卸载Viper"]="remove_viper"
     ["配置 Empire"]="config_empire"
     ["配置 Starkiller"]="config_starkiller"
     ["配置 Dnscat2"]="config_dnscat2"
     ["配置 HFish"]="config_hfish"
     ["配置 CTFd"]="config_ctfd"
-    # ["安装CTFd"]="install_ctfd"
-    # ["卸载CTFd"]="remove_ctfd"
     ["配置 AWVS"]="config_awvs"
-    # ["安装AWVS"]="install_awvs"
-    # ["卸载AWVS"]="remove_awvs"
     ["配置 ocr_api_server"]="config_ocr_api_server"
-    # ["安装ocr_api_server"]="install_ocr_api_server"
-    # ["卸载ocr_api_server"]="remove_ocr_api_server"
 )
 
 # 基础配置
@@ -630,118 +568,6 @@ remove_jdk() {
         echo "找不到JDK, 或者无法确定JDK安装路径。"
         exit 1
     fi
-}
-
-# 安装Python3.8
-install_python38() {
-    # 设置Python版本
-    PYTHON_VERSION="Python-3.8.10"
-
-    # 设置下载链接（以Python 3.8.10为例）
-    PYTHON_URL="https://www.python.org/ftp/python/3.8.10/$PYTHON_VERSION.tar.xz"
-
-    # 设置解压目录
-    PYTHON_DIR="/usr/local"
-
-    # 下载Python源码
-    echo "Downloading $PYTHON_VERSION..."
-    wget $PYTHON_URL -O $PYTHON_VERSION.tar.xz
-
-    # 检查是否下载成功
-    if [ $? -ne 0 ]; then
-        echo "Failed to download $PYTHON_VERSION."
-        exit 1
-    fi
-
-    # 解压Python源码
-    echo "Unpacking $PYTHON_VERSION..."
-    tar -xJf $PYTHON_VERSION.tar.xz
-
-    # 检查解压是否成功
-    if [ $? -ne 0 ]; then
-        echo "Failed to unpack $PYTHON_VERSION."
-        exit 1
-    fi
-
-    # 编译和安装Python
-    echo "Installing $PYTHON_VERSION..."
-    cd $PYTHON_VERSION
-    ./configure --enable-optimizations
-    make -j 8
-    sudo make altinstall
-
-    # 检查安装是否成功
-    if [ $? -ne 0 ]; then
-        echo "Failed to install $PYTHON_VERSION."
-        exit 1
-    fi
-
-    cd ..
-
-    # 配置Python和pip
-    echo "Configuring $PYTHON_VERSION and pip..."
-
-    # 设置Python和pip的替代选项
-    sudo update-alternatives --install /usr/bin/python python $PYTHON_DIR/$PYTHON_VERSION 1
-    sudo update-alternatives --install /usr/bin/pip pip $PYTHON_DIR/$PYTHON_VERSION/bin/pip 1
-
-    # 设置默认的Python和pip版本
-    sudo update-alternatives --set python /usr/bin/python
-    sudo update-alternatives --set pip /usr/bin/pip
-
-    # 清理下载的源码压缩包
-    rm -f $PYTHON_VERSION.tar.xz
-    rm -rf $PYTHON_VERSION
-
-    echo "Python $PYTHON_VERSION has been successfully installed and configured."
-}
-
-# 卸载Python3.8
-remove_python38() {
-    echo "卸载Python3.8"
-    # 检查Python版本，这里以Python 3.8为例
-    PYTHON_VERSION="3.8"
-
-    # 定位Python安装目录，这里假设是标准的安装路径
-    PYTHON_DIR="/usr/local/lib/python$PYTHON_VERSION"
-
-    # 检查Python目录是否存在
-    if [ -d "$PYTHON_DIR" ]; then
-        echo "Python $PYTHON_VERSION found at $PYTHON_DIR."
-
-        # 删除Python目录和内容
-        sudo rm -rf "$PYTHON_DIR"
-        echo "Python $PYTHON_VERSION has been uninstalled."
-    else
-        echo "Python $PYTHON_VERSION not found at $PYTHON_DIR."
-        exit 1
-    fi
-
-    # 检查并删除Python可执行文件
-    for cmd in python$PYTHON_VERSION python3.8; do
-        if [ -x "$(command -v $cmd)" ]; then
-            sudo rm "$(command -v $cmd)"
-            echo "Removed $cmd executable."
-        fi
-    done
-
-    # 检查并删除pip可执行文件
-    for cmd in pip$PYTHON_VERSION pip3.8; do
-        if [ -x "$(command -v $cmd)" ]; then
-            sudo rm "$(command -v $cmd)"
-            echo "Removed $cmd executable."
-        fi
-    done
-
-    # 更新alternatives，移除Python和pip的配置
-    sudo update-alternatives --remove python /usr/local/bin/python$PYTHON_VERSION
-    sudo update-alternatives --remove pip /usr/local/bin/pip$PYTHON_VERSION
-
-    # 清理系统配置文件（如果有）
-    sudo rm -f /etc/python$PYTHON_VERSION/*
-    sudo rm -f /etc/alternatives/python$PYTHON_VERSION
-
-    echo "Python $PYTHON_VERSION uninstallation process completed."
 }
 
 # 配置Docker为国内镜像
