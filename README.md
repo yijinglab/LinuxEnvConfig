@@ -109,8 +109,11 @@ sudo bash LinuxEnvConfig.sh
 ### 配置 ARL
 
 1. 安装 ARL
-2. 卸载 ARL
-3. 返回主菜单
+2. 停止 ARL
+3. 启动 ARL
+4. 卸载 ARL
+5. 添加指纹
+6. 返回主菜单
 
 ### 配置 Metasploit-framework
 
