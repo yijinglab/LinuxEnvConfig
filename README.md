@@ -156,6 +156,14 @@ sudo bash LinuxEnvConfig.sh
 3. 启动 Dnscat2 (中继模式)
 4. 返回主菜单
 
+### 配置Beef
+
+1. 安装 Beef
+2. 关闭 Beef
+3. 启动 Beef
+4. 卸载 Beef
+5. 返回主菜单
+
 ### 配置 HFish
 
 1. 安装 HFish

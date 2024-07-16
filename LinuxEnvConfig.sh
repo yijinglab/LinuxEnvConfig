@@ -95,6 +95,7 @@ menu_options=(
     "配置 Empire"
     "配置 Starkiller"
     "配置 Dnscat2"
+    "配置 Beef"
     "配置 HFish"
     "配置 CTFd"
     "配置 AWVS"
@@ -115,6 +116,7 @@ commands=(
     ["配置 Empire"]="config_empire"
     ["配置 Starkiller"]="config_starkiller"
     ["配置 Dnscat2"]="config_dnscat2"
+    ["配置 Beef"]="config_beef"
     ["配置 HFish"]="config_hfish"
     ["配置 CTFd"]="config_ctfd"
     ["配置 AWVS"]="config_awvs"
@@ -1701,7 +1703,7 @@ EOF
     echo "MySQL 端 口 号: 3306"
     echo "MySQL 数据库名: hfish"
     echo "MySQL 用 户 名: root"
-    echo "MySQL 密    码: 123456"
+    echo "MySQL 密    码: HFish2021"
 
     echo "安装HFish完成"
 }
@@ -1780,7 +1782,7 @@ get_hfish_db_info() {
     echo "MySQL 端 口 号: 3306"
     echo "MySQL 数据库名: hfish"
     echo "MySQL 用 户 名: root"
-    echo "MySQL 密    码: 123456"
+    echo "MySQL 密    码: HFish2021"
 }
 
 # 配置 Dnscat2
@@ -1840,6 +1842,114 @@ start_dnscat2_relay_mode() {
         exit 1
     fi
     docker run -it --name dnscat2 --rm -p 53:53/udp registry.cn-hangzhou.aliyuncs.com/mingy123/dnscat2:v0.07 server "${subdomain}"
+}
+
+# 配置Beef
+config_beef() {
+    echo "请选择操作: "
+    echo "1. 安装 Beef"
+    echo "2. 关闭 Beef"
+    echo "3. 启动 Beef"
+    echo "4. 卸载 Beef"
+    echo "5. 返回主菜单"
+    read -p "请输入选择(1-5): " choice
+
+    case $choice in
+        1)
+            install_beef
+            ;;
+        2)
+            stop_beef
+            ;;
+        3)
+            start_beef
+            ;;
+        4)
+            remove_beef
+            ;;
+        5)
+            echo "退出到主菜单"
+            ;;
+        *)
+            echo "无效的选择"
+            ;;
+    esac
+}
+
+# 安装Beef
+install_beef() {
+    echo "安装Beef开始"
+    read -p "输入启动Beef的主机地址: " host_ip
+    # 检查是否输入了IP地址
+    if [ -z "${host_ip}" ]; then
+        echo "请输入正确的IP地址"
+        exit 1
+    fi
+    docker pull registry.cn-shanghai.aliyuncs.com/yijingsec/beef:latest
+    if [ $? -eq 0 ]; then
+        echo "拉取最新Beef镜像成功"
+    else
+        echo "拉取最新Beef镜像失败"
+        exit 0
+    fi
+    docker run -dit --name beef -p 3500:3000 registry.cn-shanghai.aliyuncs.com/yijingsec/beef:latest
+    if [ $? -eq 0 ]; then
+        echo "安装Beef成功"
+        echo "访问地址: http://${host_ip}:3000/ui/panel 登录到服务器"
+        echo "用户名: beef"
+        echo "密  码: yijingsec"
+    else
+        echo "安装Beef失败"
+        exit 0
+    fi
+}
+
+# 关闭Beef
+stop_beef() {
+    echo "关闭Beef开始"
+    docker stop beef
+    if [ $? -eq 0 ]; then
+        echo "关闭Beef成功"
+    else
+        echo "关闭Beef失败"
+    fi
+}
+
+# 启动Beef
+start_beef() {
+    echo "启动Beef开始"
+    read -p "输入启动Beef的主机地址: " host_ip
+    # 检查是否输入了IP地址
+    if [ -z "${host_ip}" ]; then
+        echo "请输入正确的IP地址"
+        exit 1
+    fi
+    docker start beef
+    if [ $? -eq 0 ]; then
+        echo "启动Beef成功"
+        echo "访问地址: http://${host_ip}:3000/ui/panel 登录到服务器"
+        echo "默认用户: beef"
+        echo "默认密码: yijingsec"
+    else
+        echo "启动Beef失败"
+    fi
+}
+
+# 卸载Beef
+remove_beef() {
+    echo "卸载Beef开始"
+    docker rm beef -f
+    if [ $? -eq 0 ]; then
+        read -p "是否要删除镜像? (y/n)" yn
+        if [[ $yn == "y" || $yn == "Y" ]]; then
+            docker rmi registry.cn-shanghai.aliyuncs.com/yijingsec/beef:latest
+            echo "删除Beef镜像成功"
+        fi
+        echo "卸载Beef成功"
+    else
+        echo "卸载Beef失败"
+    fi
+
 }
 
 # 配置CTFd
