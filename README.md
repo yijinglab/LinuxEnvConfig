@@ -42,10 +42,12 @@ sudo bash LinuxEnvConfig.sh
 11. 配置 Empire
 12. 配置 Starkiller
 13. 配置 Dnscat2
-14. 配置 HFish
-15. 配置 CTFd
-16. 配置 AWVS
-17. 配置 ocr_api_server
+14. 配置 Beef
+15. 配置 Bluelotus
+16. 配置 HFish
+17. 配置 CTFd
+18. 配置 AWVS
+19. 配置 ocr_api_server
 
 ### 基础配置
 
