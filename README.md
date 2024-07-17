@@ -156,12 +156,20 @@ sudo bash LinuxEnvConfig.sh
 3. 启动 Dnscat2 (中继模式)
 4. 返回主菜单
 
-### 配置Beef
+### 配置 Beef
 
 1. 安装 Beef
 2. 关闭 Beef
 3. 启动 Beef
 4. 卸载 Beef
+5. 返回主菜单
+
+### 配置 Bluelotus
+
+1. 安装 Bluelotus
+2. 关闭 Bluelotus
+3. 启动 Bluelotus
+4. 卸载 Bluelotus
 5. 返回主菜单
 
 ### 配置 HFish

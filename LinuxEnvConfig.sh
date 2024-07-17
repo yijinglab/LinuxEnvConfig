@@ -96,6 +96,7 @@ menu_options=(
     "配置 Starkiller"
     "配置 Dnscat2"
     "配置 Beef"
+    "配置 Bluelotus"
     "配置 HFish"
     "配置 CTFd"
     "配置 AWVS"
@@ -117,6 +118,7 @@ commands=(
     ["配置 Starkiller"]="config_starkiller"
     ["配置 Dnscat2"]="config_dnscat2"
     ["配置 Beef"]="config_beef"
+    ["配置 Bluelotus"]="config_bluelotus"
     ["配置 HFish"]="config_hfish"
     ["配置 CTFd"]="config_ctfd"
     ["配置 AWVS"]="config_awvs"
@@ -1892,7 +1894,7 @@ install_beef() {
         echo "拉取最新Beef镜像失败"
         exit 0
     fi
-    docker run -dit --name beef -p 3500:3000 registry.cn-shanghai.aliyuncs.com/yijingsec/beef:latest
+    docker run -dit --name beef -p 3000:3000 registry.cn-shanghai.aliyuncs.com/yijingsec/beef:latest
     if [ $? -eq 0 ]; then
         echo "安装Beef成功"
         echo "访问地址: http://${host_ip}:3000/ui/panel 登录到服务器"
@@ -1950,6 +1952,112 @@ remove_beef() {
         echo "卸载Beef失败"
     fi
 
+}
+
+# 配置Bluelotus
+config_bluelotus() {
+    echo "请选择操作: "
+    echo "1. 安装 Bluelotus"
+    echo "2. 关闭 Bluelotus"
+    echo "3. 启动 Bluelotus"
+    echo "4. 卸载 Bluelotus"
+    echo "5. 返回主菜单"
+    read -p "请输入选择(1-5): " choice
+
+    case $choice in
+        1)
+            install_bluelotus
+            ;;
+        2)
+            stop_bluelotus
+            ;;
+        3)
+            start_bluelotus
+            ;;
+        4)
+            remove_bluelotus
+            ;;
+        5)
+            echo "退出到主菜单"
+            ;;
+        *)
+            echo "无效的选择"
+            ;;
+    esac
+}
+
+# 安装 Bluelotus
+install_bluelotus() {
+    echo "安装Bluelotus开始"
+    read -p "输入启动Bluelotus的主机地址: " host_ip
+    # 检查是否输入了IP地址
+    if [ -z "${host_ip}" ]; then
+        echo "请输入正确的IP地址"
+        exit 1
+    fi
+
+    docker pull registry.cn-shanghai.aliyuncs.com/yijingsec/bluelotus:latest
+    if [ $? -eq 0 ]; then
+        echo "拉取最新Bluelotus镜像成功"
+    else
+        echo "拉取最新Bluelotus镜像失败"
+        exit 0
+    fi
+    docker run -dit --name bluelotus -p 5080:80 registry.cn-shanghai.aliyuncs.com/yijingsec/bluelotus:latest
+    if [ $? -eq 0 ]; then
+        echo "安装Bluelotus成功"
+        echo "访问地址: http://${host_ip}:5080/login.php 登录到服务器"
+        echo "默认密码: bluelotus"
+    else
+        echo "安装Bluelotus失败"
+        exit 0
+    fi
+}
+
+# 关闭Bluelotus
+stop_bluelotus() {
+    echo "关闭Bluelotus开始"
+    docker stop bluelotus
+    if [ $? -eq 0 ]; then
+        echo "关闭Bluelotus成功"
+    else
+        echo "关闭Bluelotus失败"
+    fi
+}
+
+# 启动Bluelotus
+start_bluelotus() {
+    echo "启动Bluelotus开始"
+    read -p "输入启动Bluelotus的主机地址: " host_ip
+    # 检查是否输入了IP地址
+    if [ -z "${host_ip}" ]; then
+        echo "请输入正确的IP地址"
+        exit 1
+    fi
+    docker start bluelotus
+    if [ $? -eq 0 ]; then
+        echo "启动Bluelotus成功"
+        echo "访问地址: http://${host_ip}:5080/login.php 登录到服务器"
+        echo "默认密码: bluelotus"
+    else
+        echo "启动Bluelotus失败"
+    fi
+}
+
+# 卸载Bluelotus
+remove_bluelotus() {
+    echo "卸载Bluelotus开始"
+    docker rm bluelotus -f
+    if [ $? -eq 0 ]; then
+        read -p "是否要删除镜像? (y/n)" yn
+        if [[ $yn == "y" || $yn == "Y" ]]; then
+            docker rmi registry.cn-shanghai.aliyuncs.com/yijingsec/bluelotus:latest
+            echo "删除Bluelotus镜像成功"
+        fi
+        echo "卸载Bluelotus成功"
+    else
+        echo "卸载Bluelotus失败"
+    fi
 }
 
 # 配置CTFd
