@@ -133,8 +133,9 @@ basic_config() {
     echo "3. 设置nameserver"
     echo "4. 允许root用户ssh登录"
     echo "5. 获取当前主机网卡及IP地址信息"
-    echo "6. 返回主菜单"
-    read -p "请输入选择(1-6): " choice
+    echo "6. 解除dns协议53端口占用"
+    echo "7. 返回主菜单"
+    read -p "请输入选择(1-7): " choice
     case $choice in
         1)
             enable_root_user
@@ -152,6 +153,9 @@ basic_config() {
             get_ip_addr
             ;;
         6)
+            unlock_dns_port
+            ;;
+        7)
             echo "退出到主菜单"
             ;;
         *)
@@ -253,6 +257,19 @@ get_ip_addr() {
             echo "- ${ifname} ${ipaddr}"
         done
     done
+}
+
+unlock_dns_port() {
+    echo "[+] 解除dns协议53端口占用"
+    # 停止systemd-resolved
+    sudo systemctl stop systemd-resolved
+    # 修改systemd-resolved配置
+    sudo sed -i 's/#DNS=.*/DNS=114.114.114.114/' /etc/systemd/resolved.conf
+    sudo sed -i 's/^#DNSStubListener=.*/DNSStubListener=no/' /etc/systemd/resolved.conf
+    # 创建软链接
+    sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+    # 启动systemd-resolved
+    sudo systemctl start systemd-resolved
 }
 
 # 配置JDK
