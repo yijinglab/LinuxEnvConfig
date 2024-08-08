@@ -780,10 +780,12 @@ config_docker() {
     echo "请选择操作: "
     echo "1. 安装 Docker"
     echo "2. 卸载 Docker"
-    echo "3. 配置 Docker国内镜像"
-    echo "4. 配置 Docker网络代理"
-    echo "5. 返回主菜单"
-    read -p "请输入选择(1-5): " choice
+    echo "3. 配置 Docker 国内镜像"
+    echo "4. 取消 Docker 国内镜像"
+    echo "5. 配置 Docker 网络代理"
+    echo "6. 取消 Docker 网络代理"
+    echo "7. 返回主菜单"
+    read -p "请输入选择(1-7): " choice
     case $choice in
         1)
             install_docker
@@ -795,9 +797,15 @@ config_docker() {
             configure_docker_mirror
             ;;
         4)
-            configure_docker_proxy
+            unconfigure_docker_mirror
             ;;
         5)
+            configure_docker_proxy
+            ;;
+        6)
+            unconfigure_docker_proxy
+            ;;
+        7)
             echo "退出到主菜单"
             ;;
         *)
@@ -920,6 +928,15 @@ EOF
     Show 0 "docker 国内镜像地址配置完毕!"
 }
 
+# 取消配置Docker为国内镜像
+unconfigure_docker_mirror() {
+    echo "取消配置Docker为国内镜像开始"
+    sudo rm -f /etc/docker/daemon.json
+    sudo systemctl daemon-reload
+    sudo systemctl restart docker
+    echo "取消配置Docker为国内镜像成功"
+}
+
 # 配置Docker网络代理
 configure_docker_proxy() {
     echo "配置Docker网络代理开始"
@@ -967,6 +984,21 @@ EOF
 
     # 显示配置结果
     echo "成功配置Docker使用网络代理: ${proxy_type}://${proxy_ip_port}"
+}
+
+# 取消配置Docker网络代理
+unconfigure_docker_proxy() {
+    echo "取消配置Docker网络代理开始"
+    # 删除配置文件
+    sudo rm -f /etc/systemd/system/docker.service.d/proxy.conf
+
+    # 重新加载systemd管理器配置
+    sudo systemctl daemon-reload
+
+    # 重启Docker服务
+    sudo systemctl restart docker
+
+    echo "取消Docker使用网络代理成功"
 }
 
 # 配置Docker-compose
