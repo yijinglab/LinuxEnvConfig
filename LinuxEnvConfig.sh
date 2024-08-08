@@ -591,28 +591,6 @@ remove_jdk() {
     fi
 }
 
-# 配置Docker为国内镜像
-configure_docker_mirror() {
-    echo "配置Docker为国内镜像"
-    sudo mkdir -p /etc/docker
-
-    sudo tee /etc/docker/daemon.json <<-'EOF'
-{
-  "registry-mirrors": [
-    "https://06009bb76e000fc60fd1c01a26a6dfe0.mirror.swr.myhuaweicloud.com",
-    "https://fl37993c.mirror.aliyuncs.com",
-    "https://registry.docker-cn.com",
-    "http://hub-mirror.c.163.com",
-    "https://docker.mirrors.ustc.edu.cn"
-  ]
-}
-EOF
-
-    sudo systemctl daemon-reload
-    sudo systemctl restart docker
-    Show 0 "docker 国内镜像地址配置完毕!"
-}
-
 # 配置APT源
 config_apt_source_version(){
     local version=$1
@@ -803,8 +781,9 @@ config_docker() {
     echo "1. 安装 Docker"
     echo "2. 卸载 Docker"
     echo "3. 配置 Docker国内镜像"
-    echo "4. 返回主菜单"
-    read -p "请输入选择(1-3): " choice
+    echo "4. 配置 Docker网络代理"
+    echo "5. 返回主菜单"
+    read -p "请输入选择(1-5): " choice
     case $choice in
         1)
             install_docker
@@ -816,6 +795,9 @@ config_docker() {
             configure_docker_mirror
             ;;
         4)
+            configure_docker_proxy
+            ;;
+        5)
             echo "退出到主菜单"
             ;;
         *)
@@ -914,6 +896,77 @@ remove_docker() {
 
     # 卸载完成
     echo "Docker 已卸载."
+}
+
+# 配置Docker为国内镜像
+configure_docker_mirror() {
+    echo "配置Docker为国内镜像"
+    sudo mkdir -p /etc/docker
+
+    sudo tee /etc/docker/daemon.json <<-'EOF'
+{
+  "registry-mirrors": [
+    "https://06009bb76e000fc60fd1c01a26a6dfe0.mirror.swr.myhuaweicloud.com",
+    "https://fl37993c.mirror.aliyuncs.com",
+    "https://registry.docker-cn.com",
+    "http://hub-mirror.c.163.com",
+    "https://docker.mirrors.ustc.edu.cn"
+  ]
+}
+EOF
+
+    sudo systemctl daemon-reload
+    sudo systemctl restart docker
+    Show 0 "docker 国内镜像地址配置完毕!"
+}
+
+# 配置Docker网络代理
+configure_docker_proxy() {
+    echo "配置Docker网络代理开始"
+    echo "选择代理协议类型: "
+    echo "1. http/https"
+    echo "2. socks5"
+    echo "3. 返回主菜单"
+    read -p "请输入序号(1-3): " type
+    case $type in
+        1)
+            proxy_type=http
+            ;;
+        2)
+            proxy_type=socks5
+            ;;
+        3)
+            echo "退出到主菜单"
+            ;;
+        *)
+            echo "输入的序号无效"
+            ;;
+    esac
+    # 输入代理地址
+    read -p "输入代理地址 (Ex: 127.0.0.1:7890): " proxy_ip_port
+
+    # 配置文件路径
+    CONFIG_FILE="/etc/systemd/system/docker.service.d/proxy.conf"
+
+    # 创建配置目录
+    sudo mkdir -p /etc/systemd/system/docker.service.d
+
+    # 创建或更新配置文件
+    cat <<EOF | sudo tee $CONFIG_FILE > /dev/null
+[Service]
+Environment="HTTP_PROXY=${proxy_type}://${proxy_ip_port}"
+Environment="HTTPS_PROXY=${proxy_type}://${proxy_ip_port}"
+Environment="NO_PROXY=localhost,127.0.0.1"
+EOF
+
+    # 重新加载systemd管理器配置
+    sudo systemctl daemon-reload
+
+    # 重启Docker服务
+    sudo systemctl restart docker
+
+    # 显示配置结果
+    echo "成功配置Docker使用网络代理: ${proxy_type}://${proxy_ip_port}"
 }
 
 # 配置Docker-compose

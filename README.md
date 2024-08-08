@@ -56,7 +56,8 @@ sudo bash LinuxEnvConfig.sh
 3. 设置nameserver
 4. 允许root用户ssh登录
 5. 获取当前主机网卡及IP地址信息
-6. 返回主菜单
+6. 解除dns协议53端口占用
+7. 返回主菜单
 
 ### 配置 APT
 
@@ -94,7 +95,8 @@ sudo bash LinuxEnvConfig.sh
 1. 安装 Docker
 2. 卸载 Docker
 3. 配置 Docker国内镜像
-4. 返回主菜单
+4. 配置 Docker网络代理
+5. 返回主菜单
 
 ### 配置 Docker-compose
 
