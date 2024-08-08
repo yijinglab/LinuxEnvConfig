@@ -94,9 +94,11 @@ sudo bash LinuxEnvConfig.sh
 
 1. 安装 Docker
 2. 卸载 Docker
-3. 配置 Docker国内镜像
-4. 配置 Docker网络代理
-5. 返回主菜单
+3. 配置 Docker 国内镜像
+4. 取消 Docker 国内镜像
+5. 配置 Docker 网络代理
+6. 取消 Docker 网络代理
+7. 返回主菜单
 
 ### 配置 Docker-compose
 
