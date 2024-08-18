@@ -181,27 +181,43 @@ enable_root_user() {
     fi
 }
 
-# 启用SSH服务
+# 启用 SSH 服务
 enable_ssh() {
-    # 检查 openssh-server 是否安装
+    Show 2 "启用 SSH 服务开始"
+    Show 2 "检查 openssh-server 是否安装..."
     if dpkg -l | grep -q openssh-server; then
-        echo "openssh-server 已安装。"
+        Show 0 "openssh-server 已安装"
     else
-        echo "openssh-server 未安装，正在安装..."
+        Show 2 "openssh-server 未安装，正在安装..."
         sudo apt-get update
         sudo apt-get install openssh-server -y
+        if [ $? -eq 0 ]; then
+            Show 0 "openssh-server 安装成功"
+        else
+            Show 1 "openssh-server 安装失败"
+        fi
     fi
 
-    # 启动 SSH 服务
-    sudo systemctl start ssh
-    echo "SSH 服务已启动。"
+    Show 2 "开始启动 SSH 服务..."
+    sudo systemctl start ssh >&/dev/null
+    if [ $? -eq 0 ]; then
+        Show 0 "启动 SSH 服务成功"
+    else
+        Show 1 "启动 SSH 服务失败"
+    fi
 
-    # 设置 SSH 服务开机自启
-    sudo systemctl enable ssh
-    echo "SSH 服务已设置为开机自启。"
+    Show 2 "设置 SSH 服务开机自启..."
+    sudo systemctl enable ssh >&/dev/null
+    if [ $? -eq 0 ]; then
+        Show 0 "设置 SSH 服务开机自启成功"
+    else
+        Show 1 "设置 SSH 服务开机自启失败"
+    fi
 
     # 显示 SSH 服务状态
+    Show 2 "检查 SSH 服务状态..."
     sudo systemctl status ssh
+    Show 0 "启用SSH 服务成功"
 }
 
 # 设置nameserver
