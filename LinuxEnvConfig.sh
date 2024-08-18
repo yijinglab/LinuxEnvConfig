@@ -283,10 +283,10 @@ root_ssh_login() {
 
 # 获取当前主机网卡及IP地址信息
 get_ip_addr() {
-    echo "[+] 获取当前主机网卡及IP地址信息"
+    Show 2 "获取当前主机网卡及IP地址信息"
     ip -4 addr show | awk '/:/ {print $0}' | awk '{print $2}' | grep -v lo | while read -r ifname; do
         ip -4 addr show "${ifname}" | awk '/inet/ {print $2}' | while read -r ipaddr; do
-            echo "- ${ifname} ${ipaddr}"
+            Show 0 "- ${ifname} ${ipaddr}"
         done
     done
 }
