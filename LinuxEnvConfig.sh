@@ -672,11 +672,11 @@ EOF
 
 # 配置Miniconda3
 config_miniconda3() {
-    echo "请选择操作: "
+	echo -e "${YELLOW}[+] 请选择操作: ${NC}"
     echo "1. 安装 Miniconda3"
     echo "2. 卸载 Miniconda3"
     echo "3. 返回主菜单"
-    read -p "请输入选择(1-3): " choice
+    read -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
     case $choice in
         1)
             install_miniconda3
@@ -685,38 +685,48 @@ config_miniconda3() {
             remove_miniconda3
             ;;
         3)
-            echo "退出到主菜单"
+            Show 2 "退出到主菜单"
             ;;
         *)
-            echo "无效的选择"
+            Show 2 "无效的选择"
             ;;
     esac
 }
 
 # 安装Miniconda3
 install_miniconda3() {
-    echo "开始安装 Miniconda3"
+    Show 2 "开始安装 Miniconda3"
 
-    # 检查 Miniconda3 安装脚本是否存在
+    Show 2 "检查 Miniconda3 安装脚本是否存在"
     if [ ! -f "/miniconda3.sh" ]; then
         # 下载 Miniconda3 安装脚本
+        Show 2 "下载 Miniconda3 安装脚本"
         sudo wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /miniconda3.sh
-        echo "安装脚本下载完成"
+        if [ $? -eq 0 ]; then
+            Show 0 "下载 Miniconda3 安装脚本成功"
+        else
+            Show 1 "下载 Miniconda3 安装脚本失败"
+        fi
     else
-        echo "/miniconda3.sh 已存在，跳过下载。"
+        Show 2 "/miniconda3.sh 已存在，跳过下载"
     fi
 
-    # 执行安装脚本
+    Show 2 "执行 Miniconda3 安装脚本" 
     sudo bash /miniconda3.sh -b -p /miniconda3
-    echo "Miniconda3 成功安装到目录：/miniconda3"
+    if [ $? -eq 0 ]; then
+        Show 0 "Miniconda3 安装成功"
+        Show 0 "安装目录: /miniconda3"
+    else
+        Show 1 "Miniconda3 安装失败"
+    fi
 
-    # 初始化 conda
+    Show 2 "初始化 conda"
     source /miniconda3/bin/activate
     /miniconda3/bin/conda init bash
     /miniconda3/bin/conda init zsh
-    echo "conda 初始化完成"
+    Show 0 "初始化 conda 完成"
 
-    # 配置 conda 镜像源
+    Show 2 "配置 conda 镜像源"
     cat <<EOF | sudo tee ~/.condarc > /dev/null
 channels:
   - defaults
@@ -737,21 +747,26 @@ custom_channels:
   simpleitk: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
 EOF
 
-    echo "conda 镜像源配置完成"
+    Show 0 "配置 conda 镜像源完成"
 
-    # 更新 conda
+    Show 2 "开始更新 conda"
     sudo /miniconda3/bin/conda update conda -y
-    echo "conda 更新完成"
+    if [ $? -eq 0 ]; then
+        Show 0 "更新 conda 成功"
+    else
+        Show 1 "更新 conda 失败"
+    fi
 
-    # 清理 conda 缓存
+    Show 2 "清理 conda 缓存"
     sudo /miniconda3/bin/conda clean -a -y
-    echo "清理 conda 缓存完成"
-    echo "Miniconda3 安装完成"
+
+    Show 2 "清理 conda 缓存完成"
+    echo "安装 Miniconda3 完成"
 }
 
 # 卸载Miniconda3
 remove_miniconda3() {
-    echo "卸载 miniconda3"
+    Show 2 "开始卸载 miniconda3"
     
     # 定义要删除的文件和目录
     declare -a files=("/miniconda3" "~/.condarc")
@@ -759,40 +774,38 @@ remove_miniconda3() {
     # 定义要处理的配置文件
     declare -a config_files=(".bashrc" ".zshrc")
     
-    # 删除文件和目录
+    Show 2 "删除miniconda3文件和目录"
     for file in "${files[@]}"; do
         sudo rm -rf "${file}"
         if [ $? -eq 0 ]; then
-            echo "已成功删除 ${file}"
+            Show 0 "删除 ${file} 成功"
         else
-            echo "删除 ${file} 失败"
-            exit 1
+            Show 1 "删除 ${file} 失败"
         fi
     done
     
-    # 删除conda初始化代码
     CONDA_INIT_START="# >>> conda initialize >>"
     CONDA_INIT_END="# <<< conda initialize <<"
     
     for config in "${config_files[@]}"; do
-        # 检查配置文件是否存在
+        Show 2 "检查配置文件: ${HOME}/${config}"
         if [ -f "${HOME}/${config}" ]; then
             # 使用sed命令删除配置文件中的conda初始化代码
+            Show 2 "删除 conda 初始化代码"
             sudo sed -i "/${CONDA_INIT_START}/,/${CONDA_INIT_END}/d" "${HOME}/${config}"
             
             # 检查sed命令是否成功执行
             if [ $? -eq 0 ]; then
-                echo "已成功移除 ${config} 中的conda初始化代码。"
+                Show 0 "移除 conda 初始化代码成功"
             else
-                echo "移除 ${config} 中的conda初始化代码失败。"
-                exit 1
+                Show 1 "移除 conda 初始化代码失败"
             fi
         else
-            echo "未找到 ${config} 文件。"
+            Show 2 "未找到 ${config} 文件"
         fi
     done
 
-    echo "卸载 mimiconda3 完成"
+    Show 0 "卸载 mimiconda3 完成"
 }
 
 check_docker() {
