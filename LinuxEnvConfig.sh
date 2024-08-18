@@ -262,15 +262,23 @@ config_nameserver() {
 
 # 允许ROOT用户SSH登录
 root_ssh_login() {
-    # 修改ssh服务配置文件允许root用户登录
+    Show 2 修改SSH服务配置文件允许root用户登录
     sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-    echo "[+] SSH 服务配置已更改为允许root用户登录。"
+    if [ $? -eq 0 ]; then
+        Show 0 "SSH服务配置已更改为允许root用户登录"
+    else
+        Show 1 "SSH服务配置更改失败"
+    fi
 
-    # 重启ssh服务
+    Show 2 "重启SSH服务..."
     sudo systemctl restart ssh
-    echo "[+] SSH 服务已重启。"
-    echo "[+] 尝试以root用户登录ssh服务。"
-    echo "    示例： ssh root@ip"
+    if [ $? -eq 0 ]; then
+        Show 0 "SSH服务重启成功"
+        Show 2 "尝试以root用户登录SSH服务"
+        Show 2 "示例: ssh root@ip"
+    else
+        Show 1 "SSH服务重启失败"
+    fi
 }
 
 # 获取当前主机网卡及IP地址信息
