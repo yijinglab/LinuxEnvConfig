@@ -222,6 +222,7 @@ enable_ssh() {
 
 # 设置nameserver
 config_nameserver() {
+    Show 2 "配置名称服务器开始"
     # 定义新的名称服务器地址
     nameservers=("114.114.114.114" "223.5.5.5" "1.1.1.1")
 
@@ -230,15 +231,22 @@ config_nameserver() {
 
     # 检查是否需要更改名称服务器
     if [[ $current_nameservers == *"${nameservers[0]}"* && $current_nameservers == *"${nameservers[1]}"* ]]; then
-        echo "名称服务器已设置为 (${nameservers[*]})。"
+        Show 0 "名称服务器已设置为 (${nameservers[*]})。"
     else
         # 备份当前的 resolv.conf 文件
-        sudo cp /etc/resolv.conf /etc/resolv.conf.backup
+        Show 2 "备份当前的 resolv.conf 文件..."
+        if [ -f /etc/resolv.conf.backup ]; then
+            Show 2 "备份文件已存在，跳过备份步骤"
+        else
+            Show 2 "备份文件不存在，正在备份..."
+            sudo cp /etc/resolv.conf /etc/resolv.conf.backup
+        fi
 
-        # 清空当前的 resolv.conf 文件
+        Show 2 "清空当前的 resolv.conf 文件"
         > /etc/resolv.conf
 
         # 添加新的名称服务器
+        Show 2 "添加新的名称服务器..."
         for ns in "${nameservers[@]}"; do
             echo "nameserver $ns" >> /etc/resolv.conf
         done
@@ -249,6 +257,7 @@ config_nameserver() {
 
     # 显示当前的 resolv.conf 配置
     cat /etc/resolv.conf
+    Show 0 "配置名称服务器成功"
 }
 
 # 允许ROOT用户SSH登录
