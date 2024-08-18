@@ -914,6 +914,8 @@ configure_docker_mirror() {
     sudo tee /etc/docker/daemon.json <<-'EOF'
 {
   "registry-mirrors": [
+    "https://dockerpull.com"
+    "https://dockerproxy.cn"
     "https://06009bb76e000fc60fd1c01a26a6dfe0.mirror.swr.myhuaweicloud.com",
     "https://fl37993c.mirror.aliyuncs.com",
     "https://registry.docker-cn.com",
