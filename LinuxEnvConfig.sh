@@ -612,9 +612,17 @@ remove_jdk() {
 # 配置APT源
 config_apt_source_version(){
     local version=$1
-    echo "apt源配置"
-    sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
+    Show 2 "APT源配置"
+    if [ -f "/etc/apt/sources.list.bak" ]; then
+        Show 2 "已存在APT源配置文件备份, 跳过备份"
+    else
+        Show 2 "备份/etc/apt/sources.list文件"
+        sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
+    fi
+
     # sudo sed -i 's/^deb .*$/#&/g' /etc/apt/sources.list
+
+    Show 2 "修改APT源配置文件"
     sudo tee /etc/apt/sources.list <<-EOF
 # 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释
 deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ $version main restricted universe multiverse
@@ -626,15 +634,23 @@ deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ $version-backports main restric
 deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ $version-security main restricted universe multiverse
 # deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ $version-security main restricted universe multiverse
 EOF
+    if [ $? -eq 0 ]; then
+        Show 0 "APT源配置文件修改成功"
+    else
+        Show 1 "APT源配置文件修改失败"
+    fi
+    Show 2 "更新APT源"
     sudo apt update
+    Show 2 "安装软件源管理工具"
     sudo apt install -y software-properties-common
+    Show 2 "添加Python源"
     sudo add-apt-repository ppa:deadsnakes/ppa
-    echo "apt源更新成功"
+    Show 0 "APT源配置成功"
 }
 
 # 配置APT源
 config_apt_source() {
-    echo "根据当前系统版本类型, 自动配置APT源"
+    Show 2 "根据当前系统版本类型, 自动配置APT源"
     if [[ "$(lsb_release -rs)" == "18.04" ]]; then
         config_apt_source_version "bionic"
     elif [[ "$(lsb_release -rs)" == "20.04" ]]; then
@@ -650,9 +666,8 @@ deb https://mirrors.tuna.tsinghua.edu.cn/kali kali-rolling main contrib non-free
 # deb-src https://mirrors.tuna.tsinghua.edu.cn/kali kali-rolling main contrib non-free non-free-firmware
 EOF
     else
-        echo "不支持的系统版本, 请手动配置apt源"
+        Show 1 "不支持的系统版本, 请手动配置APT源"
     fi
-    echo "配置完成"
 }
 
 # 配置Miniconda3
