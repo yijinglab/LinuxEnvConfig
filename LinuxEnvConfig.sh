@@ -127,15 +127,15 @@ commands=(
 
 # 基础配置
 basic_config() {
-    echo "请选择操作: "
-    echo "1. 启用root用户"
-    echo "2. 启用ssh服务"
-    echo "3. 设置nameserver"
-    echo "4. 允许root用户ssh登录"
+    echo -e "${YELLOW}[+] 请选择操作: ${NC}"
+    echo "1. 启用ROOT用户"
+    echo "2. 启用SSH服务"
+    echo "3. 允许ROOT用户SSH登录"
+    echo "4. 设置NameServer"
     echo "5. 获取当前主机网卡及IP地址信息"
-    echo "6. 解除dns协议53端口占用"
+    echo "6. 解除DNS协议53端口占用"
     echo "7. 返回主菜单"
-    read -p "请输入选择(1-7): " choice
+    read -p "$(echo -e "${GREEN}请输入选择(1-7): ${NC}")" choice
     case $choice in
         1)
             enable_root_user
@@ -144,10 +144,10 @@ basic_config() {
             enable_ssh
             ;;
         3)
-            config_nameserver
+            root_ssh_login
             ;;
         4)
-            root_ssh_login
+            config_nameserver
             ;;
         5)
             get_ip_addr
@@ -156,10 +156,10 @@ basic_config() {
             unlock_dns_port
             ;;
         7)
-            echo "退出到主菜单"
+            Show 2 "退出到主菜单"
             ;;
         *)
-            echo "无效的选择"
+            Show 2 "无效的选择"
             ;;
     esac
 }
@@ -167,7 +167,7 @@ basic_config() {
 # 启用root用户
 enable_root_user() {
     # 读取用户输入的新密码
-    read -sp '请输入新的root密码: ' new_password
+    read -sp "$(echo -e "${GREEN}请输入新的root密码: ${NC}")" new_password
     echo
 
     # 使用chpasswd命令设置root用户的新密码
@@ -175,10 +175,9 @@ enable_root_user() {
 
     # 检查命令是否成功执行
     if [ $? -eq 0 ]; then
-        echo "root密码已成功设置。"
+        Show 0 "root密码设置成功"
     else
-        echo "设置root密码失败。"
-        exit 1
+        Show 1 "root密码设置失败"
     fi
 }
 
