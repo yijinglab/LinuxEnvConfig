@@ -244,14 +244,14 @@ config_nameserver() {
         done
 
         # 输出结果
-        echo "名称服务器已设置为 (${nameservers[*]})。"
+        Show 0 "名称服务器已设置为 (${nameservers[*]})。"
     fi
 
     # 显示当前的 resolv.conf 配置
     cat /etc/resolv.conf
 }
 
-# 允许root用户SSH登录
+# 允许ROOT用户SSH登录
 root_ssh_login() {
     # 修改ssh服务配置文件允许root用户登录
     sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
