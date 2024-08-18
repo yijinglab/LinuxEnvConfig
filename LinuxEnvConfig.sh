@@ -313,12 +313,12 @@ unlock_dns_port() {
 
 # 配置JDK
 config_jdk() {
-    echo "请选择操作: "
+    echo -e "${YELLOW}[+] 请选择操作: ${NC}"
     echo "1. 安装 OracleJDK"
     echo "2. 安装 OpenJDK"
     echo "3. 删除当前JDK环境"
     echo "4. 返回主菜单"
-    read -p "请输入选择(1-4): " choice
+    read -p "$(echo -e "${GREEN}请输入选择(1-4): ${NC}")" choice
     case $choice in
         1)
             install_oracle_jdk
@@ -330,75 +330,75 @@ config_jdk() {
             remove_jdk
             ;;
         4)
-            echo "退出到主菜单"
+            Show 2 "退出到主菜单"
             ;;
         *)
-            echo "无效的选择"
+            Show 2 "无效的选择"
             ;;
     esac
 }
 
 # 安装Oracle JDK
 install_oracle_jdk() {
-    echo "安装Oracle JDK"
-    echo "选择想要安装的OracleJDK版本: "
+    Show 2 "安装Oracle JDK"
+    echo -e "${YELLOW}[+] 选择想要安装的OracleJDK版本: ${NC}"
     echo "1. Oracle JDK 8 LTS"
     echo "2. Oracle JDK 11 LTS"
     echo "3. Oracle JDK 17 LTS"
     echo "4. Oracle JDK 21 LTS"
     echo "5. 返回主菜单"
-    read -p "请输入序号: " version
+    read -p "$(echo -e "${GREEN}请输入序号(1-5): ${NC}")" version
     case $version in
         1)
-            echo "安装Oracle JDK 8 LTS"
+            Show 2 "安装Oracle JDK 8 LTS"
             JDK_VER="jdk1.8.0_381"
             JDK_NAME="jdk-8u381-linux-x64.tar.gz"
             JDK_URL="https://d6.injdk.cn/oraclejdk/8/jdk-8u381-linux-x64.tar.gz"
             check_oracle_jdk
             ;;
         2)
-            echo "安装Oracle JDK 11 LTS"
+            Show 2 "安装Oracle JDK 11 LTS"
             JDK_VER="jdk-11.0.21"
             JDK_NAME="jdk-11.0.21_linux-x64_bin.tar.gz"
             JDK_URL="https://d6.injdk.cn/oraclejdk/11/jdk-11.0.21_linux-x64_bin.tar.gz"
             check_oracle_jdk
             ;;
         3)
-            echo "安装Oracle JDK 17 LTS"
+            Show 2 "安装Oracle JDK 17 LTS"
             JDK_VER="jdk-17.0.9"
             JDK_NAME="jdk-17.0.9_linux-x64_bin.tar.gz"
             JDK_URL="https://d6.injdk.cn/oraclejdk/17/jdk-17_linux-x64_bin.tar.gz"
             check_oracle_jdk
             ;;
         4)
-            echo "安装Oracle JDK 21 LTS"
+            Show 2 "安装Oracle JDK 21 LTS"
             JDK_VER="jdk-21.0.1"
             JDK_NAME="jdk-21.0.1_linux-x64_bin.tar.gz"
             JDK_URL="https://d6.injdk.cn/oraclejdk/21/jdk-21_linux-x64_bin.tar.gz"
             check_oracle_jdk
             ;;
         5)
-            echo "退出到主菜单"
+            Show 2 "退出到主菜单"
             ;;
         *)
-            echo "输入的序号无效"
+            Show 2 "输入的序号无效"
             ;;
     esac
 }
 
+# 检查 Oracle JDK
 check_oracle_jdk() {
-    # 下载JDK
+    Show 2 "检查 Oracle JDK..."
     if [ -f $JDK_NAME ]; then
-        echo "已存在 {$JDK_NAME} 文件, 无需下载。"
+        Show 2 "已存在 ${JDK_NAME} 文件, 无需下载"
     else
-        echo "下载 $JDK_NAME ..."
+        Show 2 "${JDK_NAME} 文件不存在, 开始下载..."
         wget -q --show-progress "$JDK_URL"
         
         # 检查是否下载成功
         if [ $? -ne 0 ]; then
-            echo "下载Oracle JDK失败。"
-            rm -f {$JDK_NAME}
-            exit 1
+            rm -f $JDK_NAME
+            Show 1  "下载 Oracle JDK 失败。"
         fi
     fi
 
@@ -406,33 +406,28 @@ check_oracle_jdk() {
     JDK_DIR="/usr/lib/jvm"
 
     if [ ! -d "$JDK_DIR" ]; then
-        echo "创建 ${JDK_DIR} 目录..."
+        Show 2 "开始创建 ${JDK_DIR} 目录..."
         sudo mkdir -p "${JDK_DIR}"
-
         if [ $? -eq 0 ]; then
-            echo "目录创建成功。"
+            Show 0 "目录创建成功"
         else
-            echo "目录创建失败。"
+            Show 1 "目录创建失败"
         fi
     fi
 
     # 解压JDK
-    echo "Unpacking JDK..."
+    Show 2 "正在解压缩 Oracle JDK..."
     sudo tar -xzf $JDK_NAME -C $JDK_DIR
 
     # 检查解压是否成功
-    if [ $? -ne 0 ]; then
-        echo "解压Oracle JDK失败。"
-        exit 1
+    if [ $? -eq 0 ]; then
+        Show 0 "解压 Oracle JDK 成功"
+    else
+        Show 1 "解压 Oracle JDK 失败"
     fi
 
-    # 配置Java和Javac
-    echo "配置Java和Javac..."
+    Show 2 "配置Java和Javac..."
 
-    # 移动解压后的JDK到JDK目录
-    # mv $JDK_DIR/jdk* $JDK_DIR/
-
-    # 设置Java和Javac的替代选项
     sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/${JDK_VER}/bin/java 2
     sudo update-alternatives --set java /usr/lib/jvm/${JDK_VER}/bin/java
 
@@ -448,26 +443,18 @@ check_oracle_jdk() {
     sudo update-alternatives --install /usr/bin/jarsigner jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner 2
     sudo update-alternatives --set jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner
 
-    # 检查update-alternatives是否成功
-    if [ $? -ne 0 ]; then
-        echo "未能成功配置Java和Javac。"
-        exit 1
-    fi
-
-    echo "Oracle JDK已成功安装和配置。"
+    Show 0 "成功安装和配置Oracle JDK"
 }
-
 
 # 安装OpenJDK
 install_openjdk() {
-    echo "安装OpenJDK"
-    echo "选择想要安装的OpenJDK版本: "
-    # 输入数字，选择想要安装的不同openjdk版本
+    Show 2 "安装OpenJDK"
+    echo -e "${YELLOW}[+] 选择想要安装的OpenJDK版本: ${NC}"
     echo "1. OpenJDK 11 LTS"
     echo "2. OpenJDK 17 LTS"
     echo "3. OpenJDK 21 LTS"
     echo "4. 返回到主菜单"
-    read -p "请输入序号: " version
+    read -p "$(echo -e "${GREEN}请输入选择(1-4): ${NC}")" choice
     # case $version in
     #     1)
     #         echo "安装OpenJDK 8 LTS"
@@ -501,45 +488,45 @@ install_openjdk() {
 
     case $version in
         1)
-            echo "安装OpenJDK 11 LTS"
+            Show 2 "安装OpenJDK 11 LTS"
             JDK_VER="11.0.2"
             JDK_URL="https://mirrors.huaweicloud.com/openjdk/${JDK_VER}/openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
             check_openjdk
             ;;
         2)
-            echo "安装OpenJDK 17 LTS"
+            Show 2 "安装OpenJDK 17 LTS"
             JDK_VER="17.0.2"
             JDK_URL="https://mirrors.huaweicloud.com/openjdk/${JDK_VER}/openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
             check_openjdk
             ;;
         3)
-            echo "安装OpenJDK 21 LTS"
+            Show 2 "安装OpenJDK 21 LTS"
             JDK_VER="21.0.1"
             JDK_URL="https://mirrors.huaweicloud.com/openjdk/${JDK_VER}/openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
             check_openjdk
             ;;
         4)
-            echo "退出到主菜单"
+            Show 2 "退出到主菜单"
             ;;
         *)
-            echo "输入的序号无效"
+            Show 2 "输入的序号无效"
             ;;
     esac
 }
 
+# 检查 OpenJDK
 check_openjdk() {
-    # 下载JDK
+    Show 2 "检查 OpenJDK..."
     if [ -f "openjdk-${JDK_VER}_linux-x64_bin.tar.gz" ]; then
-        echo "已存在openjdk-${JDK_VER}_linux-x64_bin.tar.gz文件, 无需下载。"
+        Show 2 "已存在openjdk-${JDK_VER}_linux-x64_bin.tar.gz文件, 无需下载"
     else
-        echo "下载OpenJDK..."
+        Show 2 "开始下载OpenJDK..."
         wget -q --show-progress $JDK_URL
-        
+
         # 检查是否下载成功
-        if [ $? -ne 0 ]; then
-            echo "下载OpenJDK失败。"
+        if [ $? -eq 0 ]; then
             rm -f openjdk-${JDK_VER}_linux-x64_bin.tar.gz
-            exit 1
+            Show 1 "下载OpenJDK失败"
         fi
     fi
 
@@ -547,31 +534,29 @@ check_openjdk() {
     JDK_DIR="/usr/lib/jvm"
 
     if [ ! -d "$JDK_DIR" ]; then
-        echo "创建 ${JDK_DIR} 目录..."
+        Show 2 "创建 ${JDK_DIR} 目录..."
         sudo mkdir -p "${JDK_DIR}"
 
         if [ $? -eq 0 ]; then
-            echo "目录创建成功。"
+            Show 0 "目录创建成功"
         else
-            echo "目录创建失败。"
+            Show 1 "目录创建失败"
         fi
     fi
 
     # 解压JDK
-    echo "Unpacking JDK..."
+    Show 2 "正在解压缩JDK..."
     sudo tar -xzf openjdk-${JDK_VER}_linux-x64_bin.tar.gz -C ${JDK_DIR}
 
     # 检查解压是否成功
-    if [ $? -ne 0 ]; then
-        echo "解压OpenJDK失败。"
-        exit 1
+    if [ $? -eq 0 ]; then
+        Show 0 "解压OpenJDK成功"
+    else
+        Show 1 "解压OpenJDK失败"
     fi
 
     # 配置Java和Javac
-    echo "配置Java和Javac..."
-
-    # 移动解压后的JDK到JDK目录
-    # mv $JDK_DIR/jdk* $JDK_DIR/
+    Show 2 "配置Java和Javac..."
 
     # 设置Java和Javac的替代选项
     sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/jdk-${JDK_VER}/bin/java 2
@@ -589,44 +574,38 @@ check_openjdk() {
     sudo update-alternatives --install /usr/bin/jarsigner jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner 2
     sudo update-alternatives --set jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner
 
-    # 检查update-alternatives是否成功
-    if [ $? -ne 0 ]; then
-        echo "未能成功配置Java和Javac。"
-        exit 1
-    fi
-    echo "OpenJDK已成功安装和配置。"
+    Show 0 "安装和配置OpenJDK成功"
 }
 
 
 # 删除当前JDK环境
 remove_jdk() {
-    # 定位JDK安装目录
+    Show 2 "定位JDK安装目录"
     JDK_DIR=$(dirname $(dirname $(readlink -f $(which java))))
 
-    # 检查JDK目录是否存在
+    Show 2 "检查JDK目录是否存在"
     if [ -d "$JDK_DIR" ]; then
-        echo "在 $JDK_DIR 找到JDK。"
+        Show 2 "在 $JDK_DIR 目录找到JDK"
 
-        # 移除Java和Javac的配置
+        Show 2 "移除Java和Javac的配置"
         update-alternatives --remove java /usr/bin/java
         update-alternatives --remove javac /usr/bin/javac
-        update-alternatives --remove javac /usr/bin/keytool
-        update-alternatives --remove javac /usr/bin/jar
-        update-alternatives --remove javac /usr/bin/jarsigner
+        update-alternatives --remove keytool /usr/bin/keytool
+        update-alternatives --remove jar /usr/bin/jar
+        update-alternatives --remove jarsigner /usr/bin/jarsigner
 
-        # 配置默认的Java和Javac版本
+        Show 2 配置默认的Java和Javac版本
         echo 0 | sudo update-alternatives --config java 2>&1 >/dev/null
         echo 0 | sudo update-alternatives --config javac 2>&1 >/dev/null
         echo 0 | sudo update-alternatives --config keytool 2>&1 >/dev/null
         echo 0 | sudo update-alternatives --config jar 2>&1 >/dev/null
         echo 0 | sudo update-alternatives --config jarsigner 2>&1 >/dev/null
 
-        # 删除JDK目录
+        Show 2 "删除JDK目录"
         sudo rm -rf "$JDK_DIR"
-        echo "JDK已被卸载。"
+        Show 0 "删除JDK成功"
     else
-        echo "找不到JDK, 或者无法确定JDK安装路径。"
-        exit 1
+        Show 1 "找不到JDK, 或者无法确定JDK安装路径"
     fi
 }
 
