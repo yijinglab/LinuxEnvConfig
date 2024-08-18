@@ -291,17 +291,24 @@ get_ip_addr() {
     done
 }
 
+# 解除DNS协议53端口占用
 unlock_dns_port() {
-    echo "[+] 解除dns协议53端口占用"
-    # 停止systemd-resolved
+    Show 2 "解除DNS协议53端口占用"
+
+    Show 2 "停止systemd-resolved"
     sudo systemctl stop systemd-resolved
-    # 修改systemd-resolved配置
+
+    Show 2 "修改systemd-resolved配置"
     sudo sed -i 's/#DNS=.*/DNS=114.114.114.114/' /etc/systemd/resolved.conf
     sudo sed -i 's/^#DNSStubListener=.*/DNSStubListener=no/' /etc/systemd/resolved.conf
-    # 创建软链接
+
+    Show 2 "创建软链接"
     sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
-    # 启动systemd-resolved
+
+    Show 2 "启动systemd-resolved"
     sudo systemctl start systemd-resolved
+
+    Show 0 "DNS协议53端口占用解除成功"
 }
 
 # 配置JDK
