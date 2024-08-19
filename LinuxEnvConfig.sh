@@ -808,22 +808,29 @@ remove_miniconda3() {
     Show 0 "卸载 mimiconda3 完成"
 }
 
+# 检查Docker
 check_docker() {
+    Show 2 "检查Docker是否安装"
     which docker > /dev/null 2>&1
 
     if [ $? == 0 ]; then
-        echo "Docker 已安装"
-        service docker start > /dev/null 2>&1
-        systemctl start docker > /dev/null 2>&1
+        Show 0 "Docker 已安装"
+        Show 2 "启动Docker服务"
+        systemctl start docker >& /dev/null
+        if [ $? == 0 ]; then
+            Show 0 "Docker 服务已启动"
+        else
+            Show 1 "Docker 服务启动失败"
+        fi
     else
-        echo "Docker 未安装，开始安装"
+        Show 2 "Docker 未安装，开始安装"
         install_docker
     fi
 }
 
 # 配置Docker
 config_docker() {
-    echo "请选择操作: "
+	echo -e "${YELLOW}[+] 请选择操作: ${NC}"
     echo "1. 安装 Docker"
     echo "2. 卸载 Docker"
     echo "3. 配置 Docker 国内镜像"
@@ -831,7 +838,7 @@ config_docker() {
     echo "5. 配置 Docker 网络代理"
     echo "6. 取消 Docker 网络代理"
     echo "7. 返回主菜单"
-    read -p "请输入选择(1-7): " choice
+    read -p "$(echo -e "${GREEN}请输入选择(1-7): ${NC}")" choice
     case $choice in
         1)
             install_docker
@@ -852,109 +859,115 @@ config_docker() {
             unconfigure_docker_proxy
             ;;
         7)
-            echo "退出到主菜单"
+            Show 2 "退出到主菜单"
             ;;
         *)
-            echo "无效的选择"
+            Show 2 "无效的选择"
             ;;
     esac
 }
 
 # 安装Docker
 install_docker() {
-    echo "开始安装 docker"
-    # 更新软件包列表
+    Show 2 "开始安装 Docker"
+    Show 2 "更新 APT 源"
     sudo apt-get update
-    # 安装依赖包
+    Show 2 "安装依赖包..."
     sudo apt-get install apt-transport-https ca-certificates curl gnupg -y
+    if [ $? -eq 0 ]; then
+        Show 0 "安装依赖包成功"
+    else
+        Show 1 "安装依赖包失败"
+    fi
 
     if [[ "$(lsb_release -is)" == "Ubuntu" ]] || [[ "$(lsb_release -is)" == "Debian" ]]; then
         local repo_name=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
 
-        echo "检测到系统为 ${repo_name}"
-        echo "请选择要使用的镜像源: "
+        Show 0 "检测到系统为: ${repo_name}"
+        echo -e "${YELLOW}[+] 请选择要使用的镜像源: ${NC}"
         echo "1. 清华大学 TUNA 镜像站"
         echo "2. 中国科学技术大学 USTC 镜像站"
-        read -p "请输入选择(1 或 2): " choice
+        read -p "$(echo -e "${GREEN}请输入选择(1-2): ${NC}")" choice
 
         # 根据用户选择设置 Docker 软件源
         if [[ "$choice" == "1" ]]; then
-            echo "选择使用清华大学 TUNA 镜像站"
+            Show 2 "选择使用清华大学 TUNA 镜像站"
             local mirror_url="https://mirrors.tuna.tsinghua.edu.cn"
         elif [[ "$choice" == "2" ]]; then
-            echo "选择使用中国科学技术大学 USTC 镜像站"
+            Show 2 "选择使用中国科学技术大学 USTC 镜像站"
             local mirror_url="https://mirrors.ustc.edu.cn"
         else
-            echo "输入错误，退出安装"
-            return 1
+            Show 1 "输入错误, 退出安装"
         fi
 
-        # 设置 Docker 软件源
+        Show 2 "设置 Docker 软件源"
         sudo install -d /etc/apt/keyrings
         sudo curl -fsSL "${mirror_url}/docker-ce/linux/${repo_name}/gpg" | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
         sudo chmod a+r /etc/apt/keyrings/docker.gpg
         sudo echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] ${mirror_url}/docker-ce/linux/${repo_name} "$(. /etc/os-release && echo "${VERSION_CODENAME}")" stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-        # 更新软件包列表并安装 Docker
+        Show 2 "更新软件包列表"
         sudo apt-get update
+        Show 2 "安装 Docker"
         sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     elif [[ "$(lsb_release -cs)" == "kali-rolling" ]]; then
         # 针对 Kali Rolling 的特定安装逻辑
-        echo "检测到系统为 Kali Rolling"
-        echo "请选择要使用的镜像源: "
+        Show 0 "检测到系统为 Kali Rolling"
+        echo -e "${YELLOW}[+] 请选择要使用的镜像源: ${NC}"
         echo "1. 清华大学 TUNA 镜像站"
         echo "2. 中国科学技术大学 USTC 镜像站"
-        read -p "请输入选择(1 或 2): " choice
+        read -p "$(echo -e "${GREEN}请输入选择(1-2): ${NC}")" choice
 
         # 根据用户选择设置 Docker 软件源
         if [[ "$choice" == "1" ]]; then
-            echo "选择使用清华大学 TUNA 镜像站"
+            Show 2 "选择使用清华大学 TUNA 镜像站"
             local mirror_url="https://mirrors.tuna.tsinghua.edu.cn"
         elif [[ "$choice" == "2" ]]; then
-            echo "选择使用中国科学技术大学 USTC 镜像站"
+            Show 2 "选择使用中国科学技术大学 USTC 镜像站"
             local mirror_url="https://mirrors.ustc.edu.cn"
         else
-            echo "输入错误，退出安装"
-            return 1
+            Show 1 "输入错误, 退出安装"
         fi
         
+        Show 2 "设置 Docker 软件源"
         curl -fsSL ${mirror_url}/docker-ce/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
         sudo chmod a+r /etc/apt/keyrings/docker.gpg
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] ${mirror_url}/docker-ce/linux/debian/ bookworm stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        
+        Show 2 "更新软件包列表"
         sudo apt update
+        
+        Show 2 "安装 Docker"
         sudo apt install -y docker-ce docker-ce-cli containerd.io
     else
-        echo "当前系统版本不支持"
-        return 1
+        Show 1 "当前系统版本不支持"
     fi
 
-    # 验证 Docker 是否安装成功
-    echo "安装 Docker 版本："
+    Show 2 "安装 Docker 版本："
     docker --version
 }
 
 # 卸载Docker
 remove_docker() {
-    echo "开始卸载 docker"
-    # 卸载 Docker 相关软件
+    Show 2 "开始卸载 Docker"
+    Show 2 "卸载 Docker 相关软件"
     sudo apt-get remove -y docker-ce docker-ce-cli containerd.io
 
-    # 删除 Docker 数据目录
+    Show 2 "删除 Docker 数据目录"
     sudo rm -rf /var/lib/docker
     sudo rm -rf /var/lib/containerd
     sudo rm -rf /etc/apt/keyrings/docker.gpg
     sudo rm -rf /etc/apt/sources.list.d/docker.list
 
-    # 清理残留的配置文件
+    Show 2 "删除 Docker 配置文件"
     sudo rm -rf /etc/docker
 
-    # 卸载完成
-    echo "Docker 已卸载."
+    Show 0 "成功卸载 Docker"
 }
 
-# 配置Docker为国内镜像
+# 配置Docker为国内镜像源
 configure_docker_mirror() {
-    echo "配置Docker为国内镜像"
+    Show 2 "配置Docker国内镜像源"
     sudo mkdir -p /etc/docker
 
     sudo tee /etc/docker/daemon.json <<-'EOF'
@@ -970,29 +983,37 @@ configure_docker_mirror() {
   ]
 }
 EOF
-
-    sudo systemctl daemon-reload
-    sudo systemctl restart docker
-    Show 0 "docker 国内镜像地址配置完毕!"
+    if [ $? -eq 0 ]; then
+        Show 0 "修改配置文件成功"
+        Show 2 "重启 Docker 服务"
+        sudo systemctl daemon-reload
+        sudo systemctl restart docker
+        Show 0 "配置Docker国内镜像源成功"
+    else
+        Show 2 "修改配置文件失败"
+        Show 1 "配置Docker国内镜像源失败"
+    fi
 }
 
-# 取消配置Docker为国内镜像
+# 取消配置Docker为国内镜像源
 unconfigure_docker_mirror() {
-    echo "取消配置Docker为国内镜像开始"
+    Show 2 "取消配置Docker使用国内镜像开始"
+    Show 2 "删除配置文件"
     sudo rm -f /etc/docker/daemon.json
+    Show 2 "重启 Docker 服务"
     sudo systemctl daemon-reload
     sudo systemctl restart docker
-    echo "取消配置Docker为国内镜像成功"
+    Show 0 "取消配置Docker使用国内镜像成功"
 }
 
 # 配置Docker网络代理
 configure_docker_proxy() {
-    echo "配置Docker网络代理开始"
-    echo "选择代理协议类型: "
-    echo "1. http/https"
-    echo "2. socks5"
+    Show 2 "配置Docker网络代理开始"
+	echo -e "${YELLOW}[+] 选择代理协议类型: ${NC}"
+    echo "1. HTTP / HTTPS"
+    echo "2. SOCKS5"
     echo "3. 返回主菜单"
-    read -p "请输入序号(1-3): " type
+    read -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" type
     case $type in
         1)
             proxy_type=http
@@ -1001,22 +1022,27 @@ configure_docker_proxy() {
             proxy_type=socks5
             ;;
         3)
-            echo "退出到主菜单"
+            Show 2 "退出到主菜单"
             ;;
         *)
-            echo "输入的序号无效"
+            Show 2 "输入的序号无效"
             ;;
     esac
     # 输入代理地址
-    read -p "输入代理地址 (Ex: 127.0.0.1:7890): " proxy_ip_port
+    read -p "$(echo -e "${GREEN}输入代理地址 (Ex: 127.0.0.1:7890): ${NC}")" proxy_ip_port
 
     # 配置文件路径
     CONFIG_FILE="/etc/systemd/system/docker.service.d/proxy.conf"
 
-    # 创建配置目录
+    Show 2 "检查并创建配置目录"
     sudo mkdir -p /etc/systemd/system/docker.service.d
 
-    # 创建或更新配置文件
+    Show 2 "根据选择创建或更新配置文件"
+    if [ -f "$CONFIG_FILE" ]; then
+        Show 2 "配置文件已存在，将覆盖原有配置"
+    else
+        Show 2 "配置文件不存在，将创建新的配置文件"
+    fi
     cat <<EOF | sudo tee $CONFIG_FILE > /dev/null
 [Service]
 Environment="HTTP_PROXY=${proxy_type}://${proxy_ip_port}"
@@ -1024,29 +1050,34 @@ Environment="HTTPS_PROXY=${proxy_type}://${proxy_ip_port}"
 Environment="NO_PROXY=localhost,127.0.0.1"
 EOF
 
-    # 重新加载systemd管理器配置
+    Show 2 "重新加载systemd管理器配置"
     sudo systemctl daemon-reload
 
-    # 重启Docker服务
+    Show 2 "重启Docker服务"
     sudo systemctl restart docker
-
-    # 显示配置结果
-    echo "成功配置Docker使用网络代理: ${proxy_type}://${proxy_ip_port}"
+    if  [ $? -eq 0 ]; then
+        Show 0 "成功配置Docker使用网络代理: ${proxy_type}://${proxy_ip_port}"
+    else
+        Show 1 "配置Docker网络代理失败"
+    fi
 }
 
 # 取消配置Docker网络代理
 unconfigure_docker_proxy() {
-    echo "取消配置Docker网络代理开始"
-    # 删除配置文件
+    Show 2 "取消配置Docker网络代理开始"
+    Show 2 "删除配置文件"
     sudo rm -f /etc/systemd/system/docker.service.d/proxy.conf
 
-    # 重新加载systemd管理器配置
+    Show 2 "重新加载systemd管理器配置"
     sudo systemctl daemon-reload
 
-    # 重启Docker服务
+    Show 2 重启Docker服务
     sudo systemctl restart docker
-
-    echo "取消Docker使用网络代理成功"
+    if  [ $? -eq 0 ]; then
+        Show 0 "取消配置Docker使用网络代理成功"
+    else
+        Show 1 "取消配置Docker使用网络代理失败"
+    fi
 }
 
 # 配置Docker-compose
