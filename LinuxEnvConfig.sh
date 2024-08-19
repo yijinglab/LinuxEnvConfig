@@ -1156,11 +1156,11 @@ check_docker_compose() {
 
 # 配置vulfocus
 config_vulfocus() {
-    echo "请选择操作: "
+    echo -e "${YELLOW}[+] 请选择操作: ${NC}"
     echo "1. 安装 Vulfocus"
     echo "2. 卸载 Vulfocus"
     echo "3. 返回主菜单"
-    read -p "请输入选择(1-3): " choice
+    read -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
 
     case $choice in
         1)
@@ -1170,46 +1170,57 @@ config_vulfocus() {
             remove_vulfocus
             ;;
         3)
-            echo "退出到主菜单"
+            Show 2 "退出到主菜单"
             ;;
         *)
-            echo "无效的选择."
+            Show 2 "无效的选择"
             ;;
     esac
 }
 
 # 安装vulfocus
 install_vulfocus() {
-    # 接收用户输入作为host_ip
-    echo "开始安装vulfocus"
-    read -p "输入启动vulfocus的主机地址: " host_ip
+    Show 2 "开始安装 vulfocus"
+    read -p "$(echo -e "${YELLOW}输入启动vulfocus的主机地址: ${NC}")" host_ip
+
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
-        echo "请输入正确的IP地址"
-        exit 1
+        Show 1 "请输入正确的IP地址"
     fi
 
     # 检查Docker是否安装
     check_docker
 
     # 安装vulfocus
+    Show 2 "开始拉取 vulfocus 镜像"
     sudo docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/vulfocus:latest
+    if [ $? -eq 0 ]; then
+        Show 0 "拉取 vulfocus 镜像成功"
+    else
+        Show 1 "拉取 vulfocus 镜像失败"
+    fi
+    Show 2 "开始启动 vulfocus"
     sudo docker run -d -p 88:80 --name vulfocus --restart always -v /var/run/docker.sock:/var/run/docker.sock -e VUL_IP=${host_ip} registry.cn-hangzhou.aliyuncs.com/mingy123/vulfocus:latest
-    echo "安装vulfocus完成"
+    if [ $? -eq 0 ]; then
+        Show 0 "启动 vulfocus 成功"
+    else
+        Show 1 "启动 vulfocus 失败"
+    fi
 
     # 打印访问信息
-    echo "Vulfocus 服务已启动。"
-    echo "访问地址: http://${host_ip}:88"
-    echo "默认用户: admin"
-    echo "默认密码: admin"
+    Show 0 "访问地址: http://${host_ip}:88"
+    Show 0 "默认用户: admin"
+    Show 0 "默认密码: admin"
 }
 
 # 卸载vulfocus
 remove_vulfocus() {
-    echo "开始卸载vulfocus"
+    Show 2 "开始卸载 vulfocus"
+    Show 2 "停止 vulfocus"
     sudo docker stop vulfocus
+    Show 2 "删除 vulfocus"
     sudo docker rm vulfocus
-    echo "卸载vulfocus完成"
+    Show 0 "卸载 vulfocus 完成"
 }
 
 # 配置ARL
