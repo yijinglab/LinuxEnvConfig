@@ -1082,11 +1082,11 @@ unconfigure_docker_proxy() {
 
 # 配置Docker-compose
 config_docker_compose() {
-    echo "请选择操作: "
+    echo -e "${YELLOW}[+] 请选择操作: ${NC}"
     echo "1. 安装 Docker-compose"
     echo "2. 卸载 Docker-compose"
     echo "3. 返回主菜单"
-    read -p "请输入选择(1-3): " choice
+    read -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
 
     case $choice in
         1)
@@ -1096,42 +1096,58 @@ config_docker_compose() {
             remove_docker_compose
             ;;
         3)
-            echo "退出到主菜单"
+            Show 2 "退出到主菜单"
             ;;
         *)
-            echo "无效的选择"
+            Show 2 "无效的选择"
             ;;
     esac
 }
 
 # 安装Docker-compose
 install_docker_compose() {
-    echo "开始安装 docker-compose"
+    Show 2 "开始安装 docker-compose"
+    if [ -f "/usr/local/bin/docker-compose" ]; then
+        read -p "已安装 docker-compose, 是否卸载? (y/n)" yn
+        if [[ $yn == "y" || $yn == "Y" ]]; then
+            remove_docker_compose
+        fi
+    fi
+    Show 2 "开始下载 docker-compose"
     sudo curl -L "https://gitee.com/yijingsec/compose/releases/download/$(curl -s https://gitee.com/api/v5/repos/yijingsec/compose/releases/latest | grep -E -o '\"tag_name\":\"([^\"]+)\"' | awk -F\" '{print $4}')/docker-compose-$(uname -s | tr A-Z a-z)-$(uname -m)" -o /usr/local/bin/docker-compose
     sudo chmod +x /usr/local/bin/docker-compose
-    echo "安装 docker-compose 版本："
-    sudo docker-compose --version
+    if [ $? -eq 0 ]; then
+        Show 0 "安装 docker-compose 成功"
+        Show 2 "安装 docker-compose 版本:"
+        sudo docker-compose --version
+    else
+        Show 1 "安装 docker-compose 失败"
+    fi
 }
 
 # 卸载Docker-compose
 remove_docker_compose() {
-    echo "开始卸载 docker-compose"
+    Show 2 "卸载 docker-compose 开始"
     sudo rm -rf /usr/local/bin/docker-compose
-    echo "卸载 docker-compose 完成"
+    if [ $? -eq 0 ]; then
+        echo "卸载 docker-compose 成功"
+    else
+        echo "卸载 docker-compose 失败"
+    fi
 }
 
 # 检查 docker compose 命令
 check_docker_compose() {
-    # 检查docker compose子命令是否存在
+    Show 2 "检查docker compose命令是否存在"
     if docker compose >/dev/null 2>&1; then
-        echo "docker compose 子命令存在。"
+        Show 0 "docker compose 命令存在"
         COMPOSE_CMD="docker compose"
         # 检查docker-compose命令是否存在
     elif command -v docker-compose >/dev/null 2>&1; then
-        echo "docker-compose 命令存在。"
+        Show 0 "docker-compose 命令存在"
         COMPOSE_CMD="docker-compose"
     else
-        echo "docker-compose 命令不存在"
+        Show 2 "docker-compose 命令不存在"
         # 安装docker-compose
         install_docker_compose
         COMPOSE_CMD="docker-compose"
