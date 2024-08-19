@@ -1462,7 +1462,7 @@ remove_metasploit() {
 
 # 配置Viper
 config_viper() {
-    echo "请选择操作: "
+    echo -e "${YELLOW}[+] 请选择操作: ${NC}"
     echo "1. 安装 Viper"
     echo "2. 更新 Viper 版本"
     echo "3. 更新 Viper 密码"
@@ -1470,7 +1470,7 @@ config_viper() {
     echo "5. 关闭 Viper"
     echo "6. 卸载 Viper"
     echo "7. 返回主菜单"
-    read -p "请输入选择(1-7): " choice
+    read -p "$(echo -e "${GREEN}请输入选择(1-7): ${NC}")" choice
     case $choice in
         1)
             install_viper
@@ -1491,10 +1491,10 @@ config_viper() {
             remove_viper
             ;;
         7)
-            echo "退出到主菜单"
+            Show 2 "退出到主菜单"
             ;;
         *)
-            echo "无效的选择"
+            Show 2 "无效的选择"
             ;;
     esac
 }
@@ -1502,17 +1502,18 @@ config_viper() {
 # 安装Viper
 install_viper() {
     # 检查Docker是否安装
-    echo "开始安装Viper"
+    Show 2 "开始安装 Viper"
     check_docker
-    read -p "输入启动Viper的主机地址: " host_ip
+    read -p "$(echo -e "${YELLOW}输入启动Viper的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
-        echo "请输入正确的IP地址"
-        exit 1
+        Show 1 "请输入正确的IP地址"
     fi
 
+    Show 2 "创建安装目录"
     mkdir -p /root/VIPER && cd /root/VIPER && rm -f docker-compose.* > /dev/null 2>&1
 
+    Show 2 "创建docker-compose.yml文件"
     tee docker-compose.yml <<-'EOF'
 version: "3"
 services:
@@ -1530,70 +1531,78 @@ services:
     command: ["VIPER_PASSWORD"]
 EOF
 
-    read -p "输入VIPER密码: " VIPER_PASSWORD
+    read -p "$(echo -e "${YELLOW}输入VIPER密码: ${NC}")" VIPER_PASSWORD
     sed -i "s/VIPER_PASSWORD/${VIPER_PASSWORD}/g" docker-compose.yml
     cd /root/VIPER
     check_docker_compose
     sudo $COMPOSE_CMD up -d
-    echo "正在等待系统启动"
+    Show 2 "正在等待系统启动"
     sleep 15
-    echo "访问地址: https://${host_ip}:60000 登录到服务器"
-    echo "用户名: root"
-    echo "密  码: ${VIPER_PASSWORD}"
-    echo "安装Viper完成"
+    Show 0 "访问地址: https://${host_ip}:60000 登录到服务器"
+    Show 0 "用户名: root"
+    Show 0 "密  码: ${VIPER_PASSWORD}"
+    Show 0 "安装Viper完成"
 }
 
 # 更新Viper版本
 update_viper_version() {
-    echo "开始更新Viper"
-    cd /root/VIPER
+    Show 2 "开始更新Viper"
     check_docker_compose
+    Show 2 "移除所有容器"
+    cd /root/VIPER
     sudo $COMPOSE_CMD down
+    Show 2 "删除数据文件"
     rm -rf ./db/*
     rm -f ./module/*
+    Show 2 "拉取最新镜像"
     sudo $COMPOSE_CMD pull
+    Show 2 "启动容器"
     sudo $COMPOSE_CMD up -d
-    echo "更新Viper完成"
+    Show 0 "更新Viper完成"
 }
 
 # 更新Viper密码
 update_viper_password() {
-    echo "开始更新Viper密码"
+    SHow 2 "开始更新Viper密码"
     cd /root/VIPER
-    read -p "输入VIPER密码: " VIPER_PASSWORD
+    read -p "$(echo -e "${YELLOW}输入VIPER密码: ${NC}")" VIPER_PASSWORD
+    Show 2 "更新docker-compose.yml文件"
     sed -i "s/VIPER_PASSWORD/${VIPER_PASSWORD}/g" docker-compose.yml
     check_docker_compose
+    Show 2 "更新Viper容器"
     sudo $COMPOSE_CMD down
     sudo $COMPOSE_CMD up -d
-    echo "更新Viper密码完成"
+    Show 0 "更新Viper密码完成"
 }
 
 # 启动Viper
 start_viper() {
-    echo "开始启动Viper"
+    Show 2 "开始启动Viper"
     cd /root/VIPER
     check_docker_compose
     sudo $COMPOSE_CMD start
-    echo "启动Viper完成"
+    Show 0 "启动Viper完成"
 }
 
 # 关闭Viper
 stop_viper() {
-    echo "开始关闭Viper"
+    Show 2 "开始关闭Viper"
     cd /root/VIPER
     check_docker_compose
     sudo $COMPOSE_CMD stop
-    echo "关闭Viper完成"
+    Show 0 "关闭Viper完成"
 }
 
 # 卸载Viper
 remove_viper() {
-    echo "开始卸载Viper"
+    Show 2 "开始卸载Viper"
     cd /root/VIPER
     check_docker_compose
+    Show 2 "删除Viper容器"
     sudo $COMPOSE_CMD down
+    Show 2 "删除Viper目录"
     cd ~ && sudo rm -rf /root/VIPER
-    echo "卸载Viper完成"
+    Show 0 "卸载Viper完成"
 }
 
 # 配置Viper
