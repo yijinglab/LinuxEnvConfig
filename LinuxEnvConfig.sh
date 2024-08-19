@@ -1407,11 +1407,11 @@ add_fingerprint_to_arl() {
 
 # 配置Metasploit-framework
 config_metasploit() {
-    echo "请选择操作: "
+    echo -e "${YELLOW}[+] 请选择操作: ${NC}"
     echo "1. 安装 Metasploit-framework"
     echo "2. 卸载 Metasploit-framework"
     echo "3. 返回主菜单"
-    read -p "请输入选择(1-3): " choice
+    read -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
 
     case $choice in
         1)
@@ -1421,31 +1421,43 @@ config_metasploit() {
             remove_metasploit
             ;;
         3)
-            echo "退出到主菜单"
+            Show 2 "退出到主菜单"
             ;;
         *)
-            echo "无效的选择"
+            Show 2 "无效的选择"
             ;;
     esac
 }
 
 # 安装Metasploit-framework
 install_metasploit() {
-    # 配置 apt 镜像源
+    Show 2 "开始安装 Metasploit-framework"
+    Show 2 "配置 Kali APT 源"
     sudo echo "deb https://mirrors.tuna.tsinghua.edu.cn/kali kali-rolling main non-free contrib" | sudo tee -a /etc/apt/sources.list > /dev/null
-    # 导入 Kali 镜像源的 GPG 公钥
+    Show 2 "导入 Kali APT 源的 GPG 公钥"
     wget -qO - https://archive.kali.org/archive-key.asc | sudo apt-key add -
-    # 更新 apt 软件包列表
+    Show 2 "更新 APT 软件包列表"
     sudo apt update
-    # 安装 metasploit
+    Show 2 "安装 metasploit-framework"
     sudo apt install metasploit-framework -y
-    echo "安装 metasploit 版本："
+    if [ $? -eq 0 ]; then
+        Show 0 "安装 metasploit-framework 完成"
+    else
+        Show 1 "安装 metasploit-framework 失败"
+    fi
+    Show 2 "安装 metasploit 版本: "
     msfconsole --version
 }
 
 # 卸载Metasploit-framework
 remove_metasploit() {
+    Show 2 "开始卸载 Metasploit-framework"
     sudo apt remove metasploit-framework -y
+    if [ $? -eq 0 ]; then
+        Show 0 "卸载 metasploit-framework 完成"
+    else
+        Show 1 "卸载 metasploit-framework 失败"
+    fi
 }
 
 # 配置Viper
