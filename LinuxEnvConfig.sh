@@ -2484,7 +2484,7 @@ show_menu() {
                 --- Made by mingy ---
     '
     echo -e "${GREEN_LINE}"
-    echo ">>> 请选择操作 >>> "
+    echo -e "${YELLOW}[+] 请选择操作 >>> ${NC}"
 
     # 特殊处理的项数组
     special_items=("")
@@ -2532,11 +2532,12 @@ handle_choice() {
 
 while true; do
     show_menu
-    read -p ">>> 请输入选项的序号(输入q退出) >>> " choice
+    read -p "$(echo -e "${GREEN}>>> 请输入选项的序号(输入q退出) >>> ${NC}")" choice
+    # read -p ">>> 请输入选项的序号(输入q退出) >>> " choice
     if [[ $choice == 'q' || $choice == 'Q' ]]; then
         break
     fi
     handle_choice $choice
-    echo ">>> 按任意键继续... <<<"
+    Show 3 "按任意键继续..."
     read -n 1 # 等待用户按键
 done
