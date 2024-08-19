@@ -1225,14 +1225,14 @@ remove_vulfocus() {
 
 # 配置ARL
 config_arl() {
-    echo "请选择操作: "
+    echo -e "${YELLOW}[+] 请选择操作: ${NC}"
     echo "1. 安装 ARL"
     echo "2. 停止 ARL"
     echo "3. 启动 ARL"
     echo "4. 卸载 ARL"
     echo "5. 添加指纹"
     echo "6. 返回主菜单"
-    read -p "请输入选择(1-6): " choice
+    read -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
 
     case $choice in
         1)
@@ -1261,141 +1261,148 @@ config_arl() {
 
 # 安装灯塔ARL
 install_arl() {
-    echo "开始安装灯塔ARL"
-    read -p "输入启动灯塔ARL的主机地址: " host_ip
+    Show 2 "开始安装灯塔ARL"
+    read -p "$(echo -e "${YELLOW}输入启动灯塔ARL的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
-        echo "请输入正确的IP地址"
-        exit 1
+        Show 1 "请输入正确的IP地址"
     fi
 
     # 检查Docker是否安装
     check_docker
 
-    echo "创建 docker_arl 目录"
+    Show 2 "创建 docker_arl 目录"
     sudo mkdir -p /opt/docker_arl
-    echo "创建 arl_db 卷"
+    Show 2 "创建 arl_db 卷"
     sudo docker volume create arl_db
 
     # 获取最新版本的 ARL 下载链接并下载
     # sudo curl -Ls "https://gitee.com/yijingsec/ARL/releases/download/$(curl -s https://gitee.com/api/v5/repos/yijingsec/ARL/releases/latest | grep -E -o '\"tag_name\":\"([^\"]+)\"' | awk -F\" '{print $4}')/docker.zip" -o /opt/docker_arl/docker.zip && cd /opt/docker_arl && unzip -o docker.zip
 
     local latest_tag_name=$(curl -s https://gitee.com/api/v5/repos/yijingsec/ARL/releases/latest | grep -E -o '"tag_name":"([^\"]+)"' | awk -F\" '{print $4}')
-    echo "发现最新版本: ${latest_tag_name}"
-    echo "下载 ARL 压缩包..."
+    Show 0 "发现最新版本ARL: ${latest_tag_name}"
+    Show 2 "开始下载 ARL 压缩包..."
     local download_url="https://gitee.com/yijingsec/ARL/releases/download/${latest_tag_name}/docker.zip"
     curl -Ls "${download_url}" -o /opt/docker_arl/docker.zip
+    if [ $? -eq 0 ]; then
+        Show 0 "下载 ARL 压缩包成功"
+    else
+        Show 1 "下载 ARL 压缩包失败"
+    fi
 
-    # 解压 ARL 压缩包
+    Show 2 "开始解压 ARL 压缩包"
     cd /opt/docker_arl
     unzip -o docker.zip
 
-    # 启动 ARL 服务
-    echo "启动 ARL 服务..."
     check_docker_compose
+
+    Show 2 "开始启动 ARL 服务"
     sudo $COMPOSE_CMD up -d
     # 检查命令是否成功执行
     if [ $? -eq 0 ]; then
-        echo "ARL 服务已启动。"
-        echo "访问地址: https://${host_ip}:5003"
-        echo "默认用户: admin"
-        echo "默认密码: arlpass"
+        Show 0 "成功启动 ARL 服务"
+        Show 0 "访问地址: https://${host_ip}:5003"
+        Show 0 "默认用户: admin"
+        Show 0 "默认密码: arlpass"
     else
-        echo "ARL 服务启动失败, 请重试"
-        exit 1
+        Show 1 "启动 ARL 服务失败, 请重试"
     fi
 }
 
 # 停止灯塔ARL
 stop_arl() {
-    echo "停止灯塔ARL开始"
-    cd /opt/docker_arl
+    Show 2 "停止灯塔ARL开始"
     check_docker_compose
+    cd /opt/docker_arl
     sudo $COMPOSE_CMD ps | grep arl_ | grep Up >/dev/null 2>&1
     if [ $? -eq 0 ]; then
         sudo $COMPOSE_CMD stop
-        echo "停止灯塔ARL完成"
+        Show 0 "停止灯塔ARL完成"
     else
-        echo "灯塔ARL服务已经停止"
+        Show 2 "灯塔ARL服务已停止"
     fi
 }
 
 # 启动灯塔ARL
 start_arl() {
-    echo "启动灯塔ARL开始"
-    read -p "输入启动灯塔ARL的主机地址: " host_ip
+    Show 2 "启动灯塔ARL开始"
+    read -p "$(echo -e "${YELLOW}输入启动灯塔ARL的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
-        echo "请输入正确的IP地址"
-        exit 1
+        Show 1 "请输入正确的IP地址"
     fi
-    echo "启动灯塔ARL服务"
-    cd /opt/docker_arl
+    
     check_docker_compose
+
+    Show 2 "启动灯塔ARL服务"
+    cd /opt/docker_arl
     sudo $COMPOSE_CMD ps -a | grep arl_ | grep Exited >/dev/null 2>&1
     if [ $? -eq 0 ]; then
         sudo $COMPOSE_CMD up -d
         if [ $? -eq 0 ]; then
-            echo "启动灯塔ARL完成"
-            echo "访问地址: https://${host_ip}:5003"
-            echo "默认用户: admin"
-            echo "默认密码: arlpass"
+            Show 0 "启动灯塔ARL成功"
+            Show 0 "访问地址: https://${host_ip}:5003"
+            Show 0 "默认用户: admin"
+            Show 0 "默认密码: arlpass"
         else
-            echo "启动灯塔ARL失败, 请重试"
-            exit 0
+            Show 1 "启动灯塔ARL失败, 请重试"
         fi
     else
-        echo "灯塔ARL服务已经启动"
+        Show 0 "灯塔ARL服务已经启动"
     fi
 }
 
 # 卸载灯塔ARL
 remove_arl() {
-    echo "开始卸载ARL"
-    cd /opt/docker_arl
+    Show 2 "开始卸载ARL"
+
     check_docker_compose
-    echo "停止灯塔ARL服务"
+
+    Show 2 "停止灯塔ARL服务"
+    cd /opt/docker_arl
     sudo $COMPOSE_CMD down
-    echo "删除 arl_db 卷"
+    Show 2 "删除 arl_db 卷"
     sudo docker volume rm arl_db
+    Show 2 "删除 docker_arl 目录"
     cd ~
     sudo rm -rf /opt/docker_arl
-    read -p "是否要删除镜像? (y/n)" yn
+    read -p "是否删除ARL镜像? (y/n)" yn
     if [[ $yn == "y" || $yn == "Y" ]]; then
         sudo docker rmi registry.cn-hangzhou.aliyuncs.com/mingy123/arl:latest
         sudo docker rmi registry.cn-hangzhou.aliyuncs.com/mingy123/rabbitmq:3.8.19-management-alpine
         sudo docker rmi registry.cn-hangzhou.aliyuncs.com/mingy123/mongo:4.0.27
+        Show 0 "删除ARL镜像成功"
     fi
     echo "卸载ARL完成"
 }
 
 # 给ARL添加指纹
 add_fingerprint_to_arl() {
-    echo "开始给ARL添加指纹"
-    read -p "输入ARL的IP地址: " arl_ip
+    Show 2 "开始给ARL添加指纹"
+    read -p "$(echo -e "${YELLOW}请输入ARL的IP地址: ${NC}")" arl_ip
     if [ -z "${arl_ip}" ]; then
-        echo "请输入正确的ARL_IP地址"
-        exit 0
+        Show 1 "请输入正确的ARL_IP地址"
     fi
-    read -p "输入ARL的密码: " arl_pass
+    read -p "$(echo -e "${YELLOW}请输入ARL的密码: ${NC}")" arl_pass
     if [ -z "${arl_pass}" ]; then
-        echo "请输入正确的ARL密码"
-        exit 0
+        Show 1 "请输入正确的ARL密码"
     fi
     # 如果存在ARL-Finger-ADD目录则删除
     if [ -d "/opt/docker_arl/ARL-Finger-ADD" ]; then
         rm -rf /opt/docker_arl/ARL-Finger-ADD
     fi
+    Show 2 "开始克隆ARL-Finger-ADD项目"
     git clone https://gitee.com/yijingsec/ARL-Finger-ADD.git /opt/docker_arl/ARL-Finger-ADD
     cd /opt/docker_arl/ARL-Finger-ADD
+    Show 2 "开始添加指纹"
     if command -v python3 &>/dev/null; then
         python3 ARL-Finger-ADD.py https://${arl_ip}:5003/ admin ${arl_pass}
     elif command -v python &>/dev/null; then
         python ARL-Finger-ADD.py https://${arl_ip}:5003/ admin ${arl_pass}
     else
-        echo "Python3未安装, 请先安装Python3"
-        exit 0
+        Show 1 "Python3未安装, 请先安装Python3"
     fi
+    Show 2 "添加指纹完成"
 }
 
 # 配置Metasploit-framework
