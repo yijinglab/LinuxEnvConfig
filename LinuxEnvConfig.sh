@@ -2036,12 +2036,12 @@ get_hfish_db_info() {
 
 # 配置 Dnscat2
 config_dnscat2() {
-    echo "请选择操作: "
+    echo -e "${YELLOW}[+] 请选择操作: ${NC}"
     echo "1. 安装 Dnscat2"
     echo "2. 启动 Dnscat2 (直连模式)"
     echo "3. 启动 Dnscat2 (中继模式)"
     echo "4. 返回主菜单"
-    read -p "请输入选择(1-4): " choice
+    read -p "$(echo -e "${GREEN}请输入选择(1-4): ${NC}")" choice
 
     case $choice in
         1)
@@ -2054,43 +2054,51 @@ config_dnscat2() {
             start_dnscat2_relay_mode
             ;;
         4)
-            echo "退出到主菜单"
+            Show 2 "退出到主菜单"
             ;;
         *)
-            echo "无效的选择"
+            Show 2 "无效的选择"
             ;;
     esac
 }
 
 # 安装dnscat2
 install_dnscat2() {
-    echo "安装Dnscat2开始"
+    Show 2 "安装Dnscat2开始"
     docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/dnscat2:v0.07
     if [ $? -eq 0 ]; then
-        echo "拉取最新Dnscat2镜像成功"
-        echo "安装Dnscat2成功"
-        echo "请继续选择配置Dnscat2, 启动Dnscat2"
+        Show 0 "拉取最新Dnscat2镜像成功"
+        Show 0 "安装Dnscat2成功, 请启动Dnscat2"
     else
-        echo "拉取最新Dnscat2镜像失败"
-        echo "安装Dnscat2失败"
+        Show 2 "拉取最新Dnscat2镜像失败"
+        Show 1 "安装Dnscat2失败"
     fi
 }
 
 # 启动dnscat2直连模式
 start_dnscat2_direct_mode() {
-    echo "启动Dnscat2(直连模式)开始"
+    Show 2 "启动Dnscat2(直连模式)开始"
     docker run -it --name dnscat2 --rm -p 53:53/udp registry.cn-hangzhou.aliyuncs.com/mingy123/dnscat2:v0.07 server
+    if [ $? -eq 0 ]; then
+        Show 0 "启动Dnscat2(直连模式)成功"
+    else
+        Show 1 "启动Dnscat2(直连模式)失败"
+    fi
 }
 
 # 启动Dnscat2中继模式
 start_dnscat2_relay_mode() {
-    echo "启动Dnscat2(中继模式)开始"
-    read -p "输入启动Dnscat2的子域名: " subdomain
+    Show 2 "启动Dnscat2(中继模式)开始"
+    read -p "$(echo -e "${YELLOW}输入启动Dnscat2的子域名: ${NC}")" subdomain
     if [ -z "${subdomain}" ]; then
-        echo "请输入正确的子域名"
-        exit 1
+        Show 1 "请输入正确的子域名"
     fi
     docker run -it --name dnscat2 --rm -p 53:53/udp registry.cn-hangzhou.aliyuncs.com/mingy123/dnscat2:v0.07 server "${subdomain}"
+    if [ $? -eq 0 ]; then
+        Show 0 "启动Dnscat2(中继模式)成功"
+    else
+        Show 1 "启动Dnscat2(中继模式)失败"
+    fi
 }
 
 # 配置Beef
