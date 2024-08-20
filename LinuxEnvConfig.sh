@@ -2210,13 +2210,13 @@ remove_beef() {
 
 # 配置Bluelotus
 config_bluelotus() {
-    echo "请选择操作: "
+    echo -e "${YELLOW}[+] 请选择操作: ${NC}"
     echo "1. 安装 Bluelotus"
     echo "2. 关闭 Bluelotus"
     echo "3. 启动 Bluelotus"
     echo "4. 卸载 Bluelotus"
     echo "5. 返回主菜单"
-    read -p "请输入选择(1-5): " choice
+    read -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
 
     case $choice in
         1)
@@ -2232,95 +2232,94 @@ config_bluelotus() {
             remove_bluelotus
             ;;
         5)
-            echo "退出到主菜单"
+            Show 2 "退出到主菜单"
             ;;
         *)
-            echo "无效的选择"
+            Show 2 "无效的选择"
             ;;
     esac
 }
 
 # 安装 Bluelotus
 install_bluelotus() {
-    echo "安装Bluelotus开始"
-    read -p "输入启动Bluelotus的主机地址: " host_ip
+    Show 2 "安装Bluelotus开始"
+    read -p "$(echo -e "${YELLOW}输入启动Bluelotus的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
-        echo "请输入正确的IP地址"
-        exit 1
+        Show 1 "请输入正确的IP地址"
     fi
-
+    Show 2 "开始拉取最新Bluelotus镜像"
     docker pull registry.cn-shanghai.aliyuncs.com/yijingsec/bluelotus:latest
     if [ $? -eq 0 ]; then
-        echo "拉取最新Bluelotus镜像成功"
+        Show 0 "拉取最新Bluelotus镜像成功"
     else
-        echo "拉取最新Bluelotus镜像失败"
-        exit 0
+        Show 1 "拉取最新Bluelotus镜像失败"
     fi
+    Show 2 "启动Bluelotus容器服务"
     docker run -dit --name bluelotus -p 5080:80 registry.cn-shanghai.aliyuncs.com/yijingsec/bluelotus:latest
     if [ $? -eq 0 ]; then
-        echo "安装Bluelotus成功"
-        echo "访问地址: http://${host_ip}:5080/login.php 登录到服务器"
-        echo "默认密码: bluelotus"
+        Show 0 "安装Bluelotus成功"
+        Show 0 "访问地址: http://${host_ip}:5080/login.php 登录到服务器"
+        Show 0 "默认密码: bluelotus"
     else
-        echo "安装Bluelotus失败"
-        exit 0
+        Show 1 "安装Bluelotus失败"
     fi
 }
 
 # 关闭Bluelotus
 stop_bluelotus() {
-    echo "关闭Bluelotus开始"
+    Show 2 "关闭Bluelotus开始"
     docker stop bluelotus
     if [ $? -eq 0 ]; then
-        echo "关闭Bluelotus成功"
+        Show 0 "关闭Bluelotus成功"
     else
-        echo "关闭Bluelotus失败"
+        Show 1 "关闭Bluelotus失败"
     fi
 }
 
 # 启动Bluelotus
 start_bluelotus() {
-    echo "启动Bluelotus开始"
-    read -p "输入启动Bluelotus的主机地址: " host_ip
+    Show 2 "启动Bluelotus开始"
+    read -p "$(echo -e "${YELLOW}输入启动Bluelotus的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
-        echo "请输入正确的IP地址"
-        exit 1
+        Show 1 "请输入正确的IP地址"
     fi
+    Show 2 "启动Bluelotus容器服务"
     docker start bluelotus
     if [ $? -eq 0 ]; then
-        echo "启动Bluelotus成功"
-        echo "访问地址: http://${host_ip}:5080/login.php 登录到服务器"
-        echo "默认密码: bluelotus"
+        Show 0 "启动Bluelotus成功"
+        Show 0 "访问地址: http://${host_ip}:5080/login.php 登录到服务器"
+        Show 0 "默认密码: bluelotus"
     else
-        echo "启动Bluelotus失败"
+        Show 1 "启动Bluelotus失败"
     fi
 }
 
 # 卸载Bluelotus
 remove_bluelotus() {
-    echo "卸载Bluelotus开始"
+    Show 2 "卸载Bluelotus开始"
     docker rm bluelotus -f
     if [ $? -eq 0 ]; then
+        Show 0 "删除Bluelotus容器成功"
         read -p "是否要删除镜像? (y/n)" yn
         if [[ $yn == "y" || $yn == "Y" ]]; then
             docker rmi registry.cn-shanghai.aliyuncs.com/yijingsec/bluelotus:latest
-            echo "删除Bluelotus镜像成功"
+            Show 0 "删除Bluelotus镜像成功"
         fi
-        echo "卸载Bluelotus成功"
+        Show 0 "卸载Bluelotus成功"
     else
-        echo "卸载Bluelotus失败"
+        Show 1 "卸载Bluelotus失败"
     fi
 }
 
 # 配置CTFd
 config_ctfd() {
-    echo "请选择操作: "
+    echo -e "${YELLOW}[+] 请选择操作: ${NC}"
     echo "1. 安装 CTFd"
     echo "2. 卸载 CTFd"
     echo "3. 返回主菜单"
-    read -p "请输入选择(1-3): " choice
+    read -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
 
     case $choice in
         1)
@@ -2330,51 +2329,53 @@ config_ctfd() {
             remove_ctfd
             ;;
         3)
-            echo "退出到主菜单"
+            Show 2 "退出到主菜单"
             ;;
         *)
-            echo "无效的选择"
+            Show 2 "无效的选择"
             ;;
     esac
 }
 
 # 安装CTFd
 install_ctfd() {
+    Show 2 "开始安装CTFd"
     # 检查Docker是否安装
     check_docker
-    echo "开始安装CTFd"
-    read -p "输入启动CTFd的主机地址: " host_ip
+    read -p "$(echo -e "${YELLOW}输入启动CTFd的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
-        echo "请输入正确的IP地址"
-        exit 1
+        Show 1 "请输入正确的IP地址"
     fi
 
-    read -p "输入启动CTFd的主机端口: " host_port
+    read -p "$(echo -e "${YELLOW}输入启动CTFd的主机端口: ${NC}")" host_port
     if [ -z "${host_port}" ]; then
-        echo "请输入正确的端口号"
-        exit 1
+        Show 1 "请输入正确的端口号"
     fi
-
+    Show 2 "创建CTFd目录"
     mkdir -p /opt/CTFd && cd /opt/CTFd
+    Show 2 "启动CTFd容器服务"
     docker run --name ctfd -dit -p "${host_port}:8000" -v /opt/CTFd:/ ctfd/ctfd
-    echo "访问地址: https://${host_ip}:${host_port}"
+    Show 0 "访问地址: https://${host_ip}:${host_port}"
 }
 
 # 卸载CTFd
 remove_ctfd() {
-    echo "开始卸载CTFd"
+    Show 2 "开始卸载CTFd"
     docker rm ctfd -f
-    if [ $? -ne 0 ]; then
-        echo "删除容器失败，请检查容器是否启动"
-        exit 1
+    if [ $? -eq 0 ]; then
+        Show 0 "删除容器成功"
+    else
+        Show 1 "删除容器失败，请检查容器是否存在"
     fi
+    Show 2 "删除CTFd目录"
     rm -rf /opt/CTFd
     read -p "是否要删除镜像? (y/n)" yn
     if [[ $yn == "y" || $yn == "Y" ]]; then
         docker rmi ctfd/ctfd
+        Show 0 "删除镜像成功"
     fi
-    echo "卸载CTFd完成"
+    Show 0 "卸载CTFd完成"
 }
 
 # 配置AWVS
