@@ -2103,13 +2103,13 @@ start_dnscat2_relay_mode() {
 
 # 配置Beef
 config_beef() {
-    echo "请选择操作: "
+    echo -e "${YELLOW}[+] 请选择操作: ${NC}"
     echo "1. 安装 Beef"
     echo "2. 关闭 Beef"
     echo "3. 启动 Beef"
     echo "4. 卸载 Beef"
     echo "5. 返回主菜单"
-    read -p "请输入选择(1-5): " choice
+    read -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
 
     case $choice in
         1)
@@ -2125,86 +2125,85 @@ config_beef() {
             remove_beef
             ;;
         5)
-            echo "退出到主菜单"
+            Show 2 "退出到主菜单"
             ;;
         *)
-            echo "无效的选择"
+            Show 2 "无效的选择"
             ;;
     esac
 }
 
 # 安装Beef
 install_beef() {
-    echo "安装Beef开始"
-    read -p "输入启动Beef的主机地址: " host_ip
+    Show 2 "安装Beef开始"
+    read -p "$(echo -e "${YELLOW}输入启动Beef的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
-        echo "请输入正确的IP地址"
-        exit 1
+        Show 1 "请输入正确的IP地址"
     fi
+    Show 2 "开始拉取最新Beef镜像"
     docker pull registry.cn-shanghai.aliyuncs.com/yijingsec/beef:latest
     if [ $? -eq 0 ]; then
-        echo "拉取最新Beef镜像成功"
+        Show 0 "拉取最新Beef镜像成功"
     else
-        echo "拉取最新Beef镜像失败"
-        exit 0
+        Show 1 "拉取最新Beef镜像失败"
     fi
+    Show 2 "启动Beef容器服务"
     docker run -dit --name beef -p 3000:3000 registry.cn-shanghai.aliyuncs.com/yijingsec/beef:latest
     if [ $? -eq 0 ]; then
-        echo "安装Beef成功"
-        echo "访问地址: http://${host_ip}:3000/ui/panel 登录到服务器"
-        echo "用户名: beef"
-        echo "密  码: yijingsec"
+        Show 0 "启动Beef容器服务成功"
+        Show 0 "访问地址: http://${host_ip}:3000/ui/panel 登录到服务器"
+        Show 0 "用户名: beef"
+        Show 0 "密  码: yijingsec"
     else
-        echo "安装Beef失败"
-        exit 0
+        Show 1 "安装Beef失败"
     fi
 }
 
 # 关闭Beef
 stop_beef() {
-    echo "关闭Beef开始"
+    Show 2 "关闭Beef开始"
     docker stop beef
     if [ $? -eq 0 ]; then
-        echo "关闭Beef成功"
+        Show 2 "关闭Beef成功"
     else
-        echo "关闭Beef失败"
+        Show 2 "关闭Beef失败"
     fi
 }
 
 # 启动Beef
 start_beef() {
-    echo "启动Beef开始"
-    read -p "输入启动Beef的主机地址: " host_ip
+    Show 2 "启动Beef开始"
+    read -p "$(echo -e "${YELLOW}输入启动Beef的主机地址: ${NC}")" host_ip 
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
-        echo "请输入正确的IP地址"
-        exit 1
+        Show 1 "请输入正确的IP地址"
     fi
     docker start beef
     if [ $? -eq 0 ]; then
-        echo "启动Beef成功"
-        echo "访问地址: http://${host_ip}:3000/ui/panel 登录到服务器"
-        echo "默认用户: beef"
-        echo "默认密码: yijingsec"
+        Show 0 "启动Beef成功"
+        Show 0 "访问地址: http://${host_ip}:3000/ui/panel 登录到服务器"
+        Show 0 "默认用户: beef"
+        Show 0 "默认密码: yijingsec"
     else
-        echo "启动Beef失败"
+        Show 1 "启动Beef失败"
     fi
 }
 
 # 卸载Beef
 remove_beef() {
-    echo "卸载Beef开始"
+    Show 2 "卸载Beef开始"
     docker rm beef -f
     if [ $? -eq 0 ]; then
+        Show 0 "删除Beef容器成功"
         read -p "是否要删除镜像? (y/n)" yn
         if [[ $yn == "y" || $yn == "Y" ]]; then
             docker rmi registry.cn-shanghai.aliyuncs.com/yijingsec/beef:latest
-            echo "删除Beef镜像成功"
+            Show 0 "删除Beef镜像成功"
         fi
-        echo "卸载Beef成功"
+        Show 0 "卸载Beef成功"
     else
-        echo "卸载Beef失败"
+        Show 1 "卸载Beef失败"
     fi
 
 }
