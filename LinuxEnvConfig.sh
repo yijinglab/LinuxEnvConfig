@@ -2465,24 +2465,24 @@ validate_ip() {
         IFS='.' read -r -a octets <<< "$ip"
         for octet in "${octets[@]}"; do
             if ((octet > 255 || octet < 0)); then
-                echo "错误: IP地址中的每个部分必须在0到255之间。"
+                Show 2 "错误: IP地址中的每个部分必须在0到255之间。"
                 return 1
             fi
         done
         return 0
     else
-        echo "错误: 请输入正确的IP地址格式。"
+        Show 2 "错误: 请输入正确的IP地址格式。"
         return 1
     fi
 }
 
 # 配置ocr_api_server
 config_ocr_api_server() {
-    echo "请选择操作: "
+    echo -e "${YELLOW}[+] 请选择操作: ${NC}"
     echo "1. 安装 ocr_api_server"
     echo "2. 卸载 ocr_api_server"
     echo "3. 返回主菜单"
-    read -p "请输入选择(1-3): " choice
+    read -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
 
     case $choice in
         1)
@@ -2492,54 +2492,67 @@ config_ocr_api_server() {
             remove_ocr_api_server
             ;;
         3)
-            echo "退出到主菜单"
+            Show 2 "退出到主菜单"
             ;;
         *)
-            echo "无效的选择"
+            Show 2 "无效的选择"
             ;;
     esac
 }
 
 # 安装ocr_api_server
 install_ocr_api_server() {
+    Show 2 "开始安装ocr_api_server"
     # 接收用户输入作为host_ip
-    echo "开始安装ocr_api_server"
-    read -p "输入启动ocr_api_server的主机地址: " host_ip
-    
+    read -p "$(echo -e "${YELLOW}输入启动ocr_api_server的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if validate_ip $host_ip; then
-        echo "你的IP地址为: $host_ip"
+        Show 0 "你的IP地址为: $host_ip"
     else
         return 1
     fi
 
-    # 检查Docker是否安装
+    Show 2 "检查Docker是否安装"
     check_docker
 
     # 安装ocr_api_server
+    Show 2 "拉取最新ocr_api_server镜像"
     sudo docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/ocr_api_server:latest
+    if [ $? -eq 0 ]; then
+        Show 0 "拉取最新ocr_api_server镜像成功"
+    else
+        Show 1 "拉取最新ocr_api_server镜像失败"
+    fi
+    Show 2 "启动ocr_api_server容器服务"
     sudo docker run -d -p 9898:9898 --name ocr_api_server registry.cn-hangzhou.aliyuncs.com/mingy123/ocr_api_server:latest
+    if [ $? -eq 0 ]; then
+        Show 0 "ocr_api_server容器启动成功"
+    else
+        Show 1 "ocr_api_server容器启动失败"
+    fi
     sleep 5
     # 打印访问信息
-    echo "ocr_api_server 服务已启动。"
-    echo "访问地址: http://${host_ip}:9898/ping"
-    echo "访问后响应 pong, 表明服务启动成功。"
+    Show 0 "ocr_api_server 服务已启动"
+    Show 0 "访问地址: http://${host_ip}:9898/ping"
+    Show 3 "访问后响应 pong, 表明服务启动成功"
 }
 
 # 卸载ocr_api_server
 remove_ocr_api_server() {
-    echo "开始卸载ocr_api_server"
+    Show 2 "开始卸载ocr_api_server"
+    Show 2 "删除ocr_api_server容器"
     sudo docker rm -f ocr_api_server
-    if [ $? -ne 0 ]; then
-        echo "删除容器失败"
-        exit 1
+    if [ $? -eq 0 ]; then
+        Show 0 "删除ocr_api_server容器成功"
+        read -p "是否要删除镜像? (y/n)" yn
+        if [[ $yn == "y" || $yn == "Y" ]]; then
+            docker rmi registry.cn-shanghai.aliyuncs.com/yijingsec/ocr_api_server:latest
+            Show 0 "删除镜像成功"
+        fi
+    else
+        Show 1 "删除容器失败"
     fi
-
-    read -p "是否要删除镜像? (y/n)" yn
-    if [[ $yn == "y" || $yn == "Y" ]]; then
-        docker rmi registry.cn-shanghai.aliyuncs.com/yijingsec/ocr_api_server:latest
-    fi
-    echo "卸载ocr_api_server完成"
+    Show 0 "卸载ocr_api_server完成"
 }
 
 # 显示菜单
