@@ -2380,11 +2380,11 @@ remove_ctfd() {
 
 # 配置AWVS
 config_awvs() {
-    echo "请选择操作: "
+    echo -e "${YELLOW}[+] 请选择操作: ${NC}"
     echo "1. 安装 AWVS"
     echo "2. 卸载 AWVS"
     echo "3. 返回主菜单"
-    read -p "请输入选择(1-3): " choice
+    read -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
 
     case $choice in
         1)
@@ -2394,64 +2394,64 @@ config_awvs() {
             remove_awvs
             ;;
         3)
-            echo "退出到主菜单"
+            Show 2 "退出到主菜单"
             ;;
         *)
-            echo "无效的选择"
+            Show 2 "无效的选择"
             ;;
     esac
 }
 
 # 安装AWVS
 install_awvs() {
-    # 检查Docker是否安装
-    check_docker
     echo "开始安装AWVS"
-    read -p "输入启动AWVS的主机地址: " host_ip
+    Show 2 "检查Docker是否安装"
+    check_docker
+    read -p "$(echo -e "${YELLOW}输入启动AWVS的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
-        echo "请输入正确的IP地址"
-        exit 1
+        Show 1 "请输入正确的IP地址"
     fi
 
-    read -p "输入启动AWVS的主机端口: " host_port
+    read -p "$(echo -e "${YELLOW}输入启动AWVS的主机端口: ${NC}")" host_port
     if [ -z "${host_port}" ]; then
-        echo "请输入正确的端口号"
-        exit 1
+        Show 1 "请输入正确的端口号"
     fi
+    Show 2 "拉取最新AWVS镜像"
     docker pull registry.cn-shanghai.aliyuncs.com/yijingsec/awvs:latest
     if [ $? -ne 0 ]; then
-        echo "拉取镜像失败，请检查网络连接"
-        exit 1
+        Show 1 "拉取最新AWVS镜像失败"
     fi
-    echo "正在启动AWVS"
+    Show 2 "启动AWVS容器服务"
     docker run -dit -p ${host_port}:3443 --name yijingsec-awvs --cap-add LINUX_IMMUTABLE registry.cn-shanghai.aliyuncs.com/yijingsec/awvs:latest
     while true; do
         sleep 3
         docker ps | grep "yijingsec-awvs" > /dev/null 2>&1
         if [ $? -eq 0 ]; then
-            echo "容器启动成功"
+            Show 0 "容器启动成功"
             break
         fi
     done
-    echo "访问地址: https://${host_ip}:${host_port}"
-    echo "默认用户: admin@admin.com"
-    echo "默认密码: Admin123"
+    Show 0 "访问地址: https://${host_ip}:${host_port}"
+    Show 0 "默认用户: admin@admin.com"
+    Show 0 "默认密码: Admin123"
 }
 
 # 卸载AWVS
 remove_awvs() {
-    echo "开始卸载AWVS"
+    Show 2 "开始卸载AWVS"
+    Show 2 "删除AWVS容器"
     docker rm yijingsec-awvs -f
-    if [ $? -ne 0 ]; then
-        echo "删除容器失败，请检查容器是否启动"
-        exit 1
+    if [ $? -eq 0 ]; then
+        Show 0 "删除AWVS容器成功"
+        read -p "是否要删除镜像? (y/n)" yn
+        if [[ $yn == "y" || $yn == "Y" ]]; then
+            docker rmi registry.cn-shanghai.aliyuncs.com/yijingsec/awvs:latest
+        fi
+    else
+        Show 1 "删除AWVS容器失败, 请检查容器是否启动"
     fi
-    read -p "是否要删除镜像? (y/n)" yn
-    if [[ $yn == "y" || $yn == "Y" ]]; then
-        docker rmi registry.cn-shanghai.aliyuncs.com/yijingsec/awvs:latest
-    fi
-    echo "卸载AWVS完成"
+    Show 0 "卸载AWVS完成"
 }
 
 # 检查输入是否是有效的IPv4地址
