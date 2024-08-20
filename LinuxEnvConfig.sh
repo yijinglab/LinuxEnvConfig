@@ -1719,14 +1719,14 @@ remove_empire() {
 
 # 配置 Starkiller
 config_starkiller() {
-    echo "请选择操作: "
+    echo -e "${YELLOW}[+] 请选择操作: ${NC}"
     echo "1. 安装 Starkiller"
     echo "2. 更新 Starkiller"
     echo "3. 关闭 Starkiller"
     echo "4. 启动 Starkiller"
     echo "5. 卸载 Starkiller"
     echo "6. 返回主菜单"
-    read -p "请输入选择(1-6): " choice
+    read -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
     case $choice in
         1)
             install_starkiller
@@ -1744,117 +1744,116 @@ config_starkiller() {
             remove_starkiller
             ;;
         6)
-            echo "退出到主菜单"
+            Show 2 "退出到主菜单"
             ;;
         *)
-            echo "无效的选择"
+            Show 2 "无效的选择"
             ;;
     esac
 }
 
 # 安装 Starkiller
 install_starkiller() {
-    echo "安装Starkiller开始"
-    read -p "输入启动Starkiller的主机地址: " host_ip
+    Show 2 "安装Starkiller开始"
+    read -p "$(echo -e "${YELLOW}输入启动Starkiller的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
-        echo "请输入正确的IP地址"
-        exit 1
+        Show 1 "请输入正确的IP地址"
     fi
 
-    echo "开始拉取Starkiller镜像"
+    Show 2 "开始拉取Starkiller镜像"
     docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/starkiller:latest
     if [ $? -eq 0 ]; then
-        echo "拉取Starkiller镜像完毕"
+        Show 0 "拉取Starkiller镜像完毕"
     else
-        echo "拉取Starkiller镜像失败"
-        exit 0
+        Show 1 "拉取Starkiller镜像失败"
     fi
 
+    Show 2 "启动Starkiller容器"
     docker run -d --name ps-starkiller -p 4173:4173 registry.cn-hangzhou.aliyuncs.com/mingy123/starkiller:latest
     if [ $? -eq 0 ]; then
-        echo "启动Starkiller容器成功"
+        Show 0 "启动Starkiller容器成功"
     else
-        echo "启动Starkiller容器失败"
-        exit 0
+        Show 1 "启动Starkiller容器失败"
     fi
     
-    echo "启动Starkiller完成"
-    echo "服务地址: http://${host_ip}:4173"
-    echo "默认用户: empireadmin"
-    echo "默认密码: password123"
+    Show 2 "启动Starkiller完成"
+    Show 0 "服务地址: http://${host_ip}:4173"
+    Show 0 "默认用户: empireadmin"
+    Show 0 "默认密码: password123"
 }
 
 # 更新 Starkiller
 update_starkiller() {
-    echo "更新Starkiller开始"
-    echo "开始拉取最新Starkiller镜像"
+    Show 2 "更新Starkiller开始"
+    Show 2 "开始拉取最新Starkiller镜像"
     docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/starkiller:latest
     if [ $? -eq 0 ]; then
-        echo "拉取最新Starkiller镜像成功"
-        echo "更新Starkiller成功"
+        Show 0 "拉取最新Starkiller镜像成功"
+        Show 0 "更新Starkiller成功,请启动Starkiller"
     else
-        echo "拉取最新Starkiller镜像失败"
-        echo "更新Starkiller失败"
+        Show 2 "拉取最新Starkiller镜像失败"
+        Show 1 "更新Starkiller失败"
     fi
 }
 
 # 关闭 Starkiller
 stop_starkiller() {
-    echo "关闭Starkiller开始"
+    Show 2 "关闭Starkiller开始"
     docker stop ps-starkiller
     if [ $? -eq 0 ]; then
-        echo "关闭Starkiller完成"
+        Show 0 "关闭Starkiller完成"
     else
-        echo "关闭Starkiller失败"
+        Show 1 "关闭Starkiller失败"
     fi
 }
 
 # 启动 Starkiller
 start_starkiller() {
-    echo "启动Starkiller开始"
-    read -p "输入启动Starkiller的主机地址: " host_ip
+    Show 2 "启动Starkiller开始"
+    read -p "$(echo -e "${YELLOW}输入启动Starkiller的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
-        echo "请输入正确的IP地址"
-        exit 1
+        Show 0 "请输入正确的IP地址"
     fi
     docker ps --format "{{.Names}}" | grep 'ps-starkiller'
     if [ $? -eq 0 ]; then
-        echo "Starkiller已经启动"
+        Show 0 "Starkiller已经启动"
     else
         docker start ps-starkiller
         if [ $? -eq 0 ]; then
-            echo "启动Starkiller完成"
-            echo "服务地址: http://${host_ip}:4173"
-            echo "默认用户: empireadmin"
-            echo "默认密码: password123"
+            Show 0 "启动Starkiller完成"
+            Show 0 "服务地址: http://${host_ip}:4173"
+            Show 0 "默认用户: empireadmin"
+            Show 0 "默认密码: password123"
         else
-            echo "启动Starkiller失败"
+            Show 1 "启动Starkiller失败"
         fi
     fi
 }
 
 # 卸载 Starkiller
 remove_starkiller() {
-    echo "卸载Starkiller开始"
+    Show 2 "卸载Starkiller开始"
     docker rm ps-starkiller -f
     if [ $? -eq 0 ]; then
-        echo "删除Starkiller容器完成"
+        Show 0 "删除Starkiller容器完成"
         read -p "是否要删除镜像? (y/n)" yn
         if [[ $yn == "y" || $yn == "Y" ]]; then
             docker rmi registry.cn-hangzhou.aliyuncs.com/mingy123/starkiller:latest
+            Show 0 "删除Starkiller镜像完成"
+        else
+            Show 1 "删除Starkiller镜像失败"
         fi
-        echo "删除Starkiller镜像完成"
-        echo "卸载Starkiller完成"
+        Show 0 "卸载Starkiller完成"
     else
-        echo "卸载Starkiller失败"
+        Show 1 "卸载Starkiller失败"
     fi
 }
 
 # 配置 HFish
 config_hfish() {
-echo "请选择操作: "
+    echo -e "${YELLOW}[+] 请选择操作: ${NC}"
     echo "1. 安装 HFish"
     echo "2. 更新 HFish"
     echo "3. 关闭 HFish"
@@ -1862,7 +1861,7 @@ echo "请选择操作: "
     echo "5. 卸载 HFish"
     echo "6. 获取数据库信息"
     echo "7. 返回主菜单"
-    read -p "请输入选择(1-7): " choice
+    read -p "$(echo -e "${GREEN}请输入选择(1-7): ${NC}")" choice
     case $choice in
         1)
             install_hfish
@@ -1883,28 +1882,31 @@ echo "请选择操作: "
             get_hfish_db_info
             ;;
         7)
-            echo "退出到主菜单"
+            Show 2 "退出到主菜单"
             ;;
         *)
-            echo "无效的选择"
+            Show 2 "无效的选择"
             ;;
     esac
 }
 
 # 安装 HFish
 install_hfish() {
+    Show 2 "开始安装HFish"
+
     # 检查Docker是否安装
-    echo "开始安装HFish"
     check_docker
-    read -p "输入启动HFish的主机地址: " host_ip
+
+    read -p "$(echo -e "${YELLOW}输入启动HFish的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
-        echo "请输入正确的IP地址"
-        exit 1
+        Show 1 "请输入正确的IP地址"
     fi
 
+    Show 2 "创建HFish目录"
     mkdir -p /opt/hfish && cd /opt/hfish && rm -f docker-compose.* > /dev/null 2>&1
 
+    Show 2 "创建docker-compose.yml文件"
     tee docker-compose.yml <<-'EOF'
 version: '3'
 services:
@@ -1928,105 +1930,108 @@ EOF
 
     # read -p "输入MySQL数据库密码(回车默认为123456): " MYSQL_PASSWORD
     # sed -i "s/123456/${MYSQL_PASSWORD}/g" docker-compose.yml
+    Show 2 "拉取HFish镜像并启动HFish容器"
     cd /opt/hfish
     check_docker_compose
     sudo $COMPOSE_CMD up -d
-    echo "正在等待系统启动"
+    Show 2 "正在等待HFish容器启动"
     sleep 3
     if command -v jq >/dev/null 2>&1; then
         MySQL_IP=$(docker network inspect hfish_default | jq -r '.[].Containers | to_entries[] | select(.value.Name == "mysql8") | .value.IPv4Address' | awk -F/ '{print $1}')
     else
-        echo "jq命令不存在, 开始安装jq"
-        apt install jq
+        Show 2 "jq命令不存在, 开始安装jq"
+        apt install jq -y >& /dev/null
         MySQL_IP=$(docker network inspect hfish_default | jq -r '.[].Containers | to_entries[] | select(.value.Name == "mysql8") | .value.IPv4Address' | awk -F/ '{print $1}')
     fi
-    echo "访问地址: https://${host_ip}:4433/web 登录到服务器"
-    echo "用户名: admin"
-    echo "密  码: HFish"
-    echo "MySQL IP 地 址: ${MySQL_IP}"
-    echo "MySQL 端 口 号: 3306"
-    echo "MySQL 数据库名: hfish"
-    echo "MySQL 用 户 名: root"
-    echo "MySQL 密    码: HFish2021"
-
-    echo "安装HFish完成"
+    Show 0 "访问地址: https://${host_ip}:4433/web"
+    Show 0 "用户名: admin"
+    Show 0 "密  码: HFish"
+    Show 0 "MySQL IP 地 址: ${MySQL_IP}"
+    Show 0 "MySQL 端 口 号: 3306"
+    Show 0 "MySQL 数据库名: hfish"
+    Show 0 "MySQL 用 户 名: root"
+    Show 0 "MySQL 密    码: HFish2021"
+    Show 0 "安装HFish完成"
 }
 
 # 更新 HFish
 update_hfish() {
-    echo "更新HFish开始"
-    echo "开始拉取最新HFish镜像"
+    Show 2 "更新HFish开始"
+    Show 2 "开始拉取最新HFish镜像"
     docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/hfish-server:latest
     if [ $? -eq 0 ]; then
-        echo "拉取最新HFish镜像成功"
-        echo "更新HFish成功"
+        Show 0 "拉取最新HFish镜像成功"
+        Show 0 "更新HFish成功"
     else
-        echo "拉取最新HFish镜像失败"
-        echo "更新HFish失败"
+        Show 2 "拉取最新HFish镜像失败"
+        Show 1 "更新HFish失败"
     fi
 }
 
 # 关闭 HFish
 stop_hfish() {
-    echo "关闭HFish开始"
+    Show 2 "关闭HFish开始"
     cd /opt/hfish
     check_docker_compose
     sudo $COMPOSE_CMD stop
     if [ $? -eq 0 ]; then
-        echo "关闭HFish完成"
+        Show 0 "关闭HFish完成"
     else
-        echo "关闭HFish失败"
+        Show 1 "关闭HFish失败"
     fi
 }
 
 # 启动 HFish
 start_hfish() {
-    echo "启动HFish开始"
-    read -p "输入启动HFish的主机地址: " host_ip
+    Show 2 "启动HFish开始"
+    read -p "$(echo -e "${YELLOW}输入启动HFish的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
-        echo "请输入正确的IP地址"
-        exit 1
+        Show 1 "请输入正确的IP地址"
     fi
     cd /opt/hfish
     check_docker_compose
     sudo $COMPOSE_CMD start
     if [ $? -eq 0 ]; then
-        echo "启动HFish完成"
-        echo "访问地址: https://${host_ip}:4433/web 登录到服务器"
-        echo "用户名: admin"
-        echo "密  码: HFish2021"
+        Show 0 "启动HFish完成"
+        Show 0 "访问地址: https://${host_ip}:4433/web 登录到服务器"
+        Show 0 "用户名: admin"
+        Show 0 "密  码: HFish2021"
     fi
 }
 
 # 卸载 HFish
 remove_hfish() {
-    echo "卸载HFish开始"
+    Show 2 "卸载HFish开始"
+    Show 2 "删除HFish容器"
     cd /opt/hfish
     check_docker_compose
     sudo $COMPOSE_CMD down
     if [ $? -eq 0 ]; then
+        Show 0 "删除HFish容器完成"
+        Show 2 "删除HFish目录"
         rm -rf /opt/hfish
         read -p "是否要删除镜像? (y/n)" yn
         if [[ $yn == "y" || $yn == "Y" ]]; then
             docker rmi registry.cn-hangzhou.aliyuncs.com/mingy123/hfish-server:latest
             docker rmi registry.cn-hangzhou.aliyuncs.com/mingy123/mysql:8.0
+            Show 0 "删除HFish镜像完成"
         fi
-        echo "卸载HFish完成"
+        Show 0 "卸载HFish完成"
     else
-        echo "卸载HFish失败"
+        Show 1 "卸载HFish失败"
     fi
 }
 
 # 获取HFish数据库配置信息
 get_hfish_db_info() {
-    echo "HFish数据库信息如下: "
+    Show 2 "HFish数据库信息如下: "
     MySQL_IP=$(docker network inspect hfish_default | jq -r '.[].Containers | to_entries[] | select(.value.Name == "mysql8") | .value.IPv4Address' | awk -F/ '{print $1}')
-    echo "MySQL IP 地 址: ${MySQL_IP}"
-    echo "MySQL 端 口 号: 3306"
-    echo "MySQL 数据库名: hfish"
-    echo "MySQL 用 户 名: root"
-    echo "MySQL 密    码: HFish2021"
+    Show 0 "MySQL IP 地 址: ${MySQL_IP}"
+    Show 0 "MySQL 端 口 号: 3306"
+    Show 0 "MySQL 数据库名: hfish"
+    Show 0 "MySQL 用 户 名: root"
+    Show 0 "MySQL 密    码: HFish2021"
 }
 
 # 配置 Dnscat2
