@@ -366,14 +366,14 @@ install_oracle_jdk() {
         3)
             Show 2 "安装Oracle JDK 17 LTS"
             JDK_VER="jdk-17.0.9"
-            JDK_NAME="jdk-17.0.9_linux-x64_bin.tar.gz"
+            JDK_NAME="jdk-17_linux-x64_bin.tar.gz"
             JDK_URL="https://d6.injdk.cn/oraclejdk/17/jdk-17_linux-x64_bin.tar.gz"
             check_oracle_jdk
             ;;
         4)
             Show 2 "安装Oracle JDK 21 LTS"
             JDK_VER="jdk-21.0.1"
-            JDK_NAME="jdk-21.0.1_linux-x64_bin.tar.gz"
+            JDK_NAME="jdk-21_linux-x64_bin.tar.gz"
             JDK_URL="https://d6.injdk.cn/oraclejdk/21/jdk-21_linux-x64_bin.tar.gz"
             check_oracle_jdk
             ;;
@@ -486,7 +486,7 @@ install_openjdk() {
     #         ;;
     # esac
 
-    case $version in
+    case $choice in
         1)
             Show 2 "安装OpenJDK 11 LTS"
             JDK_VER="11.0.2"
