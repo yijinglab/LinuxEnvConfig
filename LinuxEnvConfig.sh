@@ -1800,7 +1800,7 @@ update_starkiller() {
 # 关闭 Starkiller
 stop_starkiller() {
     Show 2 "关闭Starkiller开始"
-    docker stop ps-starkiller
+    docker stop ps-starkiller > /dev/null
     if [ $? -eq 0 ]; then
         Show 0 "关闭Starkiller完成"
     else
@@ -1810,17 +1810,21 @@ stop_starkiller() {
 
 # 启动 Starkiller
 start_starkiller() {
-    Show 2 "启动Starkiller开始"
-    read -p "$(echo -e "${YELLOW}输入启动Starkiller的主机地址: ${NC}")" host_ip
-    # 检查是否输入了IP地址
-    if [ -z "${host_ip}" ]; then
-        Show 0 "请输入正确的IP地址"
-    fi
-    docker ps --format "{{.Names}}" | grep 'ps-starkiller'
-    if [ $? -eq 0 ]; then
+    Show 2 "检测Starkiller是否启动"
+    # 检查ps-starkiller容器是否已经启动
+    if docker ps --format "{{.Names}}" | grep 'ps-starkiller' > /dev/null; then
         Show 0 "Starkiller已经启动"
     else
-        docker start ps-starkiller
+        Show 0 "Starkiller未启动"
+        Show 2 "启动Starkiller开始"
+        # 提示用户输入主机地址
+        read -p "$(echo -e "${YELLOW}输入启动Starkiller的主机地址: ${NC}")" host_ip
+        # 检查是否输入了IP地址
+        if [ -z "${host_ip}" ]; then
+            Show 1 "请输入正确的IP地址"
+        fi
+        # 启动ps-starkiller容器
+        docker start ps-starkiller > /dev/null
         if [ $? -eq 0 ]; then
             Show 0 "启动Starkiller完成"
             Show 0 "服务地址: http://${host_ip}:4173"
