@@ -84,7 +84,9 @@ sudo bash LinuxEnvConfig.sh
 1. OpenJDK 11 LTS
 2. OpenJDK 17 LTS
 3. OpenJDK 21 LTS
-4. 返回主菜单
+4. OpenJDK 22 LTS
+5. OpenJDK 23 LTS
+6. 返回到主菜单
 
 ### 配置 Miniconda3
 
