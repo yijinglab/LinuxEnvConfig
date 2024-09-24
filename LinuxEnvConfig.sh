@@ -351,30 +351,30 @@ install_oracle_jdk() {
     case $version in
         1)
             Show 2 "安装Oracle JDK 8 LTS"
-            JDK_VER="jdk1.8.0_381"
-            JDK_NAME="jdk-8u381-linux-x64.tar.gz"
-            JDK_URL="https://d6.injdk.cn/oraclejdk/8/jdk-8u381-linux-x64.tar.gz"
+            JDK_VER="jdk1.8.0_421"
+            JDK_NAME="jdk-8u421-linux-x64.tar.gz"
+            JDK_URL="https://d.injdk.cn/d/download/oraclejdk/8/jdk-8u421-linux-x64.tar.gz"
             check_oracle_jdk
             ;;
         2)
             Show 2 "安装Oracle JDK 11 LTS"
-            JDK_VER="jdk-11.0.21"
-            JDK_NAME="jdk-11.0.21_linux-x64_bin.tar.gz"
-            JDK_URL="https://d6.injdk.cn/oraclejdk/11/jdk-11.0.21_linux-x64_bin.tar.gz"
+            JDK_VER="jdk-11.0.24"
+            JDK_NAME="jdk-11.0.24_linux-x64_bin.tar.gz"
+            JDK_URL="https://d.injdk.cn/d/download/oraclejdk/11/jdk-11.0.24_linux-x64_bin.tar.gz"
             check_oracle_jdk
             ;;
         3)
             Show 2 "安装Oracle JDK 17 LTS"
-            JDK_VER="jdk-17.0.9"
+            JDK_VER="jdk-17.0.12"
             JDK_NAME="jdk-17_linux-x64_bin.tar.gz"
-            JDK_URL="https://d6.injdk.cn/oraclejdk/17/jdk-17_linux-x64_bin.tar.gz"
+            JDK_URL="https://d.injdk.cn/d/download/oraclejdk/17/jdk-17_linux-x64_bin.tar.gz"
             check_oracle_jdk
             ;;
         4)
             Show 2 "安装Oracle JDK 21 LTS"
-            JDK_VER="jdk-21.0.1"
+            JDK_VER="jdk-21.0.4"
             JDK_NAME="jdk-21_linux-x64_bin.tar.gz"
-            JDK_URL="https://d6.injdk.cn/oraclejdk/21/jdk-21_linux-x64_bin.tar.gz"
+            JDK_URL="https://d.injdk.cn/d/download/oraclejdk/21/jdk-21_linux-x64_bin.tar.gz"
             check_oracle_jdk
             ;;
         5)
@@ -394,7 +394,7 @@ check_oracle_jdk() {
     else
         Show 2 "${JDK_NAME} 文件不存在, 开始下载..."
         wget -q --show-progress "$JDK_URL"
-        
+
         # 检查是否下载成功
         if [ $? -ne 0 ]; then
             rm -f $JDK_NAME
@@ -711,7 +711,7 @@ install_miniconda3() {
         Show 2 "/miniconda3.sh 已存在，跳过下载"
     fi
 
-    Show 2 "执行 Miniconda3 安装脚本" 
+    Show 2 "执行 Miniconda3 安装脚本"
     sudo bash /miniconda3.sh -b -p /miniconda3
     if [ $? -eq 0 ]; then
         Show 0 "Miniconda3 安装成功"
@@ -767,13 +767,13 @@ EOF
 # 卸载Miniconda3
 remove_miniconda3() {
     Show 2 "开始卸载 miniconda3"
-    
+
     # 定义要删除的文件和目录
     declare -a files=("/miniconda3" "~/.condarc")
-    
+
     # 定义要处理的配置文件
     declare -a config_files=(".bashrc" ".zshrc")
-    
+
     Show 2 "删除miniconda3文件和目录"
     for file in "${files[@]}"; do
         sudo rm -rf "${file}"
@@ -783,17 +783,17 @@ remove_miniconda3() {
             Show 1 "删除 ${file} 失败"
         fi
     done
-    
+
     CONDA_INIT_START="# >>> conda initialize >>"
     CONDA_INIT_END="# <<< conda initialize <<"
-    
+
     for config in "${config_files[@]}"; do
         Show 2 "检查配置文件: ${HOME}/${config}"
         if [ -f "${HOME}/${config}" ]; then
             # 使用sed命令删除配置文件中的conda初始化代码
             Show 2 "删除 conda 初始化代码"
             sudo sed -i "/${CONDA_INIT_START}/,/${CONDA_INIT_END}/d" "${HOME}/${config}"
-            
+
             # 检查sed命令是否成功执行
             if [ $? -eq 0 ]; then
                 Show 0 "移除 conda 初始化代码成功"
@@ -928,15 +928,15 @@ install_docker() {
         else
             Show 1 "输入错误, 退出安装"
         fi
-        
+
         Show 2 "设置 Docker 软件源"
         curl -fsSL ${mirror_url}/docker-ce/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
         sudo chmod a+r /etc/apt/keyrings/docker.gpg
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] ${mirror_url}/docker-ce/linux/debian/ bookworm stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-        
+
         Show 2 "更新软件包列表"
         sudo apt update
-        
+
         Show 2 "安装 Docker"
         sudo apt install -y docker-ce docker-ce-cli containerd.io
     else
@@ -1331,7 +1331,7 @@ start_arl() {
     if [ -z "${host_ip}" ]; then
         Show 1 "请输入正确的IP地址"
     fi
-    
+
     check_docker_compose
 
     Show 2 "启动灯塔ARL服务"
@@ -1776,7 +1776,7 @@ install_starkiller() {
     else
         Show 1 "启动Starkiller容器失败"
     fi
-    
+
     Show 2 "启动Starkiller完成"
     Show 0 "服务地址: http://${host_ip}:4173"
     Show 0 "默认用户: empireadmin"
@@ -2178,7 +2178,7 @@ stop_beef() {
 # 启动Beef
 start_beef() {
     Show 2 "启动Beef开始"
-    read -p "$(echo -e "${YELLOW}输入启动Beef的主机地址: ${NC}")" host_ip 
+    read -p "$(echo -e "${YELLOW}输入启动Beef的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
         Show 1 "请输入正确的IP地址"
@@ -2571,7 +2571,7 @@ show_menu() {
 
     适配系统: Ubuntu / Debian / Kali (基于Debian)
     脚本作用: Linux 基础环境配置
-    
+
                 --- Made by mingy ---
     '
     echo -e "${GREEN_LINE}"
