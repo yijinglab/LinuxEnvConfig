@@ -533,7 +533,9 @@ check_openjdk() {
         wget -q --show-progress $JDK_URL
 
         # 检查是否下载成功
-        if [ $? -eq 0 ]; then
+        if [ -f "openjdk-${JDK_VER}_linux-x64_bin.tar.gz" ]; then
+            Show 0 "openjdk-${JDK_VER}_linux-x64_bin.tar.gz文件下载成功"
+        else
             rm -f openjdk-${JDK_VER}_linux-x64_bin.tar.gz
             Show 1 "下载OpenJDK失败"
         fi
