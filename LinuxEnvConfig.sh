@@ -442,7 +442,7 @@ check_oracle_jdk() {
         Show 1 "解压 Oracle JDK 失败"
     fi
 
-    Show 2 "配置Java和Javac..."
+    Show 2 "配置Java和Javac到系统..."
 
     sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/${JDK_VER}/bin/java 2
     sudo update-alternatives --set java /usr/lib/jvm/${JDK_VER}/bin/java
@@ -450,14 +450,23 @@ check_oracle_jdk() {
     sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/${JDK_VER}/bin/javac 2
     sudo update-alternatives --set javac /usr/lib/jvm/${JDK_VER}/bin/javac
 
-    sudo update-alternatives --install /usr/bin/keytool keytool /usr/lib/jvm/${JDK_VER}/bin/keytool 2
-    sudo update-alternatives --set keytool /usr/lib/jvm/${JDK_VER}/bin/keytool
+    # 设置keytool
+    if [ -f "/usr/lib/jvm/${JDK_VER}/bin/keytool" ]; then
+        sudo update-alternatives --install /usr/bin/keytool keytool /usr/lib/jvm/${JDK_VER}/bin/keytool 2
+        sudo update-alternatives --set keytool /usr/lib/jvm/${JDK_VER}/bin/keytool
+    fi
 
-    sudo update-alternatives --install /usr/bin/jar jar /usr/lib/jvm/${JDK_VER}/bin/jar 2
-    sudo update-alternatives --set jar /usr/lib/jvm/${JDK_VER}/bin/jar
+    # 设置jar
+    if [ -f "/usr/lib/jvm/${JDK_VER}/bin/jar" ]; then
+        sudo update-alternatives --install /usr/bin/jar jar /usr/lib/jvm/${JDK_VER}/bin/jar 2
+        sudo update-alternatives --set jar /usr/lib/jvm/${JDK_VER}/bin/jar
+    fi
 
-    sudo update-alternatives --install /usr/bin/jarsigner jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner 2
-    sudo update-alternatives --set jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner
+    # 设置jarsigner
+    if [ -f "/usr/lib/jvm/${JDK_VER}/bin/jarsigner" ]; then
+        sudo update-alternatives --install /usr/bin/jarsigner jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner 2
+        sudo update-alternatives --set jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner
+    fi
 
     Show 0 "成功安装和配置Oracle JDK"
 }
@@ -568,8 +577,8 @@ check_openjdk() {
 
     # 设置keytool
     if [ -f "/usr/lib/jvm/${JDK_VER}/bin/keytool" ]; then
-        sudo update-alternatives --install /usr/bin/keytool keytool /usr/lib/jvm/${JDK_VER}/bin/keytool 2 >/dev/null 2>&1
-        sudo update-alternatives --set keytool /usr/lib/jvm/${JDK_VER}/bin/keytool >/dev/null 2>&1
+        sudo update-alternatives --install /usr/bin/keytool keytool /usr/lib/jvm/${JDK_VER}/bin/keytool 2
+        sudo update-alternatives --set keytool /usr/lib/jvm/${JDK_VER}/bin/keytool
     fi
 
     # 设置jar
