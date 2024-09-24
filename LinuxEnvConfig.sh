@@ -556,7 +556,7 @@ check_openjdk() {
     fi
 
     # 配置Java和Javac
-    Show 2 "配置Java和Javac..."
+    Show 2 "配置Java和Javac到系统..."
 
     # 设置Java
     sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/jdk-${JDK_VER}/bin/java 2
@@ -567,16 +567,22 @@ check_openjdk() {
     sudo update-alternatives --set javac /usr/lib/jvm/jdk-${JDK_VER}/bin/javac
 
     # 设置keytool
-    sudo update-alternatives --install /usr/bin/keytool keytool /usr/lib/jvm/${JDK_VER}/bin/keytool 2
-    sudo update-alternatives --set keytool /usr/lib/jvm/${JDK_VER}/bin/keytool
+    if [ -f "/usr/lib/jvm/${JDK_VER}/bin/keytool" ]; then
+        sudo update-alternatives --install /usr/bin/keytool keytool /usr/lib/jvm/${JDK_VER}/bin/keytool 2 >/dev/null 2>&1
+        sudo update-alternatives --set keytool /usr/lib/jvm/${JDK_VER}/bin/keytool >/dev/null 2>&1
+    fi
 
     # 设置jar
-    sudo update-alternatives --install /usr/bin/jar jar /usr/lib/jvm/${JDK_VER}/bin/jar 2
-    sudo update-alternatives --set jar /usr/lib/jvm/${JDK_VER}/bin/jar
+    if [ -f "/usr/lib/jvm/${JDK_VER}/bin/jar" ]; then
+        sudo update-alternatives --install /usr/bin/jar jar /usr/lib/jvm/${JDK_VER}/bin/jar 2
+        sudo update-alternatives --set jar /usr/lib/jvm/${JDK_VER}/bin/jar
+    fi
 
     # 设置jarsigner
-    sudo update-alternatives --install /usr/bin/jarsigner jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner 2
-    sudo update-alternatives --set jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner
+    if [ -f "/usr/lib/jvm/${JDK_VER}/bin/jarsigner" ]; then
+        sudo update-alternatives --install /usr/bin/jarsigner jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner 2
+        sudo update-alternatives --set jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner
+    fi
 
     Show 0 "安装和配置OpenJDK成功"
 }
