@@ -346,8 +346,10 @@ install_oracle_jdk() {
     echo "2. Oracle JDK 11 LTS"
     echo "3. Oracle JDK 17 LTS"
     echo "4. Oracle JDK 21 LTS"
-    echo "5. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入序号(1-5): ${NC}")" version
+    echo "5. Oracle JDK 22 LTS"
+    echo "6. Oracle JDK 23 LTS"
+    echo "7. 返回主菜单"
+    read -p "$(echo -e "${GREEN}请输入序号(1-7): ${NC}")" version
     case $version in
         1)
             Show 2 "安装Oracle JDK 8 LTS"
@@ -378,6 +380,20 @@ install_oracle_jdk() {
             check_oracle_jdk
             ;;
         5)
+            Show 2 "安装Oracle JDK 22 LTS"
+            JDK_VER="jdk-22.0.2"
+            JDK_NAME="jdk-22_linux-x64_bin.tar.gz"
+            JDK_URL="https://d.injdk.cn/d/download/oraclejdk/22/jdk-22_linux-x64_bin.tar.gz"
+            check_oracle_jdk
+            ;;
+        6)
+            Show 2 "安装Oracle JDK 23 LTS"
+            JDK_VER="jdk-23"
+            JDK_NAME="jdk-23_linux-x64_bin.tar.gz"
+            JDK_URL="https://d.injdk.cn/d/download/oraclejdk/23/jdk-23_linux-x64_bin.tar.gz"
+            check_oracle_jdk
+            ;;
+        7)
             Show 2 "退出到主菜单"
             ;;
         *)
