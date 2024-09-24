@@ -469,38 +469,10 @@ install_openjdk() {
     echo "1. OpenJDK 11 LTS"
     echo "2. OpenJDK 17 LTS"
     echo "3. OpenJDK 21 LTS"
-    echo "4. 返回到主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-4): ${NC}")" choice
-    # case $version in
-    #     1)
-    #         echo "安装OpenJDK 8 LTS"
-    #         JDK_VER="jdk8u402-b06"
-    #         JDK_URL="https://github.com/adoptium/temurin8-binaries/releases/download/$JDK_VER/OpenJDK8U-jdk_x64_linux_hotspot_8u402b06.tar.gz"
-    #         ;;
-    #     2)
-    #         echo "安装OpenJDK 11 LTS"
-    #         JDK_VER="jdk-11.0.22+7"
-    #         JDK_URL="https://github.com/adoptium/temurin11-binaries/releases/download/$JDK_VER/OpenJDK11U-jdk_x64_linux_hotspot_11.0.22_7.tar.gz"
-    #         ;;
-    #     3)
-    #         echo "安装OpenJDK 17 LTS"
-    #         JDK_VER="jdk-17.0.10+7"
-    #         JDK_URL="https://github.com/adoptium/temurin17-binaries/releases/download/$JDK_VER/OpenJDK17U-jdk_x64_linux_hotspot_17.0.10_7.tar.gz"
-    #         ;;
-    #     4)
-    #         echo "安装OpenJDK 21 LTS"
-    #         JDK_VER="jdk-21.0.2+13"
-    #         JDK_URL="https://github.com/adoptium/temurin21-binaries/releases/download/$JDK_VER/OpenJDK21U-jdk_x64_linux_hotspot_21.0.2_13.tar.gz"
-    #         ;;
-    #     5)
-    #         echo "退出"
-    #         exit 0
-    #         ;;
-    #     *)
-    #         echo "输入的序号无效"
-    #         exit 1
-    #         ;;
-    # esac
+    echo "4. OpenJDK 22 LTS"
+    echo "5. OpenJDK 23 LTS"
+    echo "6. 返回到主菜单"
+    read -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
 
     case $choice in
         1)
@@ -522,6 +494,18 @@ install_openjdk() {
             check_openjdk
             ;;
         4)
+            Show 2 "安装OpenJDK 22 LTS"
+            JDK_VER="22.0.2"
+            JDK_URL="https://mirrors.huaweicloud.com/openjdk/${JDK_VER}/openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
+            check_openjdk
+            ;;
+        5)
+            Show 2 "安装OpenJDK 23 LTS"
+            JDK_VER="23"
+            JDK_URL="https://mirrors.huaweicloud.com/openjdk/${JDK_VER}/openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
+            check_openjdk
+            ;;
+        6)
             Show 2 "退出到主菜单"
             ;;
         *)
@@ -574,19 +558,23 @@ check_openjdk() {
     # 配置Java和Javac
     Show 2 "配置Java和Javac..."
 
-    # 设置Java和Javac的替代选项
+    # 设置Java
     sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/jdk-${JDK_VER}/bin/java 2
     sudo update-alternatives --set java /usr/lib/jvm/jdk-${JDK_VER}/bin/java
 
+    # 设置Javac
     sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/jdk-${JDK_VER}/bin/javac 2
     sudo update-alternatives --set javac /usr/lib/jvm/jdk-${JDK_VER}/bin/javac
 
+    # 设置keytool
     sudo update-alternatives --install /usr/bin/keytool keytool /usr/lib/jvm/${JDK_VER}/bin/keytool 2
     sudo update-alternatives --set keytool /usr/lib/jvm/${JDK_VER}/bin/keytool
 
+    # 设置jar
     sudo update-alternatives --install /usr/bin/jar jar /usr/lib/jvm/${JDK_VER}/bin/jar 2
     sudo update-alternatives --set jar /usr/lib/jvm/${JDK_VER}/bin/jar
 
+    # 设置jarsigner
     sudo update-alternatives --install /usr/bin/jarsigner jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner 2
     sudo update-alternatives --set jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner
 
