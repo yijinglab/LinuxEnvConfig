@@ -75,7 +75,9 @@ sudo bash LinuxEnvConfig.sh
 2. Oracle JDK 11 LTS
 3. Oracle JDK 17 LTS
 4. Oracle JDK 21 LTS
-5. 返回主菜单
+5. Oracle JDK 22 LTS
+6. Oracle JDK 23 LTS
+7. 返回主菜单
 
 #### 安装 OpenJDK
 
@@ -205,4 +207,3 @@ sudo bash LinuxEnvConfig.sh
 1. 安装 ocr_api_server
 2. 卸载 ocr_api_server
 3. 返回主菜单
-
