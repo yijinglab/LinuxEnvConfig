@@ -782,7 +782,7 @@ EOF
     sudo /miniconda3/bin/conda clean -a -y
 
     Show 2 "清理 conda 缓存完成"
-    echo "安装 Miniconda3 完成"
+    Show 0 "安装 Miniconda3 完成"
 }
 
 # 卸载Miniconda3
