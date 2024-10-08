@@ -855,11 +855,15 @@ config_docker() {
     echo "1. 安装 Docker"
     echo "2. 卸载 Docker"
     echo "3. 配置 Docker 国内镜像"
-    echo "4. 取消 Docker 国内镜像"
-    echo "5. 配置 Docker 网络代理"
-    echo "6. 取消 Docker 网络代理"
-    echo "7. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-7): ${NC}")" choice
+    echo "4. 获取 Docker 国内镜像源配置"
+    echo "5. 取消 Docker 国内镜像"
+    echo "6. 配置 Docker 网络代理"
+    echo "7. 获取 Docker 网络代理配置"
+    echo "8. 取消 Docker 网络代理"
+    echo "9. 更新 Docker 镜像源列表"
+    echo "10. 拉取 Docker 镜像"
+    echo "11. 返回主菜单"
+    read -p "$(echo -e "${GREEN}请输入选择(1-11): ${NC}")" choice
     case $choice in
         1)
             install_docker
@@ -871,15 +875,27 @@ config_docker() {
             configure_docker_mirror
             ;;
         4)
-            unconfigure_docker_mirror
+            get_docker_mirror_config
             ;;
         5)
-            configure_docker_proxy
+            unconfigure_docker_mirror
             ;;
         6)
-            unconfigure_docker_proxy
+            configure_docker_proxy
             ;;
         7)
+            get_docker_proxy_config
+            ;;
+        8)
+            unconfigure_docker_proxy
+            ;;
+        9)
+            update_docker_mirrors
+            ;;
+        10)
+            pull_docker_image
+            ;;
+        11)
             Show 2 "退出到主菜单"
             ;;
         *)
@@ -1016,6 +1032,16 @@ EOF
     fi
 }
 
+# 获取Docker国内镜像源配置
+get_docker_mirror_config() {
+    Show 2 "获取Docker国内镜像源配置"
+    if [ -f "/etc/docker/daemon.json" ]; then
+        cat /etc/docker/daemon.json
+    else
+        Show 1 "未找到Docker国内镜像源配置文件"
+    fi
+}
+
 # 取消配置Docker为国内镜像源
 unconfigure_docker_mirror() {
     Show 2 "取消配置Docker使用国内镜像开始"
@@ -1083,6 +1109,16 @@ EOF
     fi
 }
 
+# 获取Docker网络代理配置
+get_docker_proxy_config() {
+    Show 2 "获取Docker网络代理配置"
+    if [ -f "/etc/systemd/system/docker.service.d/proxy.conf" ]; then
+        cat /etc/systemd/system/docker.service.d/proxy.conf
+    else
+        Show 1 "未找到Docker网络代理配置文件"
+    fi
+}
+
 # 取消配置Docker网络代理
 unconfigure_docker_proxy() {
     Show 2 "取消配置Docker网络代理开始"
@@ -1098,6 +1134,230 @@ unconfigure_docker_proxy() {
         Show 0 "取消配置Docker使用网络代理成功"
     else
         Show 1 "取消配置Docker使用网络代理失败"
+    fi
+}
+
+# 更新Docker镜像源列表
+update_docker_mirrors() {
+    Show 2 "开始更新Docker镜像源列表"
+    
+    # 定义Docker镜像源列表
+    local mirrors=(
+        "docker.io"
+        "docker.fxxk.dedyn.io"
+        "docker.m.daocloud.io"
+        "docker.1panel.live"
+        "dockerproxy.com"
+        "dockerproxy.cn"
+        "dockerpull.com"
+        "dislabaiot.xyz"
+        "docker.wanpeng.top"
+        "doublezonline.cloud"
+        "ginger20240704.asia"
+        "lynn520.xyz"
+        "docker.wget.at"
+        "docker.mrxn.net"
+        "docker.adysec.com"
+        "docker.chenby.cn"
+        "hub.uuuadc.top"
+        "docker.jsdelivr.fyi"
+        "docker.registry.cyou"
+        "dockerhub.anzu.vip"
+    )
+
+    # 设置配置目录，默认为"/opt/docker_pull"
+    local config_dir=${1:-"/opt/docker_pull"}
+    local mirrors_file="${config_dir}/docker_mirrors.txt"
+    
+    # 创建配置目录
+    mkdir -p "${config_dir}"
+
+    # 使用默认镜像源列表并写入文件
+    printf '%s\n' "${mirrors[@]}" > "${mirrors_file}"
+
+    # 创建临时文件用于存储可用的镜像源
+    local temp_file=$(mktemp)
+    
+    Show 2 "开始检测镜像源可用性"
+    for mirror in "${mirrors[@]}"; do
+        if timeout 30 docker pull "${mirror}/library/hello-world:latest" &> /dev/null; then
+            Show 0 "✅ 镜像源可用: ${mirror}"
+            echo "${mirror}" >> "${temp_file}"
+            docker rmi "${mirror}/library/hello-world:latest" &> /dev/null
+        else
+            Show 3 "❌ 镜像源不可用: ${mirror}，将被移除"
+        fi
+    done
+
+    # 更新镜像源文件
+    mv "${temp_file}" "${mirrors_file}"
+    
+    # 显示更新后的镜像源列表
+    Show 0 "更新后的镜像源列表:"
+    cat "${mirrors_file}"
+    
+    Show 0 "Docker镜像源列表更新完成"
+}
+
+# 拉取 Docker 镜像
+pull_docker_image() {
+    # 提示用户输入要拉取的Docker镜像名称
+    read -p "$(echo -e "${YELLOW}请输入要拉取的Docker镜像名称: ${NC}")" image_name
+    
+    # 检查输入是否为空
+    if [ -z "${image_name}" ]; then
+        Show 1 "错误: 镜像名称不能为空"
+    fi
+
+    # 设置配置目录，默认为"/opt/docker_pull"
+    local config_dir=${2:-"/opt/docker_pull"}
+    local mirrors_file="${config_dir}/docker_mirrors.txt"
+
+    # 创建配置目录
+    mkdir -p "${config_dir}"
+    
+    # 定义Docker镜像源列表
+    local mirrors=(
+        "docker.io"
+        "docker.fxxk.dedyn.io"
+        "docker.m.daocloud.io"
+        "docker.1panel.live"
+        "dockerproxy.com"
+        "dockerproxy.cn"
+        "dockerpull.com"
+        "dislabaiot.xyz"
+        "docker.wanpeng.top"
+        "doublezonline.cloud"
+        "ginger20240704.asia"
+        "lynn520.xyz"
+        "docker.wget.at"
+        "docker.mrxn.net"
+        "docker.adysec.com"
+        "docker.chenby.cn"
+        "hub.uuuadc.top"
+        "docker.jsdelivr.fyi"
+        "docker.registry.cyou"
+        "dockerhub.anzu.vip"
+    )
+
+    # 检查是否存在镜像源配置文件
+    if [ -s "${mirrors_file}" ]; then
+        # 如果文件存在且非空,从文件读取镜像源列表
+        readarray -t mirrors < "${mirrors_file}"
+    else
+        # 如果文件不存在或为空,使用默认镜像源列表并写入文件
+        printf '%s\n' "${mirrors[@]}" > "${mirrors_file}"
+    fi
+
+    # 检查是否存在 timeout 命令
+    if command -v timeout > /dev/null 2>&1; then
+        # 使用 timeout 命令进行镜像拉取
+        for mirror in "${mirrors[@]}"; do
+            Show 2 "测试 ${mirror} 镜像源的连接性"
+            if timeout 30 docker pull "${mirror}/library/hello-world:latest"; then
+                Show 0 "${mirror} 镜像源连通性测试正常！正在为您下载镜像"
+                
+                # 尝试拉取用户指定的镜像，最多重试一次
+                for i in {1..2}; do
+                    if timeout 300 docker pull "${mirror}/${image_name}"; then
+                        Show 0 "${image_name} 镜像拉取成功！"
+                        # 更新镜像源列表，将成功的镜像源移到最前面
+                        sed -i "/${mirror}/d" "${mirrors_file}"
+                        sed -i "1i ${mirror}" "${mirrors_file}"
+                        break
+                    else
+                        Show 3 "${image_name} 镜像拉取失败，正在进行重试..."
+                    fi
+                done
+                
+                # 清理测试用的 hello-world 镜像并检查目标镜像是否成功拉取
+                if [[ "${mirror}" == "docker.io" ]]; then
+                    docker rmi "library/hello-world:latest"
+                    [ -n "$(docker images -q "${image_name}")" ] && return 0
+                else
+                    docker rmi "${mirror}/library/hello-world:latest"
+                    [ -n "$(docker images -q "${mirror}/${image_name}")" ] && break
+                fi
+            fi
+        done
+    else
+        # 如果没有 timeout 命令，使用自定义的超时逻辑
+        timeout=20
+        for mirror in "${mirrors[@]}"; do
+            Show 2 "测试 ${mirror} 镜像源的连接性"       
+            # 后台拉取 hello-world 镜像并设置超时
+            docker pull "${mirror}/library/hello-world:latest" || true &
+            pid=$!
+            count=0
+            while kill -0 $pid 2>/dev/null; do
+                sleep 5
+                count=$((count+5))
+                if [ $count -ge $timeout ]; then
+                    Show 3 "命令超时"
+                    kill $pid
+                    break
+                fi
+            done
+
+            # 如果成功拉取 hello-world，尝试拉取用户指定的镜像
+            if [ $? -eq 0 ]; then
+                Show 0 "${mirror} 镜像源连通性测试正常！正在为您下载镜像"
+                timeout=200
+                for i in {1..2}; do
+                    docker pull "${mirror}/${image_name}" || true &
+                    pid=$!
+                    count=0
+                    while kill -0 $pid 2>/dev/null; do
+                        sleep 5
+                        count=$((count+5))
+                        if [ $count -ge $timeout ]; then
+                            Show 3 "命令超时"
+                            kill $pid
+                            break
+                        fi
+                    done
+                done
+                
+                # 清理测试用的 hello-world 镜像并检查目标镜像是否成功拉取
+                if [[ "${mirror}" == "docker.io" ]]; then
+                    docker rmi "library/hello-world:latest"
+                    if [ -n "$(docker images -q "${image_name}")" ]; then
+                        Show 0 "${image_name} 镜像拉取成功！"
+                        # 更新镜像源列表，将成功的镜像源移到最前面
+                        sed -i "/${mirror}/d" "${config_dir}/docker_mirrors.txt"
+                        sed -i "1i ${mirror}" "${config_dir}/docker_mirrors.txt"
+                        return 0
+                    else
+                        Show 3 "${image_name} 镜像拉取失败，正在进行重试..."
+                    fi
+                else
+                    docker rmi "${mirror}/library/hello-world:latest"
+                    if [ -n "$(docker images -q "${mirror}/${image_name}")" ]; then
+                        Show 0 "${image_name} 镜像拉取成功！"
+                        # 更新镜像源列表，将成功的镜像源移到最前面
+                        sed -i "/${mirror}/d" "${config_dir}/docker_mirrors.txt"
+                        sed -i "1i ${mirror}" "${config_dir}/docker_mirrors.txt"
+                        break
+                    else
+                        Show 3 "${image_name} 镜像拉取失败，正在进行重试..."
+                    fi
+                fi
+            fi
+        done
+    fi
+
+    # 检查是否成功拉取镜像
+    if [ -n "$(docker images -q "${mirror}/${image_name}")" ]; then
+        # 为镜像添加新标签
+        docker tag "${mirror}/${image_name}" "${image_name}"
+        # 删除原始镜像
+        docker rmi "${mirror}/${image_name}"
+        Show 0 "镜像处理完成"
+        return 0
+    else
+        # 所有镜像源都尝试失败时的错误提示
+        Show 1 "所有镜像源拉取失败，请检查网络连接后重试"
+        return 1
     fi
 }
 
