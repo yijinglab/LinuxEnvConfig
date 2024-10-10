@@ -732,22 +732,50 @@ config_miniconda3() {
 install_miniconda3() {
     Show 2 "开始安装 Miniconda3"
 
+    echo -e "${YELLOW}[+] 请选择要使用的软件源: ${NC}"
+    echo "1. 清华大学 miniconda"
+    echo "2. 北京大学 miniconda"
+    echo "3. 中国科大 miniconda"
+    echo "4. 浙江大学 miniconda"
+    echo "5. 南京大学 miniconda"
+    read -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
+
+    # 根据用户选择设置 Miniconda3 软件源
+    if [[ "$choice" == "1" ]]; then
+        Show 2 "选择使用清华大学 miniconda 软件源"
+        local mirror_url="https://mirrors.tuna.tsinghua.edu.cn/anaconda"
+    elif [[ "$choice" == "2" ]]; then
+        Show 2 "选择使用北京大学 miniconda 软件源"
+        local mirror_url="https://mirrors.pku.edu.cn/anaconda"
+    elif [[ "$choice" == "3" ]]; then
+        Show 2 "选择使用中国科大 miniconda 软件源"
+        local mirror_url="https://mirrors.ustc.edu.cn/anaconda"
+    elif [[ "$choice" == "4" ]]; then
+        Show 2 "选择使用浙江大学 miniconda 软件源"
+        local mirror_url="https://mirrors.zju.edu.cn/anaconda"
+    elif [[ "$choice" == "5" ]]; then
+        Show 2 "选择使用南京大学 miniconda 软件源"
+        local mirror_url="https://mirrors.nju.edu.cn/anaconda"
+    else
+        Show 1 "输入错误, 退出安装"
+    fi
+
     Show 2 "检查 Miniconda3 安装脚本是否存在"
     if [ ! -f "/miniconda3.sh" ]; then
         # 下载 Miniconda3 安装脚本
         Show 2 "下载 Miniconda3 安装脚本"
-        sudo wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /miniconda3.sh
+        sudo wget -q --show-progress ${mirror_url}/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /miniconda3.sh
         if [ $? -eq 0 ]; then
             Show 0 "下载 Miniconda3 安装脚本成功"
         else
             Show 1 "下载 Miniconda3 安装脚本失败"
         fi
     else
-        Show 2 "/miniconda3.sh 已存在，跳过下载"
+        Show 2 "Miniconda3 安装脚本已存在"
     fi
 
     Show 2 "执行 Miniconda3 安装脚本"
-    sudo bash /miniconda3.sh -b -p /miniconda3
+    sudo bash /miniconda3.sh -b -p /miniconda3 >/dev/null
     if [ $? -eq 0 ]; then
         Show 0 "Miniconda3 安装成功"
         Show 0 "安装目录: /miniconda3"
@@ -766,26 +794,26 @@ install_miniconda3() {
 channels:
   - defaults
 show_channel_urls: true
-channel_alias: https://mirrors.tuna.tsinghua.edu.cn/anaconda
+channel_alias: ${mirror_url}
 default_channels:
-  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main
-  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free
-  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/r
-  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/pro
-  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/msys2
+  - ${mirror_url}/pkgs/main
+  - ${mirror_url}/pkgs/free
+  - ${mirror_url}/pkgs/r
+  - ${mirror_url}/pkgs/pro
+  - ${mirror_url}/pkgs/msys2
 custom_channels:
-  conda-forge: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
-  msys2: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
-  bioconda: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
-  menpo: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
-  pytorch: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
-  simpleitk: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  conda-forge: ${mirror_url}/cloud
+  msys2: ${mirror_url}/cloud
+  bioconda: ${mirror_url}/cloud
+  menpo: ${mirror_url}/cloud
+  pytorch: ${mirror_url}/cloud
+  simpleitk: ${mirror_url}/cloud
 EOF
 
     Show 0 "配置 conda 镜像源完成"
 
     Show 2 "开始更新 conda"
-    sudo /miniconda3/bin/conda update conda -y
+    sudo /miniconda3/bin/conda update conda -y >/dev/null
     if [ $? -eq 0 ]; then
         Show 0 "更新 conda 成功"
     else
@@ -793,7 +821,7 @@ EOF
     fi
 
     Show 2 "清理 conda 缓存"
-    sudo /miniconda3/bin/conda clean -a -y
+    sudo /miniconda3/bin/conda clean -a -y >/dev/null
 
     Show 2 "清理 conda 缓存完成"
     Show 0 "安装 Miniconda3 完成"
