@@ -799,7 +799,6 @@ default_channels:
   - ${mirror_url}/pkgs/main
   - ${mirror_url}/pkgs/free
   - ${mirror_url}/pkgs/r
-  - ${mirror_url}/pkgs/pro
   - ${mirror_url}/pkgs/msys2
 custom_channels:
   conda-forge: ${mirror_url}/cloud
