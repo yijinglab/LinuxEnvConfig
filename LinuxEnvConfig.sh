@@ -3002,6 +3002,41 @@ handle_choice() {
     "${commands[${menu_options[$choice - 1]}]}"
 }
 
+# 项目更新检查
+project_update_check() {
+    # 设置Gitee仓库的URL
+    REPO_URL="https://gitee.com/yijingsec/LinuxEnvConfig.git"
+
+    # 获取远程仓库的最新提交
+    REMOTE_LATEST=$(git ls-remote $REPO_URL HEAD | cut -f1)
+
+    # 获取本地仓库的当前提交
+    LOCAL_CURRENT=$(git rev-parse HEAD)
+
+    Show 2 "${GREEN}开始项目更新检查${NC}"
+
+    # 比较远程和本地的提交
+    if [ "$REMOTE_LATEST" != "$LOCAL_CURRENT" ]; then
+        Show 3 "$(Warn "检测到项目有更新")"
+        Show 3 "$(Warn "远程仓库的最新提交为: $REMOTE_LATEST")"
+        Show 3 "$(Warn "本地仓库的当前提交为: $LOCAL_CURRENT")"
+        read -p "$(echo -e "${YELLOW}>>> 是否要更新到最新项目? (y/n) >>> ${NC}")" yn
+        if [[ $yn == "y" || $yn == "Y" ]]; then
+            git restore .
+            git pull
+            if [[ $? -eq 0 ]]; then
+                Show 0 "更新项目成功"
+                Show 3 "按任意键继续..."
+                read -n 1
+            else
+                Show 1 "更新项目失败，请重试"
+            fi
+        fi
+    fi
+}
+
+project_update_check
+
 while true; do
     show_menu
     read -p "$(echo -e "${GREEN}>>> 请输入选项的序号(输入q退出) >>> ${NC}")" choice
