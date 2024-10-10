@@ -943,22 +943,26 @@ install_docker() {
         Show 0 "检测到系统为: ${repo_name}"
         echo -e "${YELLOW}[+] 请选择要使用的镜像源: ${NC}"
         echo "1. 清华大学 Docker-CE"
-        echo "2. 阿里云 Docker-CE"
-        echo "3. 华为云 Docker-CE"
-        echo "4. 腾讯云 Docker-CE"
-        read -p "$(echo -e "${GREEN}请输入选择(1-4): ${NC}")" choice
+        echo "2. 北京大学 Docker-CE"
+        echo "3. 阿里云 Docker-CE"
+        echo "4. 华为云 Docker-CE"
+        echo "5. 腾讯云 Docker-CE"
+        read -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
 
         # 根据用户选择设置 Docker 软件源
         if [[ "$choice" == "1" ]]; then
             Show 2 "选择使用清华大学 Docker-CE 镜像源"
             local mirror_url="https://mirrors.tuna.tsinghua.edu.cn"
         elif [[ "$choice" == "2" ]]; then
+            Show 2 "选择使用北京大学 Docker-CE 镜像源"
+            local mirror_url="https://mirrors.pku.edu.cn"
+        elif [[ "$choice" == "3" ]]; then
             Show 2 "选择使用阿里云 Docker-CE 镜像源"
             local mirror_url="https://mirrors.aliyun.com"
-        elif [[ "$choice" == "3" ]]; then
+        elif [[ "$choice" == "4" ]]; then
             Show 2 "选择使用华为云 Docker-CE 镜像源"
             local mirror_url="https://mirrors.huaweicloud.com"
-        elif [[ "$choice" == "4" ]]; then
+        elif [[ "$choice" == "5" ]]; then
             Show 2 "选择使用腾讯云 Docker-CE 镜像源"
             local mirror_url="https://mirrors.cloud.tencent.com"
         else
