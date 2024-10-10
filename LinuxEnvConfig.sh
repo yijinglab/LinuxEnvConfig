@@ -920,11 +920,17 @@ config_docker() {
 
 # 安装Docker
 install_docker() {
-    Show 2 "开始安装 Docker"
-    Show 2 "更新 APT 源"
-    sudo apt-get update
+    Show 2 "开始安装Docker"
+    Show 2 "更新APT源..."
+    sudo apt-get update >/dev/null
+    if [ $? -eq 0 ]; then
+        Show 0 "更新APT源成功"
+    else
+        Show 1 "更新APT源失败"
+    fi
+
     Show 2 "安装依赖包..."
-    sudo apt-get install apt-transport-https ca-certificates curl gnupg -y
+    sudo apt-get install apt-transport-https ca-certificates curl gnupg -y >/dev/null
     if [ $? -eq 0 ]; then
         Show 0 "安装依赖包成功"
     else
@@ -936,17 +942,25 @@ install_docker() {
 
         Show 0 "检测到系统为: ${repo_name}"
         echo -e "${YELLOW}[+] 请选择要使用的镜像源: ${NC}"
-        echo "1. 清华大学 TUNA 镜像站"
-        echo "2. 中国科学技术大学 USTC 镜像站"
-        read -p "$(echo -e "${GREEN}请输入选择(1-2): ${NC}")" choice
+        echo "1. 清华大学 Docker-CE"
+        echo "2. 阿里云 Docker-CE"
+        echo "3. 华为云 Docker-CE"
+        echo "4. 腾讯云 Docker-CE"
+        read -p "$(echo -e "${GREEN}请输入选择(1-4): ${NC}")" choice
 
         # 根据用户选择设置 Docker 软件源
         if [[ "$choice" == "1" ]]; then
-            Show 2 "选择使用清华大学 TUNA 镜像站"
+            Show 2 "选择使用清华大学 Docker-CE 镜像源"
             local mirror_url="https://mirrors.tuna.tsinghua.edu.cn"
         elif [[ "$choice" == "2" ]]; then
-            Show 2 "选择使用中国科学技术大学 USTC 镜像站"
-            local mirror_url="https://mirrors.ustc.edu.cn"
+            Show 2 "选择使用阿里云 Docker-CE 镜像源"
+            local mirror_url="https://mirrors.aliyun.com"
+        elif [[ "$choice" == "3" ]]; then
+            Show 2 "选择使用华为云 Docker-CE 镜像源"
+            local mirror_url="https://mirrors.huaweicloud.com"
+        elif [[ "$choice" == "4" ]]; then
+            Show 2 "选择使用腾讯云 Docker-CE 镜像源"
+            local mirror_url="https://mirrors.cloud.tencent.com"
         else
             Show 1 "输入错误, 退出安装"
         fi
@@ -956,26 +970,51 @@ install_docker() {
         sudo curl -fsSL "${mirror_url}/docker-ce/linux/${repo_name}/gpg" | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
         sudo chmod a+r /etc/apt/keyrings/docker.gpg
         sudo echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] ${mirror_url}/docker-ce/linux/${repo_name} "$(. /etc/os-release && echo "${VERSION_CODENAME}")" stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        if [ $? -eq 0 ]; then
+            Show 0 "设置 Docker 软件源成功"
+        else
+            Show 1 "设置 Docker 软件源失败"
+        fi
 
         Show 2 "更新软件包列表"
-        sudo apt-get update
-        Show 2 "安装 Docker"
-        sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+        sudo apt-get update >/dev/null
+        if [ $? -eq 0 ]; then
+            Show 0 "更新软件包列表成功"
+        else
+            Show 1 "更新软件包列表失败"
+        fi
+
+        Show 2 "安装Docker软件开始"
+        sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin >/dev/null
+        if [ $? -eq 0 ]; then
+            Show 0 "安装Docker软件成功"
+        else
+            Show 1 "安装Docker软件失败"
+        fi
+
     elif [[ "$(lsb_release -cs)" == "kali-rolling" ]]; then
         # 针对 Kali Rolling 的特定安装逻辑
         Show 0 "检测到系统为 Kali Rolling"
         echo -e "${YELLOW}[+] 请选择要使用的镜像源: ${NC}"
-        echo "1. 清华大学 TUNA 镜像站"
-        echo "2. 中国科学技术大学 USTC 镜像站"
-        read -p "$(echo -e "${GREEN}请输入选择(1-2): ${NC}")" choice
+        echo "1. 清华大学 Docker-CE"
+        echo "2. 阿里云 Docker-CE"
+        echo "3. 华为云 Docker-CE"
+        echo "4. 腾讯云 Docker-CE"
+        read -p "$(echo -e "${GREEN}请输入选择(1-4): ${NC}")" choice
 
         # 根据用户选择设置 Docker 软件源
         if [[ "$choice" == "1" ]]; then
-            Show 2 "选择使用清华大学 TUNA 镜像站"
+            Show 2 "选择使用清华大学 Docker-CE 镜像源"
             local mirror_url="https://mirrors.tuna.tsinghua.edu.cn"
         elif [[ "$choice" == "2" ]]; then
-            Show 2 "选择使用中国科学技术大学 USTC 镜像站"
-            local mirror_url="https://mirrors.ustc.edu.cn"
+            Show 2 "选择使用阿里云 Docker-CE 镜像源"
+            local mirror_url="https://mirrors.aliyun.com"
+        elif [[ "$choice" == "3" ]]; then
+            Show 2 "选择使用华为云 Docker-CE 镜像源"
+            local mirror_url="https://mirrors.huaweicloud.com"
+        elif [[ "$choice" == "4" ]]; then
+            Show 2 "选择使用腾讯云 Docker-CE 镜像源"
+            local mirror_url="https://mirrors.cloud.tencent.com"
         else
             Show 1 "输入错误, 退出安装"
         fi
@@ -984,12 +1023,27 @@ install_docker() {
         curl -fsSL ${mirror_url}/docker-ce/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
         sudo chmod a+r /etc/apt/keyrings/docker.gpg
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] ${mirror_url}/docker-ce/linux/debian/ bookworm stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        if [ $? -eq 0 ]; then
+            Show 0 "设置 Docker 软件源成功"
+        else
+            Show 1 "设置 Docker 软件源失败"
+        fi
 
         Show 2 "更新软件包列表"
-        sudo apt update
+        sudo apt update >/dev/null
+        if [ $? -eq 0 ]; then
+            Show 0 "更新软件包列表成功"
+        else
+            Show 1 "更新软件包列表失败"
+        fi
 
-        Show 2 "安装 Docker"
-        sudo apt install -y docker-ce docker-ce-cli containerd.io
+        Show 2 "安装Docker"
+        sudo apt install -y docker-ce docker-ce-cli containerd.io >/dev/null
+        if [ $? -eq 0 ]; then
+            Show 0 "安装Docker成功"
+        else
+            Show 1 "安装Docker失败"
+        fi
     else
         Show 1 "当前系统版本不支持"
     fi
@@ -1154,7 +1208,7 @@ unconfigure_docker_proxy() {
 # 更新Docker镜像源列表
 update_docker_mirrors() {
     Show 2 "开始更新Docker镜像源列表"
-    
+
     # 定义Docker镜像源列表
     local mirrors=(
         "docker.io"
@@ -1182,7 +1236,7 @@ update_docker_mirrors() {
     # 设置配置目录，默认为"/opt/docker_pull"
     local config_dir=${1:-"/opt/docker_pull"}
     local mirrors_file="${config_dir}/docker_mirrors.txt"
-    
+
     # 创建配置目录
     mkdir -p "${config_dir}"
 
@@ -1191,7 +1245,7 @@ update_docker_mirrors() {
 
     # 创建临时文件用于存储可用的镜像源
     local temp_file=$(mktemp)
-    
+
     Show 2 "开始检测镜像源可用性"
     for mirror in "${mirrors[@]}"; do
         if timeout 30 docker pull "${mirror}/library/hello-world:latest" &> /dev/null; then
@@ -1205,11 +1259,11 @@ update_docker_mirrors() {
 
     # 更新镜像源文件
     mv "${temp_file}" "${mirrors_file}"
-    
+
     # 显示更新后的镜像源列表
     Show 0 "更新后的镜像源列表:"
     cat "${mirrors_file}"
-    
+
     Show 0 "Docker镜像源列表更新完成"
 }
 
@@ -1217,7 +1271,7 @@ update_docker_mirrors() {
 pull_docker_image() {
     # 提示用户输入要拉取的Docker镜像名称
     read -p "$(echo -e "${YELLOW}请输入要拉取的Docker镜像名称: ${NC}")" image_name
-    
+
     # 检查输入是否为空
     if [ -z "${image_name}" ]; then
         Show 1 "错误: 镜像名称不能为空"
@@ -1229,7 +1283,7 @@ pull_docker_image() {
 
     # 创建配置目录
     mkdir -p "${config_dir}"
-    
+
     # 定义Docker镜像源列表
     local mirrors=(
         "docker.io"
@@ -1270,7 +1324,7 @@ pull_docker_image() {
             Show 2 "测试 ${mirror} 镜像源的连接性"
             if timeout 30 docker pull "${mirror}/library/hello-world:latest"; then
                 Show 0 "${mirror} 镜像源连通性测试正常！正在为您下载镜像"
-                
+
                 # 尝试拉取用户指定的镜像，最多重试一次
                 for i in {1..2}; do
                     if timeout 300 docker pull "${mirror}/${image_name}"; then
@@ -1283,7 +1337,7 @@ pull_docker_image() {
                         Show 3 "${image_name} 镜像拉取失败，正在进行重试..."
                     fi
                 done
-                
+
                 # 清理测试用的 hello-world 镜像并检查目标镜像是否成功拉取
                 if [[ "${mirror}" == "docker.io" ]]; then
                     docker rmi "library/hello-world:latest"
@@ -1298,7 +1352,7 @@ pull_docker_image() {
         # 如果没有 timeout 命令，使用自定义的超时逻辑
         timeout=20
         for mirror in "${mirrors[@]}"; do
-            Show 2 "测试 ${mirror} 镜像源的连接性"       
+            Show 2 "测试 ${mirror} 镜像源的连接性"
             # 后台拉取 hello-world 镜像并设置超时
             docker pull "${mirror}/library/hello-world:latest" || true &
             pid=$!
@@ -1331,7 +1385,7 @@ pull_docker_image() {
                         fi
                     done
                 done
-                
+
                 # 清理测试用的 hello-world 镜像并检查目标镜像是否成功拉取
                 if [[ "${mirror}" == "docker.io" ]]; then
                     docker rmi "library/hello-world:latest"
