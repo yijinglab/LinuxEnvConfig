@@ -1751,10 +1751,10 @@ config_arl() {
             add_fingerprint_to_arl
             ;;
         6)
-            echo "退出到主菜单"
+            Show 2 "退出到主菜单"
             ;;
         *)
-            echo "无效的选择"
+            Show 2 "无效的选择"
             ;;
     esac
 }
