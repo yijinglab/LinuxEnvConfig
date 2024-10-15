@@ -710,8 +710,9 @@ config_miniconda3() {
 	echo -e "${YELLOW}[+] 请选择操作: ${NC}"
     echo "1. 安装 Miniconda3"
     echo "2. 卸载 Miniconda3"
-    echo "3. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
+    echo "3. 配置 Miniconda3 软件源"
+    echo "4. 返回主菜单"
+    read -p "$(echo -e "${GREEN}请输入选择(1-4): ${NC}")" choice
     case $choice in
         1)
             install_miniconda3
@@ -720,6 +721,9 @@ config_miniconda3() {
             remove_miniconda3
             ;;
         3)
+            configure_conda_mirror
+            ;;
+        4)
             Show 2 "退出到主菜单"
             ;;
         *)
@@ -791,7 +795,7 @@ install_miniconda3() {
     $install_dir/bin/conda init zsh
     Show 0 "初始化 conda 完成"
 
-    configure_conda "$mirror_url" "$install_dir"
+    configure_condarc "$mirror_url" "$install_dir"
 
     Show 2 "开始更新 conda"
     sudo $install_dir/bin/conda update conda -y >/dev/null
@@ -809,7 +813,7 @@ install_miniconda3() {
 }
 
 # 配置conda镜像源
-configure_conda() {
+configure_condarc() {
     local mirror_url=$1
     local install_dir=$2
     Show 2 "配置 conda 镜像源"
@@ -875,6 +879,39 @@ EOF
     Show 0 "为用户 $user 配置 conda 镜像源完成"
 }
 
+# 配置conda镜像源
+configure_conda_mirror() {
+    echo -e "${YELLOW}[+] 请选择要使用的软件源: ${NC}"
+    echo "1. 清华大学 miniconda"
+    echo "2. 北京大学 miniconda"
+    echo "3. 中国科大 miniconda"
+    echo "4. 浙江大学 miniconda"
+    echo "5. 南京大学 miniconda"
+    read -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
+
+    # 根据用户选择设置 Miniconda3 软件源
+    if [[ "$choice" == "1" ]]; then
+        Show 2 "选择使用清华大学 miniconda 软件源"
+        local mirror_url="https://mirrors.tuna.tsinghua.edu.cn/anaconda"
+    elif [[ "$choice" == "2" ]]; then
+        Show 2 "选择使用北京大学 miniconda 软件源"
+        local mirror_url="https://mirrors.pku.edu.cn/anaconda"
+    elif [[ "$choice" == "3" ]]; then
+        Show 2 "选择使用中国科大 miniconda 软件源"
+        local mirror_url="https://mirrors.ustc.edu.cn/anaconda"
+    elif [[ "$choice" == "4" ]]; then
+        Show 2 "选择使用浙江大学 miniconda 软件源"
+        local mirror_url="https://mirrors.zju.edu.cn/anaconda"
+    elif [[ "$choice" == "5" ]]; then
+        Show 2 "选择使用南京大学 miniconda 软件源"
+        local mirror_url="https://mirrors.nju.edu.cn/anaconda"
+    else
+        Show 1 "输入错误, 退出安装"
+    fi
+    local install_dir="/opt/miniconda3"
+
+    configure_condarc "$mirror_url" "$install_dir"
+}
 
 # 卸载Miniconda3
 remove_miniconda3() {
