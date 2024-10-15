@@ -51,12 +51,12 @@ sudo bash LinuxEnvConfig.sh
 
 ### 基础配置
 
-1. 启用root用户
-2. 启用ssh服务
-3. 设置nameserver
-4. 允许root用户ssh登录
+1. 启用ROOT用户
+2. 启用SSH服务
+3. 允许ROOT用户SSH登录
+4. 设置NameServer
 5. 获取当前主机网卡及IP地址信息
-6. 解除dns协议53端口占用
+6. 解除DNS协议53端口占用
 7. 返回主菜单
 
 ### 配置 APT
@@ -92,17 +92,22 @@ sudo bash LinuxEnvConfig.sh
 
 1. 安装 Miniconda3
 2. 卸载 Miniconda3
-3. 返回主菜单
+3. 配置 Miniconda3 软件源
+4. 返回主菜单
 
 ### 配置 Docker
 
 1. 安装 Docker
 2. 卸载 Docker
 3. 配置 Docker 国内镜像
-4. 取消 Docker 国内镜像
-5. 配置 Docker 网络代理
-6. 取消 Docker 网络代理
-7. 返回主菜单
+4. 获取 Docker 国内镜像源配置
+5. 取消 Docker 国内镜像
+6. 配置 Docker 网络代理
+7. 获取 Docker 网络代理配置
+8. 取消 Docker 网络代理
+9. 更新 Docker 镜像源列表
+10. 拉取 Docker 镜像
+11. 返回主菜单
 
 ### 配置 Docker-compose
 
