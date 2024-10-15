@@ -730,7 +730,7 @@ config_miniconda3() {
 
 # 安装Miniconda3
 install_miniconda3() {
-    Show 2 "开始安装 Miniconda3"
+    Show 2 "开始安装 miniconda3"
 
     echo -e "${YELLOW}[+] 请选择要使用的软件源: ${NC}"
     echo "1. 清华大学 miniconda"
@@ -760,35 +760,58 @@ install_miniconda3() {
         Show 1 "输入错误, 退出安装"
     fi
 
-    Show 2 "检查 Miniconda3 安装脚本是否存在"
-    if [ ! -f "/miniconda3.sh" ]; then
+    Show 2 "检查 miniconda3 安装脚本是否存在"
+    local install_script="/opt/miniconda3.sh"
+    local install_dir="/opt/miniconda3"
+    if [ ! -f "$install_script" ]; then
         # 下载 Miniconda3 安装脚本
-        Show 2 "下载 Miniconda3 安装脚本"
-        sudo wget -q --show-progress ${mirror_url}/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /miniconda3.sh
+        Show 2 "下载 miniconda3 安装脚本"
+        sudo wget -q --show-progress ${mirror_url}/miniconda/Miniconda3-latest-Linux-x86_64.sh -O "$install_script"
         if [ $? -eq 0 ]; then
-            Show 0 "下载 Miniconda3 安装脚本成功"
+            Show 0 "下载 miniconda3 安装脚本成功"
         else
-            Show 1 "下载 Miniconda3 安装脚本失败"
+            Show 1 "下载 miniconda3 安装脚本失败"
         fi
     else
-        Show 2 "Miniconda3 安装脚本已存在"
+        Show 2 "miniconda3 安装脚本已存在"
     fi
 
-    Show 2 "执行 Miniconda3 安装脚本"
-    sudo bash /miniconda3.sh -b -p /miniconda3 >/dev/null
+    Show 2 "执行 miniconda3 安装脚本"
+    sudo bash "$install_script" -b -p "$install_dir" >/dev/null
     if [ $? -eq 0 ]; then
-        Show 0 "Miniconda3 安装成功"
-        Show 0 "安装目录: /miniconda3"
+        Show 0 "miniconda3 安装成功"
+        Show 0 "安装目录: $install_dir"
     else
-        Show 1 "Miniconda3 安装失败"
+        Show 1 "miniconda3 安装失败"
     fi
 
     Show 2 "初始化 conda"
-    source /miniconda3/bin/activate
-    /miniconda3/bin/conda init bash
-    /miniconda3/bin/conda init zsh
+    source $install_dir/bin/activate
+    $install_dir/bin/conda init bash
+    $install_dir/bin/conda init zsh
     Show 0 "初始化 conda 完成"
 
+    configure_conda "$mirror_url" "$install_dir"
+
+    Show 2 "开始更新 conda"
+    sudo $install_dir/bin/conda update conda -y >/dev/null
+    if [ $? -eq 0 ]; then
+        Show 0 "更新 conda 成功"
+    else
+        Show 1 "更新 conda 失败"
+    fi
+
+    Show 2 "清理 conda 缓存"
+    sudo $install_dir/bin/conda clean -a -y >/dev/null
+
+    Show 2 "清理 conda 缓存完成"
+    Show 0 "安装 miniconda3 完成"
+}
+
+# 配置conda镜像源
+configure_conda() {
+    local mirror_url=$1
+    local install_dir=$2
     Show 2 "配置 conda 镜像源"
     cat <<EOF | sudo tee ~/.condarc > /dev/null
 channels:
@@ -808,35 +831,63 @@ custom_channels:
   pytorch: ${mirror_url}/cloud
   simpleitk: ${mirror_url}/cloud
 EOF
-
     Show 0 "配置 conda 镜像源完成"
 
-    Show 2 "开始更新 conda"
-    sudo /miniconda3/bin/conda update conda -y >/dev/null
-    if [ $? -eq 0 ]; then
-        Show 0 "更新 conda 成功"
+    users=$(ls /home)
+    if [ -z "$users" ]; then
+        Show 2 "没有找到其他用户目录, 跳过其他用户配置"
     else
-        Show 1 "更新 conda 失败"
+        for user in $users; do
+            su - $user -c "$install_dir/bin/conda init zsh;$install_dir/bin/conda init bash" 2>/dev/null
+            if [ $? -eq 0 ]; then
+                Show 0 "为用户 $user 配置 conda 环境完成"
+            else
+                Show 1 "为用户 $user 配置 conda 环境失败"
+            fi
+            configure_conda_user "$mirror_url" "$user"
+        done
     fi
-
-    Show 2 "清理 conda 缓存"
-    sudo /miniconda3/bin/conda clean -a -y >/dev/null
-
-    Show 2 "清理 conda 缓存完成"
-    Show 0 "安装 Miniconda3 完成"
 }
+
+# 配置用户conda镜像源
+configure_conda_user() {
+    local mirror_url=$1
+    local user=$2
+    Show 2 "为用户 $user 配置 conda 镜像源"
+    cat <<EOF | sudo tee "/home/$user/.condarc" > /dev/null
+channels:
+  - defaults
+show_channel_urls: true
+channel_alias: ${mirror_url}
+default_channels:
+  - ${mirror_url}/pkgs/main
+  - ${mirror_url}/pkgs/free
+  - ${mirror_url}/pkgs/r
+  - ${mirror_url}/pkgs/msys2
+custom_channels:
+  conda-forge: ${mirror_url}/cloud
+  msys2: ${mirror_url}/cloud
+  bioconda: ${mirror_url}/cloud
+  menpo: ${mirror_url}/cloud
+  pytorch: ${mirror_url}/cloud
+  simpleitk: ${mirror_url}/cloud
+EOF
+    Show 0 "为用户 $user 配置 conda 镜像源完成"
+}
+
 
 # 卸载Miniconda3
 remove_miniconda3() {
     Show 2 "开始卸载 miniconda3"
+    local install_dir="/opt/miniconda3"
 
     # 定义要删除的文件和目录
-    declare -a files=("/miniconda3" "~/.condarc")
+    declare -a files=("$install_dir" "~/.condarc")
 
     # 定义要处理的配置文件
     declare -a config_files=(".bashrc" ".zshrc")
 
-    Show 2 "删除miniconda3文件和目录"
+    Show 2 "删除 miniconda3 文件和目录"
     for file in "${files[@]}"; do
         sudo rm -rf "${file}"
         if [ $? -eq 0 ]; then
@@ -846,15 +897,15 @@ remove_miniconda3() {
         fi
     done
 
-    CONDA_INIT_START="# >>> conda initialize >>"
-    CONDA_INIT_END="# <<< conda initialize <<"
+    local conda_init_start="# >>> conda initialize >>"
+    local conda_init_end="# <<< conda initialize <<"
 
     for config in "${config_files[@]}"; do
         Show 2 "检查配置文件: ${HOME}/${config}"
         if [ -f "${HOME}/${config}" ]; then
             # 使用sed命令删除配置文件中的conda初始化代码
             Show 2 "删除 conda 初始化代码"
-            sudo sed -i "/${CONDA_INIT_START}/,/${CONDA_INIT_END}/d" "${HOME}/${config}"
+            sudo sed -i "/${conda_init_start}/,/${conda_init_end}/d" "${HOME}/${config}"
 
             # 检查sed命令是否成功执行
             if [ $? -eq 0 ]; then
@@ -866,6 +917,38 @@ remove_miniconda3() {
             Show 2 "未找到 ${config} 文件"
         fi
     done
+
+    users=$(ls /home)
+    if [ -z "$users" ]; then
+        Show 2 "没有找到其他用户目录, 跳过用户目录配置删除"
+    else
+        for user in $users; do
+            Show 2 "删除用户 $user 的conda配置文件"
+            sudo rm -rf "/home/${user}/.condarc"
+            if [ $? -eq 0 ]; then
+                Show 0 "删除 /home/${user}/.condarc 成功"
+            else
+                Show 1 "删除 /home/${user}/.condarc 失败"
+            fi
+            for config in "${config_files[@]}"; do
+                Show 2 "检查配置文件: /home/${user}/${config}"
+                if [ -f "/home/${user}/${config}" ]; then
+                    # 使用sed命令删除配置文件中的conda初始化代码
+                    Show 2 "移除 conda 初始化代码"
+                    sudo sed -i "/${conda_init_start}/,/${conda_init_end}/d" "/home/${user}/${config}"
+
+                    # 检查sed命令是否成功执行
+                    if [ $? -eq 0 ]; then
+                        Show 0 "移除 conda 初始化代码成功"
+                    else
+                        Show 1 "移除 conda 初始化代码失败"
+                    fi
+                else
+                    Show 2 "未找到 ${config} 文件"
+                fi
+            done
+        done
+    fi
 
     Show 0 "卸载 mimiconda3 完成"
 }
