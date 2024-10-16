@@ -1791,7 +1791,7 @@ install_arl() {
     fi
 
     Show 2 "开始解压 ARL 压缩包"
-    if command -v unzip >/dev/null 2>&1; then
+    if ! command -v unzip >/dev/null 2>&1; then
         Show 2 "未找到 unzip 命令, 开始安装 unzip"
         apt install unzip -y >/dev/null 2>&1
         if [ $? -eq 0 ]; then
