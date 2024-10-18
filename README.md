@@ -48,6 +48,7 @@ sudo bash LinuxEnvConfig.sh
 17. 配置 CTFd
 18. 配置 AWVS
 19. 配置 ocr_api_server
+20. 配置 oh-my-zsh
 
 ### 基础配置
 
@@ -214,3 +215,12 @@ sudo bash LinuxEnvConfig.sh
 1. 安装 ocr_api_server
 2. 卸载 ocr_api_server
 3. 返回主菜单
+
+### 配置 oh-my-zsh
+
+1. 安装 oh-my-zsh
+2. 更新 oh-my-zsh
+3. 卸载 oh-my-zsh
+4. 配置 oh-my-zsh 主题
+5. 配置 oh-my-zsh 插件
+6. 返回主菜单
