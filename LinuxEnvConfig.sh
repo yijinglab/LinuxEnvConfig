@@ -115,6 +115,7 @@ menu_options=(
     "配置 CTFd"
     "配置 AWVS"
     "配置 ocr_api_server"
+    "配置 oh-my-zsh"
 )
 
 commands=(
@@ -137,6 +138,7 @@ commands=(
     ["配置 CTFd"]="config_ctfd"
     ["配置 AWVS"]="config_awvs"
     ["配置 ocr_api_server"]="config_ocr_api_server"
+    ["配置 oh-my-zsh"]="config_ohmyzsh"
 )
 
 # 基础配置
@@ -3066,6 +3068,147 @@ remove_ocr_api_server() {
         Show 1 "删除容器失败"
     fi
     Show 0 "卸载ocr_api_server完成"
+}
+
+# 配置oh-my-zsh
+config_ohmyzsh() {
+    echo -e "${YELLOW}[+] 请选择操作: ${NC}"
+    echo "1. 安装 oh-my-zsh"
+    echo "2. 更新 oh-my-zsh"
+    echo "3. 卸载 oh-my-zsh"
+    echo "4. 配置 oh-my-zsh 主题"
+    echo "5. 配置 oh-my-zsh 插件"
+    echo "6. 返回主菜单"
+    read -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
+
+    case $choice in
+        1)
+            install_ohmyzsh
+            ;;
+        2)
+            update_ohmyzsh
+            ;;
+        3)
+            uninstall_ohmyzsh
+            ;;
+        4)
+            config_ohmyzsh_theme
+            ;;
+        5)
+            config_ohmyzsh_plugin
+            ;;
+        6)
+            Show 2 "退出到主菜单"
+            ;;
+        *)
+            Show 2 "无效的选择"
+            ;;
+    esac
+}
+
+# 安装oh-my-zsh
+install_ohmyzsh() {
+    Show 2 "安装oh-my-zsh开始"
+    if command -v git >/dev/null && command -v zsh >/dev/null; then
+        Show 0 "git和zsh已安装"
+    else
+        Show 2 "安装git和zsh"
+        apt install -y git zsh >/dev/null
+        if [ $? -eq 0 ]; then
+            Show 0 "git和zsh安装成功"
+        else
+            Show 1 "git和zsh安装失败"
+            return 1
+        fi
+    fi
+
+    Show 2 "安装oh-my-zsh"
+    if [ ! -d "${HOME}/.oh-my-zsh" ]; then
+        Show 2 "oh-my-zsh未安装, 正在安装..."
+        # sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+        # sh -c "$(curl -fsSL https://gitee.com/mirrors/oh-my-zsh/raw/master/tools/install.sh)"
+
+        # 下载安装脚本
+        if [ -f "install.sh" ]; then
+            Show 0 "install.sh文件已存在"
+        else
+            Show 0 "install.sh文件不存在, 正在下载..."
+            wget -q --show-progress https://gitee.com/mirrors/oh-my-zsh/raw/master/tools/install.sh
+        fi
+
+        # 替换默认的 GitHub 源为 Gitee
+        sed -i 's|REPO=${REPO:-ohmyzsh/ohmyzsh}|REPO=${REPO:-mirrors/oh-my-zsh}|' install.sh
+        sed -i 's|REMOTE=${REMOTE:-https://github.com/${REPO}.git}|REMOTE=${REMOTE:-https://gitee.com/${REPO}.git}|' install.sh
+        sh install.sh
+        Show 0 "安装oh-my-zsh成功"
+    else
+        Show 0 "oh-my-zsh已安装"
+    fi
+}
+
+# 配置oh-my-zsh主题
+config_ohmyzsh_theme() {
+    Show 2 "开始配置oh-my-zsh主题"
+    Show 2 "设置oh-my-zsh主题为ys"
+    sed -i 's|ZSH_THEME="robbyrussell"|ZSH_THEME="ys"|g' ${HOME}/.zshrc
+
+    Show 2 "设置oh-my-zsh主题ys的提示符"
+    sed -i 's|%(#,%{\$bg\[yellow\]%}%{\$fg\[black\]%}%n%{\$reset_color%},%{\$fg\[cyan\]%}%n) \\|%(#,%{\$fg\[red\]%}%n%{\$reset_color%},%{\$fg\[cyan\]%}%n) \\|g' ${HOME}/.oh-my-zsh/themes/ys.zsh-theme
+    sed -i 's|%{$reset_color%}in \\|%{$fg[blue]%}✅ \\|g' ${HOME}/.oh-my-zsh/themes/ys.zsh-theme
+    Show 0 "oh-my-zsh主题配置完成"
+}
+
+# 配置 oh-my-zsh 插件
+config_ohmyzsh_plugin() {
+    Show 2 "开始配置 oh-my-zsh 插件"
+    Show 2 "安装oh-my-zsh插件zsh-syntax-highlighting"
+
+    local syntax_highlighting_dir="${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
+    if [ -d "$syntax_highlighting_dir" ]; then
+        if [ "$(ls -A $syntax_highlighting_dir)" ]; then
+            Show 0 "zsh-syntax-highlighting 目录已存在且不为空，跳过安装"
+        else
+            Show 0 "zsh-syntax-highlighting 目录已存在且为空，正在安装..."
+            git clone https://gitclone.com/github.com/zsh-users/zsh-syntax-highlighting.git "$syntax_highlighting_dir"
+        fi
+    else
+        Show 2 "zsh-syntax-highlighting 未安装，正在安装..."
+        git clone https://gitclone.com/github.com/zsh-users/zsh-syntax-highlighting.git "$syntax_highlighting_dir"
+    fi
+
+    Show 2 "安装oh-my-zsh插件zsh-autosuggestions"
+    # 安装 oh-my-zsh 插件 zsh-autosuggestions
+    local autosuggestions_dir="${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
+    if [ -d "$autosuggestions_dir" ]; then
+        if [ "$(ls -A $autosuggestions_dir)" ]; then
+            Show 0 "zsh-autosuggestions 目录已存在且不为空，跳过安装"
+        else
+            Show 0 "zsh-autosuggestions 目录已存在且为空，正在安装..."
+            git clone https://gitclone.com/github.com/zsh-users/zsh-autosuggestions.git "$autosuggestions_dir"
+        fi
+    else
+        Show 2 "zsh-autosuggestions 未安装，正在安装..."
+        git clone https://gitclone.com/github.com/zsh-users/zsh-autosuggestions.git "$autosuggestions_dir"
+    fi
+
+    Show 2 "启用 oh-my-zsh 插件"
+    sed -i 's|plugins=(git)|plugins=(git zsh-syntax-highlighting zsh-autosuggestions)|g' ${HOME}/.zshrc
+
+    Show 2 "配置 oh-my-zsh 完成"
+}
+
+# 更新oh-my-zsh
+update_ohmyzsh() {
+    Show 2 "更新oh-my-zsh开始"
+    zsh -c "source ~/.zshrc;omz update"
+    Show 2 "更新oh-my-zsh完成"
+}
+
+# 卸载oh-my-zsh
+uninstall_ohmyzsh() {
+    Show 2 "卸载oh-my-zsh开始"
+    zsh -c "source ~/.zshrc;uninstall_oh_my_zsh"
+    Show 2 "卸载oh-my-zsh完成"
 }
 
 # 显示菜单
