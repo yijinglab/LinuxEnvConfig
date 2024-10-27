@@ -677,11 +677,11 @@ EOF
         Show 1 "APT源配置文件修改失败"
     fi
     Show 2 "更新APT源"
-    sudo apt update
+    sudo apt update >/dev/null
     Show 2 "安装软件源管理工具"
-    sudo apt install -y software-properties-common
+    sudo apt install -y software-properties-common >/dev/null
     Show 2 "添加Python源"
-    sudo add-apt-repository ppa:deadsnakes/ppa
+    sudo add-apt-repository ppa:deadsnakes/ppa >/dev/null
     Show 0 "APT源配置成功"
 }
 
@@ -696,6 +696,8 @@ config_apt_source() {
         config_apt_source_version "jammy"
     elif [[ "$(lsb_release -rs)" == "23.04" ]]; then
         config_apt_source_version "lunar"
+    elif [[ "$(lsb_release -rs)" == "24.04" ]]; then
+        config_apt_source_version "noble"
     elif [[ "$(lsb_release -cs)" == "kali-rolling" ]]; then
         sudo mv /etc/apt/sources.list /etc/apt/sources.list.bak
         sudo tee /etc/apt/sources.list <<-'EOF'
