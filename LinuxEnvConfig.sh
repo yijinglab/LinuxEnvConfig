@@ -649,7 +649,8 @@ remove_jdk() {
 # 配置APT源
 config_apt_source_version(){
     local version=$1
-    Show 2 "APT源配置"
+    local source_url=$2
+    Show 2 "开始配置APT源"
     if [ -f "/etc/apt/sources.list.bak" ]; then
         Show 2 "已存在APT源配置文件备份, 跳过备份"
     else
@@ -662,14 +663,14 @@ config_apt_source_version(){
     Show 2 "修改APT源配置文件"
     sudo tee /etc/apt/sources.list <<-EOF
 # 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释
-deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ $version main restricted universe multiverse
-# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ $version main restricted universe multiverse
-deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ $version-updates main restricted universe multiverse
-# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ $version-updates main restricted universe multiverse
-deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ $version-backports main restricted universe multiverse
-# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ $version-backports main restricted universe multiverse
-deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ $version-security main restricted universe multiverse
-# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ $version-security main restricted universe multiverse
+deb $source_url/ubuntu $version main restricted universe multiverse
+# deb-src $source_url/ubuntu $version main restricted universe multiverse
+deb $source_url/ubuntu $version-updates main restricted universe multiverse
+# deb-src $source_url/ubuntu $version-updates main restricted universe multiverse
+deb $source_url/ubuntu $version-backports main restricted universe multiverse
+# deb-src $source_url/ubuntu $version-backports main restricted universe multiverse
+deb $source_url/ubuntu $version-security main restricted universe multiverse
+# deb-src $source_url/ubuntu $version-security main restricted universe multiverse
 EOF
     if [ $? -eq 0 ]; then
         Show 0 "APT源配置文件修改成功"
@@ -677,33 +678,94 @@ EOF
         Show 1 "APT源配置文件修改失败"
     fi
     Show 2 "更新APT源"
-    sudo apt update >/dev/null
+    sudo apt-get update >/dev/null
+    if [ $? -eq 0 ]; then
+        Show 0 "APT源更新成功"
+    else
+        Show 1 "APT源更新失败"
+    fi
     Show 2 "安装软件源管理工具"
-    sudo apt install -y software-properties-common >/dev/null
+    sudo apt-get install -y software-properties-common >/dev/null
+    if [ $? -eq 0 ]; then
+        Show 0 "软件源管理工具安装成功"
+    else
+        Show 1 "软件源管理工具安装失败"
+    fi
     Show 2 "添加Python源"
-    sudo add-apt-repository ppa:deadsnakes/ppa >/dev/null
+    sudo add-apt-repository ppa:deadsnakes/ppa -y >/dev/null
+    if [ $? -eq 0 ]; then
+        Show 0 "Python源添加成功"
+    else
+        Show 1 "Python源添加失败"
+    fi
     Show 0 "APT源配置成功"
 }
 
 # 配置APT源
 config_apt_source() {
+    echo -e "${YELLOW}[+] 请选择要使用的APT软件源: ${NC}"
+    echo "1. 华为云"
+    echo "2. 阿里云"
+    echo "3. 腾讯云"
+    echo "4. 清华大学"
+    echo "5. 北京大学"
+    echo "6. 中国科大"
+    read -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
+
+    # 根据用户选择设置 APT 软件源
+    if [[ "$choice" == "1" ]]; then
+        Show 2 "选择使用华为云APT软件源"
+        local mirror_url="https://mirrors.huaweicloud.com"
+        local kali_mirror="1"
+    elif [[ "$choice" == "2" ]]; then
+        Show 2 "选择使用阿里云APT软件源"
+        local mirror_url="https://mirrors.aliyun.com"
+        local kali_mirror="0"
+    elif [[ "$choice" == "3" ]]; then
+        Show 2 "选择使用腾讯云APT软件源"
+        local mirror_url="https://mirrors.cloud.tencent.com"
+        local kali_mirror="0"
+    elif [[ "$choice" == "4" ]]; then
+        Show 2 "选择使用清华大学APT软件源"
+        local mirror_url="https://mirrors.tuna.tsinghua.edu.cn"
+        local kali_mirror="0"
+    elif [[ "$choice" == "5" ]]; then
+        Show 2 "选择使用北京大学APT软件源"
+        local mirror_url="https://mirrors.pku.edu.cn"
+        local kali_mirror="1"
+    elif [[ "$choice" == "6" ]]; then
+        Show 2 "选择使用中国科大APT软件源"
+        local mirror_url="https://mirrors.ustc.edu.cn"
+        local kali_mirror="0"
+    else
+        Show 1 "输入错误, 退出安装"
+    fi
+
     Show 2 "根据当前系统版本类型, 自动配置APT源"
     if [[ "$(lsb_release -rs)" == "18.04" ]]; then
-        config_apt_source_version "bionic"
+        config_apt_source_version "bionic" "$mirror_url"
     elif [[ "$(lsb_release -rs)" == "20.04" ]]; then
-        config_apt_source_version "focal"
+        config_apt_source_version "focal" "$mirror_url"
     elif [[ "$(lsb_release -rs)" == "22.04" ]]; then
-        config_apt_source_version "jammy"
+        config_apt_source_version "jammy" "$mirror_url"
     elif [[ "$(lsb_release -rs)" == "23.04" ]]; then
-        config_apt_source_version "lunar"
+        config_apt_source_version "lunar" "$mirror_url"
     elif [[ "$(lsb_release -rs)" == "24.04" ]]; then
-        config_apt_source_version "noble"
+        config_apt_source_version "noble" "$mirror_url"
     elif [[ "$(lsb_release -cs)" == "kali-rolling" ]]; then
-        sudo mv /etc/apt/sources.list /etc/apt/sources.list.bak
-        sudo tee /etc/apt/sources.list <<-'EOF'
-deb https://mirrors.tuna.tsinghua.edu.cn/kali kali-rolling main contrib non-free non-free-firmware
-# deb-src https://mirrors.tuna.tsinghua.edu.cn/kali kali-rolling main contrib non-free non-free-firmware
+        if [[ "$kali_mirror" == "0" ]]; then
+            sudo mv /etc/apt/sources.list /etc/apt/sources.list.bak
+            sudo tee /etc/apt/sources.list <<-EOF
+deb ${mirror_url}/kali kali-rolling main contrib non-free non-free-firmware
+# deb-src ${mirror_url}/kali kali-rolling main contrib non-free non-free-firmware
 EOF
+        elif [[ "$kali_mirror" == "1" ]]; then
+            sudo mv /etc/apt/sources.list /etc/apt/sources.list.bak
+            sudo tee /etc/apt/sources.list <<-EOF
+deb https://mirrors.aliyun.com/kali kali-rolling main contrib non-free non-free-firmware
+# deb-src https://mirrors.aliyun.com/kali kali-rolling main contrib non-free non-free-firmware
+EOF
+        fi
     else
         Show 1 "不支持的系统版本, 请手动配置APT源"
     fi
