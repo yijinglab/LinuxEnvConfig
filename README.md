@@ -62,6 +62,12 @@ sudo bash LinuxEnvConfig.sh
 
 ### 配置 APT
 
+1. 华为云
+2. 阿里云
+3. 腾讯云
+4. 清华大学
+5. 北京大学
+6. 中国科大
 
 ### 配置 JDK
 
