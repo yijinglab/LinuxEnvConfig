@@ -1295,13 +1295,13 @@ configure_docker_mirror() {
     sudo tee /etc/docker/daemon.json <<-'EOF'
 {
   "registry-mirrors": [
-    "https://dockerpull.com",
-    "https://dockerproxy.cn",
+    "https://dockerpull.org",
+    "docker.fxxk.dedyn.io",
+    "docker.m.daocloud.io",
+    "docker.1panel.live",
     "https://06009bb76e000fc60fd1c01a26a6dfe0.mirror.swr.myhuaweicloud.com",
     "https://fl37993c.mirror.aliyuncs.com",
-    "https://registry.docker-cn.com",
-    "http://hub-mirror.c.163.com",
-    "https://docker.mirrors.ustc.edu.cn"
+    "https://registry.docker-cn.com"
   ]
 }
 EOF
@@ -1432,9 +1432,7 @@ update_docker_mirrors() {
         "docker.fxxk.dedyn.io"
         "docker.m.daocloud.io"
         "docker.1panel.live"
-        "dockerproxy.com"
-        "dockerproxy.cn"
-        "dockerpull.com"
+        "dockerpull.org"
         "dislabaiot.xyz"
         "docker.wanpeng.top"
         "doublezonline.cloud"
@@ -1507,9 +1505,7 @@ pull_docker_image() {
         "docker.fxxk.dedyn.io"
         "docker.m.daocloud.io"
         "docker.1panel.live"
-        "dockerproxy.com"
-        "dockerproxy.cn"
-        "dockerpull.com"
+        "dockerpull.org"
         "dislabaiot.xyz"
         "docker.wanpeng.top"
         "doublezonline.cloud"
