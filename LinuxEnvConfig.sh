@@ -1296,9 +1296,9 @@ configure_docker_mirror() {
 {
   "registry-mirrors": [
     "https://dockerpull.org",
-    "docker.fxxk.dedyn.io",
-    "docker.m.daocloud.io",
-    "docker.1panel.live",
+    "https://docker.fxxk.dedyn.io",
+    "https://docker.m.daocloud.io",
+    "https://docker.1panel.live",
     "https://06009bb76e000fc60fd1c01a26a6dfe0.mirror.swr.myhuaweicloud.com",
     "https://fl37993c.mirror.aliyuncs.com",
     "https://registry.docker-cn.com"
