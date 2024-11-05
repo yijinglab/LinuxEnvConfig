@@ -2003,18 +2003,40 @@ config_metasploit() {
 # 安装Metasploit-framework
 install_metasploit() {
     Show 2 "开始安装 Metasploit-framework"
-    Show 2 "配置 Kali APT 源"
-    sudo echo "deb https://mirrors.tuna.tsinghua.edu.cn/kali kali-rolling main non-free contrib" | sudo tee -a /etc/apt/sources.list > /dev/null
-    Show 2 "导入 Kali APT 源的 GPG 公钥"
-    wget -qO - https://archive.kali.org/archive-key.asc | sudo apt-key add -
-    Show 2 "更新 APT 软件包列表"
-    sudo apt update
-    Show 2 "安装 metasploit-framework"
-    sudo apt install metasploit-framework -y
-    if [ $? -eq 0 ]; then
-        Show 0 "安装 metasploit-framework 完成"
+    if [[ "$(lsb_release -is)" == "Ubuntu" ]]; then
+        Show 2 "当前系统为 Ubuntu"
+        Show 2 "下载 Metasploit-framework"
+        wget -q --show-progress https://gitee.com/yijingsec/metasploit-omnibus/raw/master/config/templates/metasploit-framework-wrappers/msfupdate.erb -O msfinstall && chmod 755 msfinstall
+        if [ $? -eq 0 ]; then
+            Show 0 "下载Metasploit安装脚本完成"
+        else
+            Show 1 "下载Metasploit安装脚本失败"
+        fi
+
+        Show 2 "安装 Metasploit-framework"
+        ./msfinstall > /dev/null
+        if [ $? -eq 0 ]; then
+            Show 0 "安装 Metasploit-framework 完成"
+        else
+            Show 1 "安装 Metasploit-framework 失败"
+        fi
+    elif [[ "$(lsb_release -is)" == "Kali" ]]; then
+        Show 2 "当前系统为 Kali"
+        Show 2 "配置 Kali APT 源"
+        sudo echo "deb https://mirrors.tuna.tsinghua.edu.cn/kali kali-rolling main non-free contrib" | sudo tee -a /etc/apt/sources.list > /dev/null
+        Show 2 "导入 Kali APT 源的 GPG 公钥"
+        wget -qO - https://archive.kali.org/archive-key.asc | sudo apt-key add -
+        Show 2 "更新 APT 软件包列表"
+        sudo apt update > /dev/null
+        Show 2 "安装 metasploit-framework"
+        sudo apt install metasploit-framework -y > /dev/null
+        if [ $? -eq 0 ]; then
+            Show 0 "安装 metasploit-framework 完成"
+        else
+            Show 1 "安装 metasploit-framework 失败"
+        fi
     else
-        Show 1 "安装 metasploit-framework 失败"
+        Show 1 "脚本不适用当前系统, 无法安装 Metasploit-framework"
     fi
     Show 2 "安装 metasploit 版本: "
     msfconsole --version
@@ -2023,7 +2045,9 @@ install_metasploit() {
 # 卸载Metasploit-framework
 remove_metasploit() {
     Show 2 "开始卸载 Metasploit-framework"
-    sudo apt remove metasploit-framework -y
+    sudo apt-get remove metasploit-framework -y > /dev/null
+    sudo rm -rf /usr/share/keyrings/metasploit-framework.gpg > /dev/null
+
     if [ $? -eq 0 ]; then
         Show 0 "卸载 metasploit-framework 完成"
     else
