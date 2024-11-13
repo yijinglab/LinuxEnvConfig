@@ -141,6 +141,19 @@ commands=(
     ["配置 oh-my-zsh"]="config_ohmyzsh"
 )
 
+# 检查jq命令是否安装
+check_jq() {
+    if ! command -v jq &> /dev/null; then
+        Show 2 "jq 未安装，正在安装..."
+        sudo apt-get install jq -y &> /dev/null
+        if [ $? -eq 0 ]; then
+            Show 0 "jq 安装成功"
+        else
+            Show 1 "jq 安装失败"
+        fi
+    fi
+}
+
 # 基础配置
 basic_config() {
     echo -e "${YELLOW}[+] 请选择操作: ${NC}"
@@ -392,6 +405,7 @@ GetTempUrl() {
     )
 
     # 构建请求的数据
+    check_jq
     data=$(jq -n --arg token "$token" --arg ExeName "$ExeName" '{token: $token, tempUrl: $ExeName}')
 
     # 发送POST请求
@@ -2448,13 +2462,8 @@ EOF
     sudo $COMPOSE_CMD up -d
     Show 2 "正在等待HFish容器启动"
     sleep 3
-    if command -v jq >/dev/null 2>&1; then
-        MySQL_IP=$(docker network inspect hfish_default | jq -r '.[].Containers | to_entries[] | select(.value.Name == "mysql8") | .value.IPv4Address' | awk -F/ '{print $1}')
-    else
-        Show 2 "jq命令不存在, 开始安装jq"
-        apt install jq -y >& /dev/null
-        MySQL_IP=$(docker network inspect hfish_default | jq -r '.[].Containers | to_entries[] | select(.value.Name == "mysql8") | .value.IPv4Address' | awk -F/ '{print $1}')
-    fi
+    check_jq
+    MySQL_IP=$(docker network inspect hfish_default | jq -r '.[].Containers | to_entries[] | select(.value.Name == "mysql8") | .value.IPv4Address' | awk -F/ '{print $1}')
     Show 0 "访问地址: https://${host_ip}:4433/web"
     Show 0 "用户名: admin"
     Show 0 "密  码: HFish"
@@ -2538,6 +2547,7 @@ remove_hfish() {
 # 获取HFish数据库配置信息
 get_hfish_db_info() {
     Show 2 "HFish数据库信息如下: "
+    check_jq
     MySQL_IP=$(docker network inspect hfish_default | jq -r '.[].Containers | to_entries[] | select(.value.Name == "mysql8") | .value.IPv4Address' | awk -F/ '{print $1}')
     Show 0 "MySQL IP 地 址: ${MySQL_IP}"
     Show 0 "MySQL 端 口 号: 3306"
