@@ -154,6 +154,19 @@ check_jq() {
     fi
 }
 
+# 检查unzip命令是否安装
+check_unzip() {
+    if ! command -v unzip &> /dev/null; then
+        Show 2 "unzip 未安装，正在安装..."
+        sudo apt-get install unzip -y &> /dev/null
+        if [ $? -eq 0 ]; then
+            Show 0 "unzip 安装成功"
+        else
+            Show 1 "unzip 安装失败"
+        fi
+    fi
+}
+
 # 基础配置
 basic_config() {
     echo -e "${YELLOW}[+] 请选择操作: ${NC}"
@@ -1780,16 +1793,8 @@ install_arl() {
     fi
 
     Show 2 "开始解压 ARL 压缩包"
-    if ! command -v unzip >/dev/null 2>&1; then
-        Show 2 "未找到 unzip 命令, 开始安装 unzip"
-        apt install unzip -y >/dev/null 2>&1
-        if [ $? -eq 0 ]; then
-            Show 0 "安装 unzip 成功"
-        else
-            Show 1 "安装 unzip 失败"
-        fi
-    fi
     cd /opt/docker_arl
+    check_unzip
     unzip -o docker.zip
 
     check_docker_compose
