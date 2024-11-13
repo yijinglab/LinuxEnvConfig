@@ -337,6 +337,29 @@ config_jdk() {
     read -p "$(echo -e "${GREEN}请输入选择(1-4): ${NC}")" choice
     case $choice in
         1)
+            echo -e "${YELLOW}[+] 选择OracleJDK安装源: ${NC}"
+            echo "1. study.yijinglab.com"
+            echo "2. www.injdk.cn"
+            echo "3. 返回主菜单"
+            read -p "$(echo -e "${GREEN}请输入序号(1-3): ${NC}")" version
+            case $version in
+                1)
+                    Show 2 "选择 study.yijinglab.com"
+                    read -p "$(echo -e "${GREEN}请输入客户端密钥(教学平台->课程云盘->客户端密钥): ${NC}")" client_key
+                    if [ -z "$client_key" ]; then
+                        Show 1 "客户端密钥不能为空"
+                    fi
+                    ;;
+                2)
+                    Show 2 "选择 injdk.cn"
+                    ;;
+                3)
+                    Show 2 "退出到主菜单"
+                    ;;
+                *)
+                    Show 1 "无效的选择"
+                    ;;
+            esac
             install_oracle_jdk
             ;;
         2)
@@ -354,8 +377,57 @@ config_jdk() {
     esac
 }
 
+# 定义函数来获取临时URL
+GetTempUrl() {
+    token=$1
+    ExeName=$2
+
+    # 定义API URL和错误消息
+    url_api='https://study.yijinglab.com/api/tools/oss/tempurl'
+
+    error_messages=(
+        "15010004:未通过验证,请先登录,获取正确客户端密钥"
+        "15010005:请求内容异常"
+        "15010001:参数不正确"
+    )
+
+    # 构建请求的数据
+    data=$(jq -n --arg token "$token" --arg ExeName "$ExeName" '{token: $token, tempUrl: $ExeName}')
+
+    # 发送POST请求
+    resp=$(curl -s -X POST -H "Content-Type: application/json" -d "$data" "$url_api")
+
+    # 解析JSON响应
+    code=$(echo "$resp" | jq -r '.code')
+    success=$(echo "$resp" | jq -r '.success')
+    errorCode=$(echo "$resp" | jq -r '.errorCode')
+    tempUrl=$(echo "$resp" | jq -r '.tempUrl')
+    msg=$(echo "$resp" | jq -r '.msg')
+
+    # 处理成功情况
+    if [ "$success" = "true" ]; then
+        Show 0 "获取OracleJDK下载地址成功"
+        JDK_URL=$tempUrl
+    else
+        # 处理错误消息
+        for error in "${error_messages[@]}"; do
+            key=$(echo "$error" | cut -d: -f1)
+            value=$(echo "$error" | cut -d: -f2)
+            if [ "$code" = "$key" ] || [ "$errorCode" = "$key" ]; then
+                Show 1 "$value"
+            fi
+        done
+        Show 1 "$msg"
+    fi
+}
+
 # 安装Oracle JDK
 install_oracle_jdk() {
+    # 定义常量
+    local JDK_VERSIONS=("jdk1.8.0_421" "jdk-11.0.24" "jdk-17.0.12" "jdk-21.0.4" "jdk-22.0.2" "jdk-23.0.1")
+    local JDK_NAMES=("jdk-8u421-linux-x64.tar.gz" "jdk-11.0.24_linux-x64_bin.tar.gz" "jdk-17.0.12_linux-x64_bin.tar.gz" "jdk-21.0.4_linux-x64_bin.tar.gz" "jdk-22.0.2_linux-x64_bin.tar.gz" "jdk-23_linux-x64_bin.tar.gz")
+    local JDK_URLS=("https://d.injdk.cn/d/download/oraclejdk/8/jdk-8u421-linux-x64.tar.gz" "https://d.injdk.cn/d/download/oraclejdk/11/jdk-11.0.24_linux-x64_bin.tar.gz" "https://d.injdk.cn/d/download/oraclejdk/17/jdk-17_linux-x64_bin.tar.gz" "https://d.injdk.cn/d/download/oraclejdk/21/jdk-21_linux-x64_bin.tar.gz" "https://d.injdk.cn/d/download/oraclejdk/22/jdk-22_linux-x64_bin.tar.gz" "https://d.injdk.cn/d/download/oraclejdk/23/jdk-23_linux-x64_bin.tar.gz")
+
     Show 2 "安装Oracle JDK"
     echo -e "${YELLOW}[+] 选择想要安装的OracleJDK版本: ${NC}"
     echo "1. Oracle JDK 8 LTS"
@@ -367,46 +439,15 @@ install_oracle_jdk() {
     echo "7. 返回主菜单"
     read -p "$(echo -e "${GREEN}请输入序号(1-7): ${NC}")" version
     case $version in
-        1)
-            Show 2 "安装Oracle JDK 8 LTS"
-            JDK_VER="jdk1.8.0_421"
-            JDK_NAME="jdk-8u421-linux-x64.tar.gz"
-            JDK_URL="https://d.injdk.cn/d/download/oraclejdk/8/jdk-8u421-linux-x64.tar.gz"
-            check_oracle_jdk
-            ;;
-        2)
-            Show 2 "安装Oracle JDK 11 LTS"
-            JDK_VER="jdk-11.0.24"
-            JDK_NAME="jdk-11.0.24_linux-x64_bin.tar.gz"
-            JDK_URL="https://d.injdk.cn/d/download/oraclejdk/11/jdk-11.0.24_linux-x64_bin.tar.gz"
-            check_oracle_jdk
-            ;;
-        3)
-            Show 2 "安装Oracle JDK 17 LTS"
-            JDK_VER="jdk-17.0.12"
-            JDK_NAME="jdk-17_linux-x64_bin.tar.gz"
-            JDK_URL="https://d.injdk.cn/d/download/oraclejdk/17/jdk-17_linux-x64_bin.tar.gz"
-            check_oracle_jdk
-            ;;
-        4)
-            Show 2 "安装Oracle JDK 21 LTS"
-            JDK_VER="jdk-21.0.4"
-            JDK_NAME="jdk-21_linux-x64_bin.tar.gz"
-            JDK_URL="https://d.injdk.cn/d/download/oraclejdk/21/jdk-21_linux-x64_bin.tar.gz"
-            check_oracle_jdk
-            ;;
-        5)
-            Show 2 "安装Oracle JDK 22 LTS"
-            JDK_VER="jdk-22.0.2"
-            JDK_NAME="jdk-22_linux-x64_bin.tar.gz"
-            JDK_URL="https://d.injdk.cn/d/download/oraclejdk/22/jdk-22_linux-x64_bin.tar.gz"
-            check_oracle_jdk
-            ;;
-        6)
-            Show 2 "安装Oracle JDK 23 LTS"
-            JDK_VER="jdk-23"
-            JDK_NAME="jdk-23_linux-x64_bin.tar.gz"
-            JDK_URL="https://d.injdk.cn/d/download/oraclejdk/23/jdk-23_linux-x64_bin.tar.gz"
+        1|2|3|4|5|6)
+            local index=$((version - 1))
+            JDK_VER=${JDK_VERSIONS[$index]}
+            JDK_NAME=${JDK_NAMES[$index]}
+            JDK_URL=${JDK_URLS[$index]}
+
+            if [ -n "$client_key" ]; then
+                GetTempUrl "$client_key" "$JDK_NAME"
+            fi
             check_oracle_jdk
             ;;
         7)
@@ -422,10 +463,10 @@ install_oracle_jdk() {
 check_oracle_jdk() {
     Show 2 "检查 Oracle JDK..."
     if [ -f $JDK_NAME ]; then
-        Show 2 "已存在 ${JDK_NAME} 文件, 无需下载"
+        Show 2 "存在 ${JDK_NAME} 文件, 无需下载"
     else
-        Show 2 "${JDK_NAME} 文件不存在, 开始下载..."
-        wget -q --show-progress "$JDK_URL"
+        Show 2 "不存在 ${JDK_NAME} 文件, 开始下载..."
+        wget -q --show-progress "$JDK_URL" -O $JDK_NAME
 
         # 检查是否下载成功
         if [ $? -ne 0 ]; then
@@ -448,7 +489,7 @@ check_oracle_jdk() {
     fi
 
     # 解压JDK
-    Show 2 "正在解压缩 Oracle JDK..."
+    Show 2 "解压 Oracle JDK..."
     sudo tar -xzf $JDK_NAME -C $JDK_DIR
 
     # 检查解压是否成功
@@ -486,134 +527,6 @@ check_oracle_jdk() {
 
     Show 0 "成功安装和配置Oracle JDK"
 }
-
-# 安装OpenJDK
-install_openjdk() {
-    Show 2 "安装OpenJDK"
-    echo -e "${YELLOW}[+] 选择想要安装的OpenJDK版本: ${NC}"
-    echo "1. OpenJDK 11 LTS"
-    echo "2. OpenJDK 17 LTS"
-    echo "3. OpenJDK 21 LTS"
-    echo "4. OpenJDK 22 LTS"
-    echo "5. OpenJDK 23 LTS"
-    echo "6. 返回到主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
-
-    case $choice in
-        1)
-            Show 2 "安装OpenJDK 11 LTS"
-            JDK_VER="11.0.2"
-            JDK_URL="https://mirrors.huaweicloud.com/openjdk/${JDK_VER}/openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
-            check_openjdk
-            ;;
-        2)
-            Show 2 "安装OpenJDK 17 LTS"
-            JDK_VER="17.0.2"
-            JDK_URL="https://mirrors.huaweicloud.com/openjdk/${JDK_VER}/openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
-            check_openjdk
-            ;;
-        3)
-            Show 2 "安装OpenJDK 21 LTS"
-            JDK_VER="21.0.1"
-            JDK_URL="https://mirrors.huaweicloud.com/openjdk/${JDK_VER}/openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
-            check_openjdk
-            ;;
-        4)
-            Show 2 "安装OpenJDK 22 LTS"
-            JDK_VER="22.0.2"
-            JDK_URL="https://mirrors.huaweicloud.com/openjdk/${JDK_VER}/openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
-            check_openjdk
-            ;;
-        5)
-            Show 2 "安装OpenJDK 23 LTS"
-            JDK_VER="23"
-            JDK_URL="https://mirrors.huaweicloud.com/openjdk/${JDK_VER}/openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
-            check_openjdk
-            ;;
-        6)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "输入的序号无效"
-            ;;
-    esac
-}
-
-# 检查 OpenJDK
-check_openjdk() {
-    Show 2 "检查 OpenJDK..."
-    if [ -f "openjdk-${JDK_VER}_linux-x64_bin.tar.gz" ]; then
-        Show 2 "已存在openjdk-${JDK_VER}_linux-x64_bin.tar.gz文件, 无需下载"
-    else
-        Show 2 "开始下载OpenJDK..."
-        wget -q --show-progress $JDK_URL
-
-        # 检查是否下载成功
-        if [ -f "openjdk-${JDK_VER}_linux-x64_bin.tar.gz" ]; then
-            Show 0 "openjdk-${JDK_VER}_linux-x64_bin.tar.gz文件下载成功"
-        else
-            rm -f openjdk-${JDK_VER}_linux-x64_bin.tar.gz
-            Show 1 "下载OpenJDK失败"
-        fi
-    fi
-
-    # 设置解压目录
-    JDK_DIR="/usr/lib/jvm"
-
-    if [ ! -d "$JDK_DIR" ]; then
-        Show 2 "创建 ${JDK_DIR} 目录..."
-        sudo mkdir -p "${JDK_DIR}"
-
-        if [ $? -eq 0 ]; then
-            Show 0 "目录创建成功"
-        else
-            Show 1 "目录创建失败"
-        fi
-    fi
-
-    # 解压JDK
-    Show 2 "正在解压缩JDK..."
-    sudo tar -xzf openjdk-${JDK_VER}_linux-x64_bin.tar.gz -C ${JDK_DIR}
-
-    # 检查解压是否成功
-    if [ $? -eq 0 ]; then
-        Show 0 "解压OpenJDK成功"
-    else
-        Show 1 "解压OpenJDK失败"
-    fi
-
-    # 配置Java和Javac
-    Show 2 "配置Java和Javac到系统..."
-
-    # 设置Java
-    sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/jdk-${JDK_VER}/bin/java 2
-    sudo update-alternatives --set java /usr/lib/jvm/jdk-${JDK_VER}/bin/java
-
-    # 设置Javac
-    sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/jdk-${JDK_VER}/bin/javac 2
-    sudo update-alternatives --set javac /usr/lib/jvm/jdk-${JDK_VER}/bin/javac
-
-    # 设置keytool
-    if [ -f "/usr/lib/jvm/${JDK_VER}/bin/keytool" ]; then
-        sudo update-alternatives --install /usr/bin/keytool keytool /usr/lib/jvm/${JDK_VER}/bin/keytool 2
-        sudo update-alternatives --set keytool /usr/lib/jvm/${JDK_VER}/bin/keytool
-    fi
-
-    # 设置jar
-    if [ -f "/usr/lib/jvm/${JDK_VER}/bin/jar" ]; then
-        sudo update-alternatives --install /usr/bin/jar jar /usr/lib/jvm/${JDK_VER}/bin/jar 2
-        sudo update-alternatives --set jar /usr/lib/jvm/${JDK_VER}/bin/jar
-    fi
-
-    # 设置jarsigner
-    if [ -f "/usr/lib/jvm/${JDK_VER}/bin/jarsigner" ]; then
-        sudo update-alternatives --install /usr/bin/jarsigner jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner 2
-        sudo update-alternatives --set jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner
-    fi
-
-    Show 0 "安装和配置OpenJDK成功"
-}
-
 
 # 删除当前JDK环境
 remove_jdk() {
@@ -2158,7 +2071,7 @@ update_viper_version() {
 
 # 更新Viper密码
 update_viper_password() {
-    SHow 2 "开始更新Viper密码"
+    Show 2 "开始更新Viper密码"
     cd /root/VIPER
     read -p "$(echo -e "${YELLOW}输入VIPER密码: ${NC}")" VIPER_PASSWORD
     Show 2 "更新docker-compose.yml文件"
