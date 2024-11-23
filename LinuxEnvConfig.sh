@@ -555,6 +555,133 @@ check_oracle_jdk() {
     Show 0 "成功安装和配置Oracle JDK"
 }
 
+# 安装OpenJDK
+install_openjdk() {
+    Show 2 "安装OpenJDK"
+    echo -e "${YELLOW}[+] 选择想要安装的OpenJDK版本: ${NC}"
+    echo "1. OpenJDK 11 LTS"
+    echo "2. OpenJDK 17 LTS"
+    echo "3. OpenJDK 21 LTS"
+    echo "4. OpenJDK 22 LTS"
+    echo "5. OpenJDK 23 LTS"
+    echo "6. 返回到主菜单"
+    read -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
+
+    case $choice in
+        1)
+            Show 2 "安装OpenJDK 11 LTS"
+            JDK_VER="11.0.2"
+            JDK_URL="https://mirrors.huaweicloud.com/openjdk/${JDK_VER}/openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
+            check_openjdk
+            ;;
+        2)
+            Show 2 "安装OpenJDK 17 LTS"
+            JDK_VER="17.0.2"
+            JDK_URL="https://mirrors.huaweicloud.com/openjdk/${JDK_VER}/openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
+            check_openjdk
+            ;;
+        3)
+            Show 2 "安装OpenJDK 21 LTS"
+            JDK_VER="21.0.1"
+            JDK_URL="https://mirrors.huaweicloud.com/openjdk/${JDK_VER}/openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
+            check_openjdk
+            ;;
+        4)
+            Show 2 "安装OpenJDK 22 LTS"
+            JDK_VER="22.0.2"
+            JDK_URL="https://mirrors.huaweicloud.com/openjdk/${JDK_VER}/openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
+            check_openjdk
+            ;;
+        5)
+            Show 2 "安装OpenJDK 23 LTS"
+            JDK_VER="23"
+            JDK_URL="https://mirrors.huaweicloud.com/openjdk/${JDK_VER}/openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
+            check_openjdk
+            ;;
+        6)
+            Show 2 "退出到主菜单"
+            ;;
+        *)
+            Show 2 "输入的序号无效"
+            ;;
+    esac
+}
+
+# 检查 OpenJDK
+check_openjdk() {
+    Show 2 "检查 OpenJDK..."
+    if [ -f "openjdk-${JDK_VER}_linux-x64_bin.tar.gz" ]; then
+        Show 2 "openjdk-${JDK_VER}_linux-x64_bin.tar.gz文件已存在, 无需下载"
+    else
+        Show 2 "开始下载OpenJDK..."
+        wget -q --show-progress $JDK_URL
+
+        # 检查是否下载成功
+        if [ -f "openjdk-${JDK_VER}_linux-x64_bin.tar.gz" ]; then
+            Show 0 "openjdk-${JDK_VER}_linux-x64_bin.tar.gz文件下载成功"
+        else
+            rm -f openjdk-${JDK_VER}_linux-x64_bin.tar.gz
+            Show 1 "下载OpenJDK失败"
+        fi
+    fi
+
+    # 设置解压目录
+    JDK_DIR="/usr/lib/jvm"
+
+    if [ ! -d "$JDK_DIR" ]; then
+        Show 2 "创建 ${JDK_DIR} 目录..."
+        sudo mkdir -p "${JDK_DIR}"
+
+        if [ $? -eq 0 ]; then
+            Show 0 "目录创建成功"
+        else
+            Show 1 "目录创建失败"
+        fi
+    fi
+
+    # 解压JDK
+    Show 2 "正在解压缩JDK..."
+    sudo tar -xzf openjdk-${JDK_VER}_linux-x64_bin.tar.gz -C ${JDK_DIR}
+
+    # 检查解压是否成功
+    if [ $? -eq 0 ]; then
+        Show 0 "解压OpenJDK成功"
+    else
+        Show 1 "解压OpenJDK失败"
+    fi
+
+    # 配置Java和Javac
+    Show 2 "配置Java和Javac到系统..."
+
+    # 设置Java
+    sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/jdk-${JDK_VER}/bin/java 2
+    sudo update-alternatives --set java /usr/lib/jvm/jdk-${JDK_VER}/bin/java
+
+    # 设置Javac
+    sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/jdk-${JDK_VER}/bin/javac 2
+    sudo update-alternatives --set javac /usr/lib/jvm/jdk-${JDK_VER}/bin/javac
+
+    # 设置keytool
+    if [ -f "/usr/lib/jvm/${JDK_VER}/bin/keytool" ]; then
+        sudo update-alternatives --install /usr/bin/keytool keytool /usr/lib/jvm/${JDK_VER}/bin/keytool 2
+        sudo update-alternatives --set keytool /usr/lib/jvm/${JDK_VER}/bin/keytool
+    fi
+
+    # 设置jar
+    if [ -f "/usr/lib/jvm/${JDK_VER}/bin/jar" ]; then
+        sudo update-alternatives --install /usr/bin/jar jar /usr/lib/jvm/${JDK_VER}/bin/jar 2
+        sudo update-alternatives --set jar /usr/lib/jvm/${JDK_VER}/bin/jar
+    fi
+
+    # 设置jarsigner
+    if [ -f "/usr/lib/jvm/${JDK_VER}/bin/jarsigner" ]; then
+        sudo update-alternatives --install /usr/bin/jarsigner jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner 2
+        sudo update-alternatives --set jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner
+    fi
+
+    Show 0 "安装和配置OpenJDK成功"
+}
+
 # 删除当前JDK环境
 remove_jdk() {
     Show 2 "定位JDK安装目录"
