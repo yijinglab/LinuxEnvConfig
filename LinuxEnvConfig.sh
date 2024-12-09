@@ -614,27 +614,30 @@ install_openjdk() {
 
 # 检查 OpenJDK
 check_openjdk() {
-    Show 2 "检查 OpenJDK..."
+    Show 2 "检查 OpenJDK 安装情况"
     if [ -f "openjdk-${JDK_VER}_linux-x64_bin.tar.gz" ]; then
-        Show 2 "openjdk-${JDK_VER}_linux-x64_bin.tar.gz文件已存在, 无需下载"
-    else
-        Show 2 "开始下载OpenJDK..."
-        wget -q --show-progress $JDK_URL
+        Show 2 "存在 openjdk-${JDK_VER}_linux-x64_bin.tar.gz 文件"
+        Show 2 "删除 openjdk-${JDK_VER}_linux-x64_bin.tar.gz 文件"
+        rm -f openjdk-${JDK_VER}_linux-x64_bin.tar.gz
+    fi
 
-        # 检查是否下载成功
-        if [ -f "openjdk-${JDK_VER}_linux-x64_bin.tar.gz" ]; then
-            Show 0 "openjdk-${JDK_VER}_linux-x64_bin.tar.gz文件下载成功"
-        else
-            rm -f openjdk-${JDK_VER}_linux-x64_bin.tar.gz
-            Show 1 "下载OpenJDK失败"
-        fi
+    Show 2 "开始下载 OpenJDK 文件"
+    wget -q --show-progress $JDK_URL
+
+    # 检查是否下载成功
+    if [ -f "openjdk-${JDK_VER}_linux-x64_bin.tar.gz" ]; then
+        Show 0 "下载 OpenJDK 文件成功"
+    else
+        rm -f openjdk-${JDK_VER}_linux-x64_bin.tar.gz
+        Show 1 "下载 OpenJDK 文件失败"
     fi
 
     # 设置解压目录
     JDK_DIR="/usr/lib/jvm"
+    Show 2 "设置解压安装目录为：${JDK_DIR}"
 
     if [ ! -d "$JDK_DIR" ]; then
-        Show 2 "创建 ${JDK_DIR} 目录..."
+        Show 2 "创建 ${JDK_DIR} 目录"
         sudo mkdir -p "${JDK_DIR}"
 
         if [ $? -eq 0 ]; then
@@ -645,18 +648,18 @@ check_openjdk() {
     fi
 
     # 解压JDK
-    Show 2 "正在解压缩JDK..."
+    Show 2 "开始解压缩 OpenJDK 文件"
     sudo tar -xzf openjdk-${JDK_VER}_linux-x64_bin.tar.gz -C ${JDK_DIR}
 
     # 检查解压是否成功
     if [ $? -eq 0 ]; then
-        Show 0 "解压OpenJDK成功"
+        Show 0 "解压 OpenJDK 成功"
     else
-        Show 1 "解压OpenJDK失败"
+        Show 1 "解压 OpenJDK 失败"
     fi
 
     # 配置Java和Javac
-    Show 2 "配置Java和Javac到系统..."
+    Show 2 "配置Java环境变量"
 
     # 设置Java
     sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/jdk-${JDK_VER}/bin/java 2
