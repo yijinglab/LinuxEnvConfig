@@ -900,17 +900,18 @@ install_miniconda3() {
     Show 2 "检查 miniconda3 安装脚本是否存在"
     local install_script="/opt/miniconda3.sh"
     local install_dir="/opt/miniconda3"
-    if [ ! -f "$install_script" ]; then
-        # 下载 Miniconda3 安装脚本
-        Show 2 "下载 miniconda3 安装脚本"
-        sudo wget -q --show-progress ${mirror_url}/miniconda/Miniconda3-latest-Linux-x86_64.sh -O "$install_script"
-        if [ $? -eq 0 ]; then
-            Show 0 "下载 miniconda3 安装脚本成功"
-        else
-            Show 1 "下载 miniconda3 安装脚本失败"
-        fi
+    if [ -f "$install_script" ]; then
+        Show 2 "存在 miniconda3 安装脚本"
+        Show 2 "删除 miniconda3 安装脚本"
+        rm -f "$install_script" >/dev/null 2>&1
+    fi
+
+    Show 2 "下载 miniconda3 安装脚本"
+    sudo wget -q --show-progress ${mirror_url}/miniconda/Miniconda3-latest-Linux-x86_64.sh -O "$install_script"
+    if [ $? -eq 0 ]; then
+        Show 0 "下载 miniconda3 安装脚本成功"
     else
-        Show 2 "miniconda3 安装脚本已存在"
+        Show 1 "下载 miniconda3 安装脚本失败"
     fi
 
     Show 2 "执行 miniconda3 安装脚本"
