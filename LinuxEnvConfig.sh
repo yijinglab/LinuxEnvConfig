@@ -488,22 +488,27 @@ install_oracle_jdk() {
 
 # 检查 Oracle JDK
 check_oracle_jdk() {
-    Show 2 "检查 Oracle JDK..."
+    Show 2 "检查 Oracle JDK 安装情况"
     if [ -f $JDK_NAME ]; then
-        Show 2 "存在 ${JDK_NAME} 文件, 无需下载"
+        Show 2 "存在 ${JDK_NAME} 文件"
+        Show 2 "删除 ${JDK_NAME} 文件"
+        rm -rf $JDK_NAME
     else
-        Show 2 "不存在 ${JDK_NAME} 文件, 开始下载..."
-        wget -q --show-progress "$JDK_URL" -O $JDK_NAME
+        Show 2 "不存在 ${JDK_NAME} 文件"
+    fi
 
-        # 检查是否下载成功
-        if [ $? -ne 0 ]; then
-            rm -f $JDK_NAME
-            Show 1  "下载 Oracle JDK 失败。"
-        fi
+    Show 2 "下载 ${JDK_NAME} 文件"
+    wget -q --show-progress "$JDK_URL" -O $JDK_NAME
+    if [ $? -ne 0 ]; then
+        rm -f $JDK_NAME >/dev/null 2>&1
+        Show 1  "下载 ${JDK_NAME} 文件失败"
+    else
+        Show 0  "下载 ${JDK_NAME} 文件成功"
     fi
 
     # 设置解压目录
     JDK_DIR="/usr/lib/jvm"
+    Show 2 "设置解压安装目录为：${JDK_DIR}"
 
     if [ ! -d "$JDK_DIR" ]; then
         Show 2 "开始创建 ${JDK_DIR} 目录..."
@@ -516,7 +521,7 @@ check_oracle_jdk() {
     fi
 
     # 解压JDK
-    Show 2 "解压 Oracle JDK..."
+    Show 2 "开始解压 Oracle JDK 文件"
     sudo tar -xzf $JDK_NAME -C $JDK_DIR
 
     # 检查解压是否成功
@@ -526,7 +531,7 @@ check_oracle_jdk() {
         Show 1 "解压 Oracle JDK 失败"
     fi
 
-    Show 2 "配置Java和Javac到系统..."
+    Show 2 "配置Java环境变量"
 
     sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/${JDK_VER}/bin/java 2
     sudo update-alternatives --set java /usr/lib/jvm/${JDK_VER}/bin/java
