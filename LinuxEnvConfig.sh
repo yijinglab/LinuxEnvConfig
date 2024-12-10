@@ -74,6 +74,36 @@ Show() {
     fi
 }
 
+action() {
+    if [ $? -eq 0 ]; then
+		Show 0 $1
+	else
+		Show 1 $2
+	fi
+}
+
+# 检查输入是否是有效的IPv4地址
+validate_ip() {
+    local ip="$1"
+    # 正则表达式匹配IPv4地址
+    local regex='^([0-9]{1,3}\.){3}[0-9]{1,3}$'
+
+    if [[ $ip =~ $regex ]]; then
+        # 进一步检查每个八位组是否在0-255之间
+        IFS='.' read -r -a octets <<< "$ip"
+        for octet in "${octets[@]}"; do
+            if ((octet > 255 || octet < 0)); then
+                Show 2 "错误: IP地址中的每个部分必须在0到255之间。"
+                return 1
+            fi
+        done
+        return 0
+    else
+        Show 2 "错误: 请输入正确的IP地址格式。"
+        return 1
+    fi
+}
+
 Warn() {
     echo -e "${aCOLOUR[3]}$1$COLOUR_RESET"
 }
@@ -85,6 +115,7 @@ GreyStart() {
 ColorReset() {
     echo -e "$COLOUR_RESET\c"
 }
+
 # 定义红色文本
 RED='\033[0;31m'
 # 无颜色
@@ -146,11 +177,7 @@ check_jq() {
     if ! command -v jq &> /dev/null; then
         Show 2 "jq 未安装，正在安装..."
         sudo apt-get install jq -y &> /dev/null
-        if [ $? -eq 0 ]; then
-            Show 0 "jq 安装成功"
-        else
-            Show 1 "jq 安装失败"
-        fi
+        action "jq 安装成功" "jq 安装失败"
     fi
 }
 
@@ -159,11 +186,7 @@ check_unzip() {
     if ! command -v unzip &> /dev/null; then
         Show 2 "unzip 未安装，正在安装..."
         sudo apt-get install unzip -y &> /dev/null
-        if [ $? -eq 0 ]; then
-            Show 0 "unzip 安装成功"
-        else
-            Show 1 "unzip 安装失败"
-        fi
+        action "unzip 安装成功" "unzip 安装失败"
     fi
 }
 
@@ -216,11 +239,7 @@ enable_root_user() {
     echo "root:${new_password}" | sudo chpasswd
 
     # 检查命令是否成功执行
-    if [ $? -eq 0 ]; then
-        Show 0 "root密码设置成功"
-    else
-        Show 1 "root密码设置失败"
-    fi
+    action "root密码设置成功" "root密码设置失败"
 }
 
 # 启用 SSH 服务
@@ -233,28 +252,16 @@ enable_ssh() {
         Show 2 "openssh-server 未安装，正在安装..."
         sudo apt-get update
         sudo apt-get install openssh-server -y
-        if [ $? -eq 0 ]; then
-            Show 0 "openssh-server 安装成功"
-        else
-            Show 1 "openssh-server 安装失败"
-        fi
+        action "openssh-server 安装成功" "openssh-server 安装失败"
     fi
 
     Show 2 "开始启动 SSH 服务..."
     sudo systemctl start ssh >&/dev/null
-    if [ $? -eq 0 ]; then
-        Show 0 "启动 SSH 服务成功"
-    else
-        Show 1 "启动 SSH 服务失败"
-    fi
+    action "启动 SSH 服务成功" "启动 SSH 服务失败"
 
     Show 2 "设置 SSH 服务开机自启..."
     sudo systemctl enable ssh >&/dev/null
-    if [ $? -eq 0 ]; then
-        Show 0 "设置 SSH 服务开机自启成功"
-    else
-        Show 1 "设置 SSH 服务开机自启失败"
-    fi
+    action "设置 SSH 服务开机自启成功" "设置 SSH 服务开机自启失败"
 
     # 显示 SSH 服务状态
     Show 2 "检查 SSH 服务状态..."
@@ -304,15 +311,11 @@ config_nameserver() {
 
 # 允许ROOT用户SSH登录
 root_ssh_login() {
-    Show 2 修改SSH服务配置文件允许root用户登录
+    Show 2 "修改SSH服务配置文件允许root用户登录"
     sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-    if [ $? -eq 0 ]; then
-        Show 0 "SSH服务配置已更改为允许root用户登录"
-    else
-        Show 1 "SSH服务配置更改失败"
-    fi
+    action "SSH服务配置已更改为允许root用户登录" "SSH服务配置更改失败"
 
-    Show 2 "重启SSH服务..."
+    Show 2 "重启SSH服务"
     sudo systemctl restart ssh
     if [ $? -eq 0 ]; then
         Show 0 "SSH服务重启成功"
@@ -513,23 +516,13 @@ check_oracle_jdk() {
     if [ ! -d "$JDK_DIR" ]; then
         Show 2 "开始创建 ${JDK_DIR} 目录..."
         sudo mkdir -p "${JDK_DIR}"
-        if [ $? -eq 0 ]; then
-            Show 0 "目录创建成功"
-        else
-            Show 1 "目录创建失败"
-        fi
+        action "创建 ${JDK_DIR} 目录成功" "创建 ${JDK_DIR} 目录失败"
     fi
 
     # 解压JDK
     Show 2 "开始解压 Oracle JDK 文件"
     sudo tar -xzf $JDK_NAME -C $JDK_DIR
-
-    # 检查解压是否成功
-    if [ $? -eq 0 ]; then
-        Show 0 "解压 Oracle JDK 成功"
-    else
-        Show 1 "解压 Oracle JDK 失败"
-    fi
+    action "解压 Oracle JDK 文件成功" "解压 Oracle JDK 文件失败"
 
     Show 2 "配置Java环境变量"
 
@@ -639,12 +632,7 @@ check_openjdk() {
     if [ ! -d "$JDK_DIR" ]; then
         Show 2 "创建 ${JDK_DIR} 目录"
         sudo mkdir -p "${JDK_DIR}"
-
-        if [ $? -eq 0 ]; then
-            Show 0 "目录创建成功"
-        else
-            Show 1 "目录创建失败"
-        fi
+        action "创建 ${JDK_DIR} 目录成功" "创建 ${JDK_DIR} 目录失败"
     fi
 
     # 解压JDK
@@ -652,12 +640,8 @@ check_openjdk() {
     sudo tar -xzf openjdk-${JDK_VER}_linux-x64_bin.tar.gz -C ${JDK_DIR}
 
     # 检查解压是否成功
-    if [ $? -eq 0 ]; then
-        Show 0 "解压 OpenJDK 成功"
-    else
-        Show 1 "解压 OpenJDK 失败"
-    fi
-
+    action "解压 OpenJDK 文件成功" "解压 OpenJDK 文件失败"
+    
     # 配置Java和Javac
     Show 2 "配置Java环境变量"
 
@@ -747,32 +731,19 @@ deb $source_url/ubuntu $version-backports main restricted universe multiverse
 deb $source_url/ubuntu $version-security main restricted universe multiverse
 # deb-src $source_url/ubuntu $version-security main restricted universe multiverse
 EOF
-    if [ $? -eq 0 ]; then
-        Show 0 "APT源配置文件修改成功"
-    else
-        Show 1 "APT源配置文件修改失败"
-    fi
+    action "APT源配置文件修改成功" "APT源配置文件修改失败"
+
     Show 2 "更新APT源"
     sudo apt-get update >/dev/null
-    if [ $? -eq 0 ]; then
-        Show 0 "APT源更新成功"
-    else
-        Show 1 "APT源更新失败"
-    fi
+    action "APT源更新成功" "APT源更新失败"
+
     Show 2 "安装软件源管理工具"
     sudo apt-get install -y software-properties-common >/dev/null
-    if [ $? -eq 0 ]; then
-        Show 0 "软件源管理工具安装成功"
-    else
-        Show 1 "软件源管理工具安装失败"
-    fi
+    action "软件源管理工具安装成功" "软件源管理工具安装失败"
+
     Show 2 "添加Python源"
     sudo add-apt-repository ppa:deadsnakes/ppa -y >/dev/null
-    if [ $? -eq 0 ]; then
-        Show 0 "Python源添加成功"
-    else
-        Show 1 "Python源添加失败"
-    fi
+    action "Python源添加成功" "Python源添加失败"
     Show 0 "APT源配置成功"
 }
 
@@ -916,11 +887,7 @@ install_miniconda3() {
 
     Show 2 "下载 miniconda3 安装脚本"
     sudo wget -q --show-progress ${mirror_url}/miniconda/Miniconda3-latest-Linux-x86_64.sh -O "$install_script"
-    if [ $? -eq 0 ]; then
-        Show 0 "下载 miniconda3 安装脚本成功"
-    else
-        Show 1 "下载 miniconda3 安装脚本失败"
-    fi
+    action "下载 miniconda3 安装脚本成功" "下载 miniconda3 安装脚本失败"
 
     Show 2 "执行 miniconda3 安装脚本"
     sudo bash "$install_script" -b -p "$install_dir" >/dev/null
@@ -941,11 +908,7 @@ install_miniconda3() {
 
     Show 2 "开始更新 conda"
     sudo $install_dir/bin/conda update conda -y >/dev/null
-    if [ $? -eq 0 ]; then
-        Show 0 "更新 conda 成功"
-    else
-        Show 1 "更新 conda 失败"
-    fi
+    action "更新 conda 成功" "更新 conda 失败"
 
     Show 2 "清理 conda 缓存"
     sudo $install_dir/bin/conda clean -a -y >/dev/null
@@ -985,11 +948,7 @@ EOF
     else
         for user in $users; do
             su - $user -c "$install_dir/bin/conda init zsh;$install_dir/bin/conda init bash" 2>/dev/null
-            if [ $? -eq 0 ]; then
-                Show 0 "为用户 $user 配置 conda 环境完成"
-            else
-                Show 1 "为用户 $user 配置 conda 环境失败"
-            fi
+            action "为用户 $user 配置 conda 环境" "为用户 $user 配置 conda 环境失败"
             configure_conda_user "$mirror_url" "$user"
         done
     fi
@@ -1069,11 +1028,7 @@ remove_miniconda3() {
     Show 2 "删除 miniconda3 文件和目录"
     for file in "${files[@]}"; do
         sudo rm -rf "${file}"
-        if [ $? -eq 0 ]; then
-            Show 0 "删除 ${file} 成功"
-        else
-            Show 1 "删除 ${file} 失败"
-        fi
+        action "删除 ${file} 成功" "删除 ${file} 失败"
     done
 
     local conda_init_start="# >>> conda initialize >>"
@@ -1087,11 +1042,7 @@ remove_miniconda3() {
             sudo sed -i "/${conda_init_start}/,/${conda_init_end}/d" "${HOME}/${config}"
 
             # 检查sed命令是否成功执行
-            if [ $? -eq 0 ]; then
-                Show 0 "移除 conda 初始化代码成功"
-            else
-                Show 1 "移除 conda 初始化代码失败"
-            fi
+            action "移除 conda 初始化代码成功" "移除 conda 初始化代码失败"
         else
             Show 2 "未找到 ${config} 文件"
         fi
@@ -1104,11 +1055,8 @@ remove_miniconda3() {
         for user in $users; do
             Show 2 "删除用户 $user 的conda配置文件"
             sudo rm -rf "/home/${user}/.condarc"
-            if [ $? -eq 0 ]; then
-                Show 0 "删除 /home/${user}/.condarc 成功"
-            else
-                Show 1 "删除 /home/${user}/.condarc 失败"
-            fi
+            action "删除 /home/${user}/.condarc 成功" "删除 /home/${user}/.condarc 失败"
+
             for config in "${config_files[@]}"; do
                 Show 2 "检查配置文件: /home/${user}/${config}"
                 if [ -f "/home/${user}/${config}" ]; then
@@ -1117,11 +1065,7 @@ remove_miniconda3() {
                     sudo sed -i "/${conda_init_start}/,/${conda_init_end}/d" "/home/${user}/${config}"
 
                     # 检查sed命令是否成功执行
-                    if [ $? -eq 0 ]; then
-                        Show 0 "移除 conda 初始化代码成功"
-                    else
-                        Show 1 "移除 conda 初始化代码失败"
-                    fi
+                    action "移除 conda 初始化代码成功" "移除 conda 初始化代码失败"
                 else
                     Show 2 "未找到 ${config} 文件"
                 fi
@@ -1141,11 +1085,7 @@ check_docker() {
         Show 0 "Docker 已安装"
         Show 2 "启动Docker服务"
         systemctl start docker >& /dev/null
-        if [ $? == 0 ]; then
-            Show 0 "Docker 服务已启动"
-        else
-            Show 1 "Docker 服务启动失败"
-        fi
+        action "启动 Docker 服务成功" "启动 Docker 服务失败"
     else
         Show 2 "Docker 未安装，开始安装"
         install_docker
@@ -1212,19 +1152,11 @@ install_docker() {
     Show 2 "开始安装Docker"
     Show 2 "更新APT源..."
     sudo apt-get update >/dev/null
-    if [ $? -eq 0 ]; then
-        Show 0 "更新APT源成功"
-    else
-        Show 1 "更新APT源失败"
-    fi
+    action "更新APT源成功" "更新APT源失败"
 
-    Show 2 "安装依赖包..."
+    Show 2 "正在安装依赖包"
     sudo apt-get install apt-transport-https ca-certificates curl gnupg -y >/dev/null
-    if [ $? -eq 0 ]; then
-        Show 0 "安装依赖包成功"
-    else
-        Show 1 "安装依赖包失败"
-    fi
+    action "安装依赖包成功" "安装依赖包失败"
 
     if [[ "$(lsb_release -is)" == "Ubuntu" ]] || [[ "$(lsb_release -is)" == "Debian" ]]; then
         local repo_name=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
@@ -1263,27 +1195,15 @@ install_docker() {
         sudo curl -fsSL "${mirror_url}/docker-ce/linux/${repo_name}/gpg" | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
         sudo chmod a+r /etc/apt/keyrings/docker.gpg
         sudo echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] ${mirror_url}/docker-ce/linux/${repo_name} "$(. /etc/os-release && echo "${VERSION_CODENAME}")" stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-        if [ $? -eq 0 ]; then
-            Show 0 "设置 Docker 软件源成功"
-        else
-            Show 1 "设置 Docker 软件源失败"
-        fi
+        action "设置 Docker 软件源成功" "设置 Docker 软件源失败"
 
         Show 2 "更新软件包列表"
         sudo apt-get update >/dev/null
-        if [ $? -eq 0 ]; then
-            Show 0 "更新软件包列表成功"
-        else
-            Show 1 "更新软件包列表失败"
-        fi
+        action "更新软件包列表成功" "更新软件包列表失败"
 
         Show 2 "安装Docker软件开始"
         sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin >/dev/null
-        if [ $? -eq 0 ]; then
-            Show 0 "安装Docker软件成功"
-        else
-            Show 1 "安装Docker软件失败"
-        fi
+        action "安装Docker软件成功" "安装Docker软件失败"
 
     elif [[ "$(lsb_release -cs)" == "kali-rolling" ]]; then
         # 针对 Kali Rolling 的特定安装逻辑
@@ -1316,27 +1236,15 @@ install_docker() {
         curl -fsSL ${mirror_url}/docker-ce/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
         sudo chmod a+r /etc/apt/keyrings/docker.gpg
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] ${mirror_url}/docker-ce/linux/debian/ bookworm stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-        if [ $? -eq 0 ]; then
-            Show 0 "设置 Docker 软件源成功"
-        else
-            Show 1 "设置 Docker 软件源失败"
-        fi
+        action "设置 Docker 软件源成功" "设置 Docker 软件源失败"
 
         Show 2 "更新软件包列表"
         sudo apt update >/dev/null
-        if [ $? -eq 0 ]; then
-            Show 0 "更新软件包列表成功"
-        else
-            Show 1 "更新软件包列表失败"
-        fi
+        action "更新软件包列表成功" "更新软件包列表失败"
 
         Show 2 "安装Docker"
         sudo apt install -y docker-ce docker-ce-cli containerd.io >/dev/null
-        if [ $? -eq 0 ]; then
-            Show 0 "安装Docker成功"
-        else
-            Show 1 "安装Docker失败"
-        fi
+        action "安装Docker成功" "安装Docker失败"
     else
         Show 1 "当前系统版本不支持"
     fi
@@ -1463,11 +1371,7 @@ EOF
 
     Show 2 "重启Docker服务"
     sudo systemctl restart docker
-    if  [ $? -eq 0 ]; then
-        Show 0 "成功配置Docker使用网络代理: ${proxy_type}://${proxy_ip_port}"
-    else
-        Show 1 "配置Docker网络代理失败"
-    fi
+    action "成功配置Docker使用网络代理: ${proxy_type}://${proxy_ip_port}" "配置Docker网络代理失败"
 }
 
 # 获取Docker网络代理配置
@@ -1491,11 +1395,7 @@ unconfigure_docker_proxy() {
 
     Show 2 重启Docker服务
     sudo systemctl restart docker
-    if  [ $? -eq 0 ]; then
-        Show 0 "取消配置Docker使用网络代理成功"
-    else
-        Show 1 "取消配置Docker使用网络代理失败"
-    fi
+    action "取消配置Docker使用网络代理成功" "取消配置Docker使用网络代理失败"
 }
 
 # 更新Docker镜像源列表
@@ -1767,11 +1667,7 @@ install_docker_compose() {
 remove_docker_compose() {
     Show 2 "卸载 docker-compose 开始"
     sudo rm -rf /usr/local/bin/docker-compose
-    if [ $? -eq 0 ]; then
-        echo "卸载 docker-compose 成功"
-    else
-        echo "卸载 docker-compose 失败"
-    fi
+    action "卸载 docker-compose 成功" "卸载 docker-compose 失败"
 }
 
 # 检查 docker compose 命令
@@ -1832,18 +1728,11 @@ install_vulfocus() {
     # 安装vulfocus
     Show 2 "开始拉取 vulfocus 镜像"
     sudo docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/vulfocus:latest
-    if [ $? -eq 0 ]; then
-        Show 0 "拉取 vulfocus 镜像成功"
-    else
-        Show 1 "拉取 vulfocus 镜像失败"
-    fi
+    action "拉取 vulfocus 镜像成功" "拉取 vulfocus 镜像失败"
+
     Show 2 "开始启动 vulfocus"
     sudo docker run -d -p 88:80 --name vulfocus --restart always -v /var/run/docker.sock:/var/run/docker.sock -e VUL_IP=${host_ip} registry.cn-hangzhou.aliyuncs.com/mingy123/vulfocus:latest
-    if [ $? -eq 0 ]; then
-        Show 0 "启动 vulfocus 成功"
-    else
-        Show 1 "启动 vulfocus 失败"
-    fi
+    action "启动 vulfocus 成功" "启动 vulfocus 失败"
 
     # 打印访问信息
     Show 0 "访问地址: http://${host_ip}:88"
@@ -1922,11 +1811,7 @@ install_arl() {
     Show 2 "开始下载 ARL 压缩包..."
     local download_url="https://gitee.com/yijingsec/ARL/releases/download/${latest_tag_name}/docker.zip"
     curl -Ls "${download_url}" -o /opt/docker_arl/docker.zip
-    if [ $? -eq 0 ]; then
-        Show 0 "下载 ARL 压缩包成功"
-    else
-        Show 1 "下载 ARL 压缩包失败"
-    fi
+    action "下载 ARL 压缩包成功" "下载 ARL 压缩包失败"
 
     Show 2 "开始解压 ARL 压缩包"
     cd /opt/docker_arl
@@ -2075,19 +1960,11 @@ install_metasploit() {
         Show 2 "当前系统为 Ubuntu"
         Show 2 "下载 Metasploit-framework"
         wget -q --show-progress https://gitee.com/yijingsec/metasploit-omnibus/raw/master/config/templates/metasploit-framework-wrappers/msfupdate.erb -O msfinstall && chmod 755 msfinstall
-        if [ $? -eq 0 ]; then
-            Show 0 "下载Metasploit安装脚本完成"
-        else
-            Show 1 "下载Metasploit安装脚本失败"
-        fi
+        action "下载Metasploit安装脚本完成" "下载Metasploit安装脚本失败"
 
         Show 2 "安装 Metasploit-framework"
         ./msfinstall > /dev/null
-        if [ $? -eq 0 ]; then
-            Show 0 "安装 Metasploit-framework 完成"
-        else
-            Show 1 "安装 Metasploit-framework 失败"
-        fi
+        action "安装 Metasploit-framework 完成" "安装 Metasploit-framework 失败"
     elif [[ "$(lsb_release -is)" == "Kali" ]]; then
         Show 2 "当前系统为 Kali"
         Show 2 "配置 Kali APT 源"
@@ -2098,15 +1975,11 @@ install_metasploit() {
         sudo apt update > /dev/null
         Show 2 "安装 metasploit-framework"
         sudo apt install metasploit-framework -y > /dev/null
-        if [ $? -eq 0 ]; then
-            Show 0 "安装 metasploit-framework 完成"
-        else
-            Show 1 "安装 metasploit-framework 失败"
-        fi
+        action "安装 Metasploit-framework 完成" "安装 Metasploit-framework 失败"
     else
         Show 1 "脚本不适用当前系统, 无法安装 Metasploit-framework"
     fi
-    Show 2 "安装 metasploit 版本: "
+    Show 2 "安装 Metasploit 版本: "
     msfconsole --version
 }
 
@@ -2115,12 +1988,7 @@ remove_metasploit() {
     Show 2 "开始卸载 Metasploit-framework"
     sudo apt-get remove metasploit-framework -y > /dev/null
     sudo rm -rf /usr/share/keyrings/metasploit-framework.gpg > /dev/null
-
-    if [ $? -eq 0 ]; then
-        Show 0 "卸载 metasploit-framework 完成"
-    else
-        Show 1 "卸载 metasploit-framework 失败"
-    fi
+    action "卸载 Metasploit-framework 完成" "卸载 Metasploit-framework 失败"
 }
 
 # 配置Viper
@@ -2313,17 +2181,11 @@ install_empire() {
     fi
     Show 2 "开始拉取Empire镜像"
     docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/empire:latest
-    if [ $? -eq 0 ]; then
-        Show 0 "Empire镜像拉取完毕"
-    else
-        Show 1 "Empire镜像拉取失败"
-    fi
+    action "Empire镜像拉取完毕" "Empire镜像拉取失败"
+
     docker run -d --name ps-empire -p 6000-6010:6000-6010 -p 1337:1337 -p 5000:5000 registry.cn-hangzhou.aliyuncs.com/mingy123/empire:latest
-    if [ $? -eq 0 ]; then
-        Show 0 "Empire容器启动成功"
-    else
-        Show 1 "Empire容器启动失败"
-    fi
+    action "Empire容器启动完毕" "Empire容器启动失败"
+
     Show 0 "服务端: http://${host_ip}:1337"
     Show 0 "用户名: empireadmin"
     Show 0 "密  码: password123"
@@ -2333,11 +2195,7 @@ install_empire() {
 update_empire() {
     Show 2 "开始更新Empire"
     docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/empire:latest
-    if [ $? -eq 0 ]; then
-        Show 0 "Empire镜像更新完毕"
-    else
-        Show 1 "Empire镜像更新失败"
-    fi
+    action "Empire镜像更新完毕" "Empire镜像更新失败"
     Show 2 "更新Empire容器"
     docker stop ps-empire
     docker rm ps-empire -f
@@ -2348,22 +2206,14 @@ update_empire() {
 stop_empire() {
     Show 2 "关闭Empire开始"
     docker stop ps-empire
-    if [ $? -eq 0 ]; then
-        Show 0 "关闭Empire容器成功"
-    else
-        Show 1 "关闭Empire容器失败"
-    fi
+    action "关闭Empire容器成功" "关闭Empire容器失败"
 }
 
 # 启动Empire
 start_empire() {
     Show 2 "启动Empire开始"
     docker start ps-empire
-    if [ $? -eq 0 ]; then
-        Show 0 "启动Empire容器成功"
-    else
-        Show 1 "启动Empire容器失败"
-    fi
+    action "启动Empire容器成功" "启动Empire容器失败"
 }
 
 # 卸载Empire
@@ -2426,19 +2276,11 @@ install_starkiller() {
 
     Show 2 "开始拉取Starkiller镜像"
     docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/starkiller:latest
-    if [ $? -eq 0 ]; then
-        Show 0 "拉取Starkiller镜像完毕"
-    else
-        Show 1 "拉取Starkiller镜像失败"
-    fi
+    action "拉取Starkiller镜像完毕" "拉取Starkiller镜像失败"
 
     Show 2 "启动Starkiller容器"
     docker run -d --name ps-starkiller -p 4173:4173 registry.cn-hangzhou.aliyuncs.com/mingy123/starkiller:latest
-    if [ $? -eq 0 ]; then
-        Show 0 "启动Starkiller容器成功"
-    else
-        Show 1 "启动Starkiller容器失败"
-    fi
+    action "启动Starkiller容器成功" "启动Starkiller容器失败"
 
     Show 2 "启动Starkiller完成"
     Show 0 "服务地址: http://${host_ip}:4173"
@@ -2464,11 +2306,7 @@ update_starkiller() {
 stop_starkiller() {
     Show 2 "关闭Starkiller开始"
     docker stop ps-starkiller > /dev/null
-    if [ $? -eq 0 ]; then
-        Show 0 "关闭Starkiller完成"
-    else
-        Show 1 "关闭Starkiller失败"
-    fi
+    action "关闭Starkiller完成" "关闭Starkiller失败"
 }
 
 # 启动 Starkiller
@@ -2632,15 +2470,11 @@ update_hfish() {
 
 # 关闭 HFish
 stop_hfish() {
-    Show 2 "关闭HFish开始"
+    Show 2 "停止HFish开始"
     cd /opt/hfish
     check_docker_compose
     sudo $COMPOSE_CMD stop
-    if [ $? -eq 0 ]; then
-        Show 0 "关闭HFish完成"
-    else
-        Show 1 "关闭HFish失败"
-    fi
+    action "停止HFish成功" "停止HFish失败"
 }
 
 # 启动 HFish
@@ -2705,7 +2539,6 @@ config_dnscat2() {
     echo "3. 启动 Dnscat2 (中继模式)"
     echo "4. 返回主菜单"
     read -p "$(echo -e "${GREEN}请输入选择(1-4): ${NC}")" choice
-
     case $choice in
         1)
             install_dnscat2
@@ -2742,11 +2575,7 @@ install_dnscat2() {
 start_dnscat2_direct_mode() {
     Show 2 "启动Dnscat2(直连模式)开始"
     docker run -it --name dnscat2 --rm -p 53:53/udp registry.cn-hangzhou.aliyuncs.com/mingy123/dnscat2:v0.07 server
-    if [ $? -eq 0 ]; then
-        Show 0 "启动Dnscat2(直连模式)成功"
-    else
-        Show 1 "启动Dnscat2(直连模式)失败"
-    fi
+    action "启动Dnscat2(直连模式)成功" "启动Dnscat2(直连模式)失败"
 }
 
 # 启动Dnscat2中继模式
@@ -2757,11 +2586,7 @@ start_dnscat2_relay_mode() {
         Show 1 "请输入正确的子域名"
     fi
     docker run -it --name dnscat2 --rm -p 53:53/udp registry.cn-hangzhou.aliyuncs.com/mingy123/dnscat2:v0.07 server "${subdomain}"
-    if [ $? -eq 0 ]; then
-        Show 0 "启动Dnscat2(中继模式)成功"
-    else
-        Show 1 "启动Dnscat2(中继模式)失败"
-    fi
+    action "启动Dnscat2(中继模式)完成" "启动Dnscat2(中继模式)失败"
 }
 
 # 配置Beef
@@ -2806,11 +2631,8 @@ install_beef() {
     fi
     Show 2 "开始拉取最新Beef镜像"
     docker pull registry.cn-shanghai.aliyuncs.com/yijingsec/beef:latest
-    if [ $? -eq 0 ]; then
-        Show 0 "拉取最新Beef镜像成功"
-    else
-        Show 1 "拉取最新Beef镜像失败"
-    fi
+    action "拉取最新Beef镜像成功" "拉取最新Beef镜像失败"
+
     Show 2 "启动Beef容器服务"
     docker run -dit --name beef -p 3000:3000 registry.cn-shanghai.aliyuncs.com/yijingsec/beef:latest
     if [ $? -eq 0 ]; then
@@ -2827,11 +2649,7 @@ install_beef() {
 stop_beef() {
     Show 2 "关闭Beef开始"
     docker stop beef
-    if [ $? -eq 0 ]; then
-        Show 2 "关闭Beef成功"
-    else
-        Show 2 "关闭Beef失败"
-    fi
+    action "关闭Beef成功" "关闭Beef失败"
 }
 
 # 启动Beef
@@ -2880,7 +2698,6 @@ config_bluelotus() {
     echo "4. 卸载 Bluelotus"
     echo "5. 返回主菜单"
     read -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
-
     case $choice in
         1)
             install_bluelotus
@@ -2913,11 +2730,8 @@ install_bluelotus() {
     fi
     Show 2 "开始拉取最新Bluelotus镜像"
     docker pull registry.cn-shanghai.aliyuncs.com/yijingsec/bluelotus:latest
-    if [ $? -eq 0 ]; then
-        Show 0 "拉取最新Bluelotus镜像成功"
-    else
-        Show 1 "拉取最新Bluelotus镜像失败"
-    fi
+    action "拉取最新Bluelotus镜像成功" "拉取最新Bluelotus镜像失败"
+
     Show 2 "启动Bluelotus容器服务"
     docker run -dit --name bluelotus -p 5080:80 registry.cn-shanghai.aliyuncs.com/yijingsec/bluelotus:latest
     if [ $? -eq 0 ]; then
@@ -2933,11 +2747,7 @@ install_bluelotus() {
 stop_bluelotus() {
     Show 2 "关闭Bluelotus开始"
     docker stop bluelotus
-    if [ $? -eq 0 ]; then
-        Show 0 "关闭Bluelotus成功"
-    else
-        Show 1 "关闭Bluelotus失败"
-    fi
+    action "关闭Bluelotus成功" "关闭Bluelotus失败"
 }
 
 # 启动Bluelotus
@@ -2983,7 +2793,6 @@ config_ctfd() {
     echo "2. 卸载 CTFd"
     echo "3. 返回主菜单"
     read -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
-
     case $choice in
         1)
             install_ctfd
@@ -3026,11 +2835,8 @@ install_ctfd() {
 remove_ctfd() {
     Show 2 "开始卸载CTFd"
     docker rm ctfd -f
-    if [ $? -eq 0 ]; then
-        Show 0 "删除容器成功"
-    else
-        Show 1 "删除容器失败，请检查容器是否存在"
-    fi
+    action "删除CTFd容器成功" "删除CTFd容器失败, 请检查容器是否存在"
+
     Show 2 "删除CTFd目录"
     rm -rf /opt/CTFd
     read -p "是否要删除镜像? (y/n)" yn
@@ -3048,7 +2854,6 @@ config_awvs() {
     echo "2. 卸载 AWVS"
     echo "3. 返回主菜单"
     read -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
-
     case $choice in
         1)
             install_awvs
@@ -3082,9 +2887,8 @@ install_awvs() {
     fi
     Show 2 "拉取最新AWVS镜像"
     docker pull registry.cn-shanghai.aliyuncs.com/yijingsec/awvs:latest
-    if [ $? -ne 0 ]; then
-        Show 1 "拉取最新AWVS镜像失败"
-    fi
+    action "拉取AWVS镜像成功" "拉取AWVS镜像失败"
+
     Show 2 "启动AWVS容器服务"
     docker run -dit -p ${host_port}:3443 --name yijingsec-awvs --cap-add LINUX_IMMUTABLE registry.cn-shanghai.aliyuncs.com/yijingsec/awvs:latest
     while true; do
@@ -3117,28 +2921,6 @@ remove_awvs() {
     Show 0 "卸载AWVS完成"
 }
 
-# 检查输入是否是有效的IPv4地址
-validate_ip() {
-    local ip="$1"
-    # 正则表达式匹配IPv4地址
-    local regex='^([0-9]{1,3}\.){3}[0-9]{1,3}$'
-
-    if [[ $ip =~ $regex ]]; then
-        # 进一步检查每个八位组是否在0-255之间
-        IFS='.' read -r -a octets <<< "$ip"
-        for octet in "${octets[@]}"; do
-            if ((octet > 255 || octet < 0)); then
-                Show 2 "错误: IP地址中的每个部分必须在0到255之间。"
-                return 1
-            fi
-        done
-        return 0
-    else
-        Show 2 "错误: 请输入正确的IP地址格式。"
-        return 1
-    fi
-}
-
 # 配置ocr_api_server
 config_ocr_api_server() {
     echo -e "${YELLOW}[+] 请选择操作: ${NC}"
@@ -3146,7 +2928,6 @@ config_ocr_api_server() {
     echo "2. 卸载 ocr_api_server"
     echo "3. 返回主菜单"
     read -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
-
     case $choice in
         1)
             install_ocr_api_server
@@ -3181,19 +2962,14 @@ install_ocr_api_server() {
     # 安装ocr_api_server
     Show 2 "拉取最新ocr_api_server镜像"
     sudo docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/ocr_api_server:latest
-    if [ $? -eq 0 ]; then
-        Show 0 "拉取最新ocr_api_server镜像成功"
-    else
-        Show 1 "拉取最新ocr_api_server镜像失败"
-    fi
+    action "拉取ocr_api_server镜像成功" "拉取ocr_api_server镜像失败"
+
     Show 2 "启动ocr_api_server容器服务"
     sudo docker run -d -p 9898:9898 --name ocr_api_server registry.cn-hangzhou.aliyuncs.com/mingy123/ocr_api_server:latest
-    if [ $? -eq 0 ]; then
-        Show 0 "ocr_api_server容器启动成功"
-    else
-        Show 1 "ocr_api_server容器启动失败"
-    fi
+    action "启动ocr_api_server容器服务成功" "启动ocr_api_server容器服务失败"
+
     sleep 5
+
     # 打印访问信息
     Show 0 "ocr_api_server 服务已启动"
     Show 0 "访问地址: http://${host_ip}:9898/ping"
@@ -3228,7 +3004,6 @@ config_ohmyzsh() {
     echo "5. 配置 oh-my-zsh 插件"
     echo "6. 返回主菜单"
     read -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
-
     case $choice in
         1)
             install_ohmyzsh
@@ -3262,12 +3037,7 @@ install_ohmyzsh() {
     else
         Show 2 "安装git和zsh"
         apt install -y git zsh >/dev/null
-        if [ $? -eq 0 ]; then
-            Show 0 "git和zsh安装成功"
-        else
-            Show 1 "git和zsh安装失败"
-            return 1
-        fi
+        action "git和zsh安装成功" "git和zsh安装失败"
     fi
 
     Show 2 "安装oh-my-zsh"
