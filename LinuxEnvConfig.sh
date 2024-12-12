@@ -181,6 +181,14 @@ check_jq() {
     fi
 }
 
+check_wget() {
+    if ! command -v wget &> /dev/null; then
+        Show 2 "wget 未安装，正在安装..."
+        sudo apt-get install wget -y &> /dev/null
+        action "wget 安装成功" "wget 安装失败"
+    fi
+}
+
 # 检查unzip命令是否安装
 check_unzip() {
     if ! command -v unzip &> /dev/null; then
@@ -500,6 +508,8 @@ check_oracle_jdk() {
         Show 2 "不存在 ${JDK_NAME} 文件"
     fi
 
+    check_wget
+
     Show 2 "下载 ${JDK_NAME} 文件"
     wget -q --show-progress "$JDK_URL" -O $JDK_NAME
     if [ $? -ne 0 ]; then
@@ -613,6 +623,8 @@ check_openjdk() {
         Show 2 "删除 openjdk-${JDK_VER}_linux-x64_bin.tar.gz 文件"
         rm -f openjdk-${JDK_VER}_linux-x64_bin.tar.gz
     fi
+
+    check_wget
 
     Show 2 "开始下载 OpenJDK 文件"
     wget -q --show-progress $JDK_URL
@@ -884,6 +896,8 @@ install_miniconda3() {
         Show 2 "删除 miniconda3 安装脚本"
         rm -f "$install_script" >/dev/null 2>&1
     fi
+
+    check_wget
 
     Show 2 "下载 miniconda3 安装脚本"
     sudo wget -q --show-progress ${mirror_url}/miniconda/Miniconda3-latest-Linux-x86_64.sh -O "$install_script"
@@ -1958,6 +1972,7 @@ install_metasploit() {
     Show 2 "开始安装 Metasploit-framework"
     if [[ "$(lsb_release -is)" == "Ubuntu" ]]; then
         Show 2 "当前系统为 Ubuntu"
+        check_wget
         Show 2 "下载 Metasploit-framework"
         wget -q --show-progress https://gitee.com/yijingsec/metasploit-omnibus/raw/master/config/templates/metasploit-framework-wrappers/msfupdate.erb -O msfinstall && chmod 755 msfinstall
         action "下载Metasploit安装脚本完成" "下载Metasploit安装脚本失败"
@@ -1969,6 +1984,7 @@ install_metasploit() {
         Show 2 "当前系统为 Kali"
         Show 2 "配置 Kali APT 源"
         sudo echo "deb https://mirrors.tuna.tsinghua.edu.cn/kali kali-rolling main non-free contrib" | sudo tee -a /etc/apt/sources.list > /dev/null
+        check_wget > /dev/null
         Show 2 "导入 Kali APT 源的 GPG 公钥"
         wget -qO - https://archive.kali.org/archive-key.asc | sudo apt-key add -
         Show 2 "更新 APT 软件包列表"
@@ -3050,6 +3066,7 @@ install_ohmyzsh() {
         if [ -f "install.sh" ]; then
             Show 0 "install.sh文件已存在"
         else
+            check_wget
             Show 0 "install.sh文件不存在, 正在下载..."
             wget -q --show-progress https://gitee.com/mirrors/oh-my-zsh/raw/master/tools/install.sh
         fi
