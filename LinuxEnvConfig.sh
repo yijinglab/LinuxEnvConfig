@@ -1253,11 +1253,11 @@ install_docker() {
         action "设置 Docker 软件源成功" "设置 Docker 软件源失败"
 
         Show 2 "更新软件包列表"
-        sudo apt update >/dev/null
+        sudo apt-get update >/dev/null
         action "更新软件包列表成功" "更新软件包列表失败"
 
         Show 2 "安装Docker"
-        sudo apt install -y docker-ce docker-ce-cli containerd.io >/dev/null
+        sudo apt-get install -y docker-ce docker-ce-cli containerd.io >/dev/null
         action "安装Docker成功" "安装Docker失败"
     else
         Show 1 "当前系统版本不支持"
@@ -1988,9 +1988,9 @@ install_metasploit() {
         Show 2 "导入 Kali APT 源的 GPG 公钥"
         wget -qO - https://archive.kali.org/archive-key.asc | sudo apt-key add -
         Show 2 "更新 APT 软件包列表"
-        sudo apt update > /dev/null
+        sudo apt-get update > /dev/null
         Show 2 "安装 metasploit-framework"
-        sudo apt install metasploit-framework -y > /dev/null
+        sudo apt-get install metasploit-framework -y > /dev/null
         action "安装 Metasploit-framework 完成" "安装 Metasploit-framework 失败"
     else
         Show 1 "脚本不适用当前系统, 无法安装 Metasploit-framework"
@@ -3052,7 +3052,7 @@ install_ohmyzsh() {
         Show 0 "git和zsh已安装"
     else
         Show 2 "安装git和zsh"
-        apt install -y git zsh >/dev/null
+        apt-get install -y git zsh >/dev/null
         action "git和zsh安装成功" "git和zsh安装失败"
     fi
 
