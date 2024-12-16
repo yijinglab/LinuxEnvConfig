@@ -181,11 +181,21 @@ check_jq() {
     fi
 }
 
+# 检查wget命令是否安装
 check_wget() {
     if ! command -v wget &> /dev/null; then
         Show 2 "wget 未安装，正在安装..."
         sudo apt-get install wget -y &> /dev/null
         action "wget 安装成功" "wget 安装失败"
+    fi
+}
+
+# 检查curl命令是否安装
+check_curl() {
+    if ! command -v curl &> /dev/null; then
+        Show 2 "curl 未安装，正在安装..."
+        sudo apt-get install curl -y &> /dev/null
+        action "curl 安装成功" "curl 安装失败"
     fi
 }
 
@@ -433,6 +443,7 @@ GetTempUrl() {
     data=$(jq -n --arg token "$token" --arg ExeName "$ExeName" '{token: $token, tempUrl: $ExeName}')
 
     # 发送POST请求
+    check_curl
     resp=$(curl -s -X POST -H "Content-Type: application/json" -d "$data" "$url_api")
 
     # 解析JSON响应
@@ -653,7 +664,7 @@ check_openjdk() {
 
     # 检查解压是否成功
     action "解压 OpenJDK 文件成功" "解压 OpenJDK 文件失败"
-    
+
     # 配置Java和Javac
     Show 2 "配置Java环境变量"
 
@@ -1666,6 +1677,7 @@ install_docker_compose() {
         fi
     fi
     Show 2 "开始下载 docker-compose"
+    check_curl
     sudo curl -L "https://gitee.com/yijingsec/compose/releases/download/$(curl -s https://gitee.com/api/v5/repos/yijingsec/compose/releases/latest | grep -E -o '\"tag_name\":\"([^\"]+)\"' | awk -F\" '{print $4}')/docker-compose-$(uname -s | tr A-Z a-z)-$(uname -m)" -o /usr/local/bin/docker-compose
     sudo chmod +x /usr/local/bin/docker-compose
     if [ $? -eq 0 ]; then
@@ -1820,6 +1832,7 @@ install_arl() {
     # 获取最新版本的 ARL 下载链接并下载
     # sudo curl -Ls "https://gitee.com/yijingsec/ARL/releases/download/$(curl -s https://gitee.com/api/v5/repos/yijingsec/ARL/releases/latest | grep -E -o '\"tag_name\":\"([^\"]+)\"' | awk -F\" '{print $4}')/docker.zip" -o /opt/docker_arl/docker.zip && cd /opt/docker_arl && unzip -o docker.zip
 
+    check_curl
     local latest_tag_name=$(curl -s https://gitee.com/api/v5/repos/yijingsec/ARL/releases/latest | grep -E -o '"tag_name":"([^\"]+)"' | awk -F\" '{print $4}')
     Show 0 "发现最新版本ARL: ${latest_tag_name}"
     Show 2 "开始下载 ARL 压缩包..."
