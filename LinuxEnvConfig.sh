@@ -1307,6 +1307,10 @@ configure_docker_mirror() {
     "https://docker.fxxk.dedyn.io",
     "https://docker.m.daocloud.io",
     "https://docker.1panel.live",
+    "https://docker.1ms.run",
+    "https://docker.xuanyuan.me",
+    "https://hub.urlsa.us.kg",
+    "https://docker.urlsa.us.kg",
     "https://06009bb76e000fc60fd1c01a26a6dfe0.mirror.swr.myhuaweicloud.com",
     "https://fl37993c.mirror.aliyuncs.com",
     "https://registry.docker-cn.com"
@@ -1429,6 +1433,10 @@ update_docker_mirrors() {
     # 定义Docker镜像源列表
     local mirrors=(
         "docker.io"
+        "docker.1ms.run"
+        "docker.xuanyuan.me"
+        "hub.urlsa.us.kg"
+        "docker.urlsa.us.kg"
         "docker.fxxk.dedyn.io"
         "docker.m.daocloud.io"
         "docker.1panel.live"
@@ -1501,6 +1509,10 @@ pull_docker_image() {
     # 定义Docker镜像源列表
     local mirrors=(
         "docker.io"
+        "docker.1ms.run"
+        "docker.xuanyuan.me"
+        "hub.urlsa.us.kg"
+        "docker.urlsa.us.kg"
         "docker.fxxk.dedyn.io"
         "docker.m.daocloud.io"
         "docker.1panel.live"
