@@ -1874,7 +1874,7 @@ install_arl() {
 
     Show 2 "开始启动 ARL 服务"
     # 检查命令是否成功执行
-    if sudo "$COMPOSE_CMD" up -d; then
+    if sudo ${COMPOSE_CMD} up -d; then
         Show 0 "成功启动 ARL 服务"
         Show 0 "访问地址: https://${host_ip}:5003"
         Show 0 "默认用户: admin"
