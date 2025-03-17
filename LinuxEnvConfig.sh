@@ -19,11 +19,11 @@
 # Ubuntu / Debian / Kali Linux 基础环境配置脚本
 
 set -e
-UNAME_M="$(uname -m)"
-readonly UNAME_M
+# UNAME_M="$(uname -m)"
+# readonly UNAME_M
 
-UNAME_U="$(uname -s)"
-readonly UNAME_U
+# UNAME_U="$(uname -s)"
+# readonly UNAME_U
 
 # COLORS
 readonly COLOUR_RESET='\e[0m'
@@ -54,8 +54,8 @@ readonly aCOLOUR=(
 )
 
 readonly GREEN_LINE=" ${aCOLOUR[0]}─────────────────────────────────────────────────────$COLOUR_RESET"
-readonly GREEN_BULLET=" ${aCOLOUR[0]}-$COLOUR_RESET"
-readonly GREEN_SEPARATOR="${aCOLOUR[0]}:$COLOUR_RESET"
+# readonly GREEN_BULLET=" ${aCOLOUR[0]}-$COLOUR_RESET"
+# readonly GREEN_SEPARATOR="${aCOLOUR[0]}:$COLOUR_RESET"
 
 Show() {
     # OK
@@ -76,9 +76,9 @@ Show() {
 
 action() {
     if [ $? -eq 0 ]; then
-		Show 0 $1
+		Show 0 "$1"
 	else
-		Show 1 $2
+		Show 1 "$2"
 	fi
 }
 
@@ -218,7 +218,7 @@ basic_config() {
     echo "5. 获取当前主机网卡及IP地址信息"
     echo "6. 解除DNS协议53端口占用"
     echo "7. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-7): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-7): ${NC}")" choice
     case $choice in
         1)
             enable_root_user
@@ -250,7 +250,7 @@ basic_config() {
 # 启用root用户
 enable_root_user() {
     # 读取用户输入的新密码
-    read -sp "$(echo -e "${GREEN}请输入新的root密码: ${NC}")" new_password
+    read -r -sp "$(echo -e "${GREEN}请输入新的root密码: ${NC}")" new_password
     echo
 
     # 使用chpasswd命令设置root用户的新密码
@@ -310,7 +310,7 @@ config_nameserver() {
         fi
 
         Show 2 "清空当前的 resolv.conf 文件"
-        > /etc/resolv.conf
+        true > /etc/resolv.conf
 
         # 添加新的名称服务器
         Show 2 "添加新的名称服务器..."
@@ -334,8 +334,8 @@ root_ssh_login() {
     action "SSH服务配置已更改为允许root用户登录" "SSH服务配置更改失败"
 
     Show 2 "重启SSH服务"
-    sudo systemctl restart ssh
-    if [ $? -eq 0 ]; then
+    
+    if sudo systemctl restart ssh >& /dev/null; then
         Show 0 "SSH服务重启成功"
         Show 2 "尝试以root用户登录SSH服务"
         Show 2 "示例: ssh root@ip"
@@ -381,18 +381,18 @@ config_jdk() {
     echo "2. 安装 OpenJDK"
     echo "3. 删除当前JDK环境"
     echo "4. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-4): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-4): ${NC}")" choice
     case $choice in
         1)
             echo -e "${YELLOW}[+] 选择OracleJDK安装源: ${NC}"
             echo "1. study.yijinglab.com"
             echo "2. www.injdk.cn"
             echo "3. 返回主菜单"
-            read -p "$(echo -e "${GREEN}请输入序号(1-3): ${NC}")" version
+            read -r -p "$(echo -e "${GREEN}请输入序号(1-3): ${NC}")" version
             case $version in
                 1)
                     Show 2 "选择 study.yijinglab.com"
-                    read -p "$(echo -e "${GREEN}请输入客户端密钥(教学平台->课程云盘->客户端密钥): ${NC}")" client_key
+                    read -r -p "$(echo -e "${GREEN}请输入客户端密钥(教学平台->课程云盘->客户端密钥): ${NC}")" client_key
                     if [ -z "$client_key" ]; then
                         Show 1 "客户端密钥不能为空"
                     fi
@@ -486,7 +486,7 @@ install_oracle_jdk() {
     echo "5. Oracle JDK 22 LTS"
     echo "6. Oracle JDK 23 LTS"
     echo "7. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入序号(1-7): ${NC}")" version
+    read -r -p "$(echo -e "${GREEN}请输入序号(1-7): ${NC}")" version
     case $version in
         1|2|3|4|5|6)
             local index=$((version - 1))
@@ -511,10 +511,10 @@ install_oracle_jdk() {
 # 检查 Oracle JDK
 check_oracle_jdk() {
     Show 2 "检查 Oracle JDK 安装情况"
-    if [ -f $JDK_NAME ]; then
+    if [ -f "$JDK_NAME" ]; then
         Show 2 "存在 ${JDK_NAME} 文件"
         Show 2 "删除 ${JDK_NAME} 文件"
-        rm -rf $JDK_NAME
+        rm -rf "$JDK_NAME"
     else
         Show 2 "不存在 ${JDK_NAME} 文件"
     fi
@@ -522,9 +522,9 @@ check_oracle_jdk() {
     check_wget
 
     Show 2 "下载 ${JDK_NAME} 文件"
-    wget -q --show-progress "$JDK_URL" -O $JDK_NAME
-    if [ $? -ne 0 ]; then
-        rm -f $JDK_NAME >/dev/null 2>&1
+    
+    if wget -q --show-progress "$JDK_URL" -O "$JDK_NAME"; then
+        rm -f "$JDK_NAME" >/dev/null 2>&1
         Show 1  "下载 ${JDK_NAME} 文件失败"
     else
         Show 0  "下载 ${JDK_NAME} 文件成功"
@@ -542,33 +542,33 @@ check_oracle_jdk() {
 
     # 解压JDK
     Show 2 "开始解压 Oracle JDK 文件"
-    sudo tar -xzf $JDK_NAME -C $JDK_DIR
+    sudo tar -xzf "$JDK_NAME" -C $JDK_DIR
     action "解压 Oracle JDK 文件成功" "解压 Oracle JDK 文件失败"
 
     Show 2 "配置Java环境变量"
 
-    sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/${JDK_VER}/bin/java 2
-    sudo update-alternatives --set java /usr/lib/jvm/${JDK_VER}/bin/java
+    sudo update-alternatives --install /usr/bin/java java "/usr/lib/jvm/${JDK_VER}/bin/java" 2
+    sudo update-alternatives --set java "/usr/lib/jvm/${JDK_VER}/bin/java"
 
-    sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/${JDK_VER}/bin/javac 2
-    sudo update-alternatives --set javac /usr/lib/jvm/${JDK_VER}/bin/javac
+    sudo update-alternatives --install /usr/bin/javac javac "/usr/lib/jvm/${JDK_VER}/bin/javac" 2
+    sudo update-alternatives --set javac "/usr/lib/jvm/${JDK_VER}/bin/javac"
 
     # 设置keytool
     if [ -f "/usr/lib/jvm/${JDK_VER}/bin/keytool" ]; then
-        sudo update-alternatives --install /usr/bin/keytool keytool /usr/lib/jvm/${JDK_VER}/bin/keytool 2
-        sudo update-alternatives --set keytool /usr/lib/jvm/${JDK_VER}/bin/keytool
+        sudo update-alternatives --install /usr/bin/keytool keytool "/usr/lib/jvm/${JDK_VER}/bin/keytool" 2
+        sudo update-alternatives --set keytool "/usr/lib/jvm/${JDK_VER}/bin/keytool"
     fi
 
     # 设置jar
     if [ -f "/usr/lib/jvm/${JDK_VER}/bin/jar" ]; then
-        sudo update-alternatives --install /usr/bin/jar jar /usr/lib/jvm/${JDK_VER}/bin/jar 2
-        sudo update-alternatives --set jar /usr/lib/jvm/${JDK_VER}/bin/jar
+        sudo update-alternatives --install /usr/bin/jar jar "/usr/lib/jvm/${JDK_VER}/bin/jar" 2
+        sudo update-alternatives --set jar "/usr/lib/jvm/${JDK_VER}/bin/jar"
     fi
 
     # 设置jarsigner
     if [ -f "/usr/lib/jvm/${JDK_VER}/bin/jarsigner" ]; then
-        sudo update-alternatives --install /usr/bin/jarsigner jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner 2
-        sudo update-alternatives --set jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner
+        sudo update-alternatives --install /usr/bin/jarsigner jarsigner "/usr/lib/jvm/${JDK_VER}/bin/jarsigner" 2
+        sudo update-alternatives --set jarsigner "/usr/lib/jvm/${JDK_VER}/bin/jarsigner"
     fi
 
     Show 0 "成功安装和配置Oracle JDK"
@@ -584,7 +584,7 @@ install_openjdk() {
     echo "4. OpenJDK 22 LTS"
     echo "5. OpenJDK 23 LTS"
     echo "6. 返回到主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
 
     case $choice in
         1)
@@ -632,19 +632,19 @@ check_openjdk() {
     if [ -f "openjdk-${JDK_VER}_linux-x64_bin.tar.gz" ]; then
         Show 2 "存在 openjdk-${JDK_VER}_linux-x64_bin.tar.gz 文件"
         Show 2 "删除 openjdk-${JDK_VER}_linux-x64_bin.tar.gz 文件"
-        rm -f openjdk-${JDK_VER}_linux-x64_bin.tar.gz
+        rm -f "openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
     fi
 
     check_wget
 
     Show 2 "开始下载 OpenJDK 文件"
-    wget -q --show-progress $JDK_URL
+    wget -q --show-progress "$JDK_URL"
 
     # 检查是否下载成功
     if [ -f "openjdk-${JDK_VER}_linux-x64_bin.tar.gz" ]; then
         Show 0 "下载 OpenJDK 文件成功"
     else
-        rm -f openjdk-${JDK_VER}_linux-x64_bin.tar.gz
+        rm -f "openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
         Show 1 "下载 OpenJDK 文件失败"
     fi
 
@@ -660,7 +660,7 @@ check_openjdk() {
 
     # 解压JDK
     Show 2 "开始解压缩 OpenJDK 文件"
-    sudo tar -xzf openjdk-${JDK_VER}_linux-x64_bin.tar.gz -C ${JDK_DIR}
+    sudo tar -xzf "openjdk-${JDK_VER}_linux-x64_bin.tar.gz" -C ${JDK_DIR}
 
     # 检查解压是否成功
     action "解压 OpenJDK 文件成功" "解压 OpenJDK 文件失败"
@@ -669,29 +669,29 @@ check_openjdk() {
     Show 2 "配置Java环境变量"
 
     # 设置Java
-    sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/jdk-${JDK_VER}/bin/java 2
-    sudo update-alternatives --set java /usr/lib/jvm/jdk-${JDK_VER}/bin/java
+    sudo update-alternatives --install /usr/bin/java java "/usr/lib/jvm/jdk-${JDK_VER}/bin/java" 2
+    sudo update-alternatives --set java "/usr/lib/jvm/jdk-${JDK_VER}/bin/java"
 
     # 设置Javac
-    sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/jdk-${JDK_VER}/bin/javac 2
-    sudo update-alternatives --set javac /usr/lib/jvm/jdk-${JDK_VER}/bin/javac
+    sudo update-alternatives --install /usr/bin/javac javac "/usr/lib/jvm/jdk-${JDK_VER}/bin/javac" 2
+    sudo update-alternatives --set javac "/usr/lib/jvm/jdk-${JDK_VER}/bin/javac"
 
     # 设置keytool
     if [ -f "/usr/lib/jvm/${JDK_VER}/bin/keytool" ]; then
-        sudo update-alternatives --install /usr/bin/keytool keytool /usr/lib/jvm/${JDK_VER}/bin/keytool 2
-        sudo update-alternatives --set keytool /usr/lib/jvm/${JDK_VER}/bin/keytool
+        sudo update-alternatives --install /usr/bin/keytool keytool "/usr/lib/jvm/${JDK_VER}/bin/keytool" 2
+        sudo update-alternatives --set keytool "/usr/lib/jvm/${JDK_VER}/bin/keytool"
     fi
 
     # 设置jar
     if [ -f "/usr/lib/jvm/${JDK_VER}/bin/jar" ]; then
-        sudo update-alternatives --install /usr/bin/jar jar /usr/lib/jvm/${JDK_VER}/bin/jar 2
-        sudo update-alternatives --set jar /usr/lib/jvm/${JDK_VER}/bin/jar
+        sudo update-alternatives --install /usr/bin/jar jar "/usr/lib/jvm/${JDK_VER}/bin/jar" 2
+        sudo update-alternatives --set jar "/usr/lib/jvm/${JDK_VER}/bin/jar"
     fi
 
     # 设置jarsigner
     if [ -f "/usr/lib/jvm/${JDK_VER}/bin/jarsigner" ]; then
-        sudo update-alternatives --install /usr/bin/jarsigner jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner 2
-        sudo update-alternatives --set jarsigner /usr/lib/jvm/${JDK_VER}/bin/jarsigner
+        sudo update-alternatives --install /usr/bin/jarsigner jarsigner "/usr/lib/jvm/${JDK_VER}/bin/jarsigner" 2
+        sudo update-alternatives --set jarsigner "/usr/lib/jvm/${JDK_VER}/bin/jarsigner"
     fi
 
     Show 0 "安装和配置OpenJDK成功"
@@ -700,7 +700,7 @@ check_openjdk() {
 # 删除当前JDK环境
 remove_jdk() {
     Show 2 "定位JDK安装目录"
-    JDK_DIR=$(dirname $(dirname $(readlink -f $(which java))))
+    JDK_DIR="$(dirname "$(dirname "$(readlink -f "$(which java)")")")"
 
     Show 2 "检查JDK目录是否存在"
     if [ -d "$JDK_DIR" ]; then
@@ -714,11 +714,11 @@ remove_jdk() {
         update-alternatives --remove jarsigner /usr/bin/jarsigner
 
         Show 2 配置默认的Java和Javac版本
-        echo 0 | sudo update-alternatives --config java 2>&1 >/dev/null
-        echo 0 | sudo update-alternatives --config javac 2>&1 >/dev/null
-        echo 0 | sudo update-alternatives --config keytool 2>&1 >/dev/null
-        echo 0 | sudo update-alternatives --config jar 2>&1 >/dev/null
-        echo 0 | sudo update-alternatives --config jarsigner 2>&1 >/dev/null
+        echo 0 | sudo update-alternatives --config java >/dev/null 2>&1
+        echo 0 | sudo update-alternatives --config javac >/dev/null 2>&1
+        echo 0 | sudo update-alternatives --config keytool >/dev/null 2>&1
+        echo 0 | sudo update-alternatives --config jar >/dev/null 2>&1
+        echo 0 | sudo update-alternatives --config jarsigner >/dev/null 2>&1
 
         Show 2 "删除JDK目录"
         sudo rm -rf "$JDK_DIR"
@@ -779,7 +779,7 @@ config_apt_source() {
     echo "4. 清华大学"
     echo "5. 北京大学"
     echo "6. 中国科大"
-    read -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
 
     # 根据用户选择设置 APT 软件源
     if [[ "$choice" == "1" ]]; then
@@ -847,7 +847,7 @@ config_miniconda3() {
     echo "2. 卸载 Miniconda3"
     echo "3. 配置 Miniconda3 软件源"
     echo "4. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-4): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-4): ${NC}")" choice
     case $choice in
         1)
             install_miniconda3
@@ -877,7 +877,7 @@ install_miniconda3() {
     echo "3. 中国科大 miniconda"
     echo "4. 浙江大学 miniconda"
     echo "5. 南京大学 miniconda"
-    read -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
 
     # 根据用户选择设置 Miniconda3 软件源
     if [[ "$choice" == "1" ]]; then
@@ -911,12 +911,11 @@ install_miniconda3() {
     check_wget
 
     Show 2 "下载 miniconda3 安装脚本"
-    sudo wget -q --show-progress ${mirror_url}/miniconda/Miniconda3-latest-Linux-x86_64.sh -O "$install_script"
+    sudo wget -q --show-progress "${mirror_url}/miniconda/Miniconda3-latest-Linux-x86_64.sh" -O "$install_script"
     action "下载 miniconda3 安装脚本成功" "下载 miniconda3 安装脚本失败"
 
     Show 2 "执行 miniconda3 安装脚本"
-    sudo bash "$install_script" -b -p "$install_dir" >/dev/null
-    if [ $? -eq 0 ]; then
+    if sudo bash "$install_script" -b -p "$install_dir" >/dev/null; then
         Show 0 "miniconda3 安装成功"
         Show 0 "安装目录: $install_dir"
     else
@@ -924,7 +923,12 @@ install_miniconda3() {
     fi
 
     Show 2 "初始化 conda"
-    source $install_dir/bin/activate
+    if [ -f "$install_dir/bin/activate" ]; then
+        # shellcheck disable=SC1091
+        source "$install_dir/bin/activate"
+    else
+        Show 1 "未找到 $install_dir/bin/activate 脚本，无法初始化 conda"
+    fi
     $install_dir/bin/conda init bash
     $install_dir/bin/conda init zsh
     Show 0 "初始化 conda 完成"
@@ -972,8 +976,8 @@ EOF
         Show 2 "没有找到其他用户目录, 跳过其他用户配置"
     else
         for user in $users; do
-            su - $user -c "$install_dir/bin/conda init zsh;$install_dir/bin/conda init bash" 2>/dev/null
-            action "为用户 $user 配置 conda 环境" "为用户 $user 配置 conda 环境失败"
+            su - "$user" -c "$install_dir/bin/conda init zsh;$install_dir/bin/conda init bash" 2>/dev/null
+            action "为用户 ${user} 配置 conda 环境" "为用户 ${user} 配置 conda 环境失败"
             configure_conda_user "$mirror_url" "$user"
         done
     fi
@@ -1013,7 +1017,7 @@ configure_conda_mirror() {
     echo "3. 中国科大 miniconda"
     echo "4. 浙江大学 miniconda"
     echo "5. 南京大学 miniconda"
-    read -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
 
     # 根据用户选择设置 Miniconda3 软件源
     if [[ "$choice" == "1" ]]; then
@@ -1045,7 +1049,7 @@ remove_miniconda3() {
     local install_dir="/opt/miniconda3"
 
     # 定义要删除的文件和目录
-    declare -a files=("$install_dir" "~/.condarc")
+    declare -a files=("$install_dir" "$HOME/.condarc")
 
     # 定义要处理的配置文件
     declare -a config_files=(".bashrc" ".zshrc")
@@ -1104,9 +1108,7 @@ remove_miniconda3() {
 # 检查Docker
 check_docker() {
     Show 2 "检查Docker是否安装"
-    which docker > /dev/null 2>&1
-
-    if [ $? == 0 ]; then
+    if which docker > /dev/null 2>&1; then
         Show 0 "Docker 已安装"
         Show 2 "启动Docker服务"
         systemctl start docker >& /dev/null
@@ -1131,7 +1133,7 @@ config_docker() {
     echo "9. 更新 Docker 镜像源列表"
     echo "10. 拉取 Docker 镜像"
     echo "11. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-11): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-11): ${NC}")" choice
     case $choice in
         1)
             install_docker
@@ -1184,7 +1186,8 @@ install_docker() {
     action "安装依赖包成功" "安装依赖包失败"
 
     if [[ "$(lsb_release -is)" == "Ubuntu" ]] || [[ "$(lsb_release -is)" == "Debian" ]]; then
-        local repo_name=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
+        local repo_name
+        repo_name=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
 
         Show 0 "检测到系统为: ${repo_name}"
         echo -e "${YELLOW}[+] 请选择要使用的镜像源: ${NC}"
@@ -1193,7 +1196,7 @@ install_docker() {
         echo "3. 阿里云 Docker-CE"
         echo "4. 华为云 Docker-CE"
         echo "5. 腾讯云 Docker-CE"
-        read -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
+        read -r -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
 
         # 根据用户选择设置 Docker 软件源
         if [[ "$choice" == "1" ]]; then
@@ -1219,8 +1222,19 @@ install_docker() {
         sudo install -d /etc/apt/keyrings
         sudo curl -fsSL "${mirror_url}/docker-ce/linux/${repo_name}/gpg" | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
         sudo chmod a+r /etc/apt/keyrings/docker.gpg
-        sudo echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] ${mirror_url}/docker-ce/linux/${repo_name} "$(. /etc/os-release && echo "${VERSION_CODENAME}")" stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-        action "设置 Docker 软件源成功" "设置 Docker 软件源失败"
+        
+        # 明确读取VERSION_CODENAME
+        if [ -f /etc/os-release ]; then
+            VERSION_CODENAME=$(grep -E '^VERSION_CODENAME=' /etc/os-release | cut -d'=' -f2)
+            if [ -n "$VERSION_CODENAME" ]; then
+                sudo echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] ${mirror_url}/docker-ce/linux/${repo_name} ${VERSION_CODENAME} stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+                action "设置 Docker 软件源成功" "设置 Docker 软件源失败"
+            else
+                Show 1 "无法从 /etc/os-release 获取版本代号"
+            fi
+        else
+            Show 1 "未找到 /etc/os-release 文件，无法设置 Docker 软件源"
+        fi
 
         Show 2 "更新软件包列表"
         sudo apt-get update >/dev/null
@@ -1238,7 +1252,7 @@ install_docker() {
         echo "2. 阿里云 Docker-CE"
         echo "3. 华为云 Docker-CE"
         echo "4. 腾讯云 Docker-CE"
-        read -p "$(echo -e "${GREEN}请输入选择(1-4): ${NC}")" choice
+        read -r -p "$(echo -e "${GREEN}请输入选择(1-4): ${NC}")" choice
 
         # 根据用户选择设置 Docker 软件源
         if [[ "$choice" == "1" ]]; then
@@ -1258,7 +1272,7 @@ install_docker() {
         fi
 
         Show 2 "设置 Docker 软件源"
-        curl -fsSL ${mirror_url}/docker-ce/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        curl -fsSL "${mirror_url}/docker-ce/linux/debian/gpg" | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
         sudo chmod a+r /etc/apt/keyrings/docker.gpg
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] ${mirror_url}/docker-ce/linux/debian/ bookworm stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
         action "设置 Docker 软件源成功" "设置 Docker 软件源失败"
@@ -1301,7 +1315,7 @@ configure_docker_mirror() {
     Show 2 "配置Docker国内镜像源"
     sudo mkdir -p /etc/docker
 
-    sudo tee /etc/docker/daemon.json <<-'EOF'
+    if sudo tee /etc/docker/daemon.json <<-'EOF'
 {
   "registry-mirrors": [
     "https://docker.fxxk.dedyn.io",
@@ -1317,7 +1331,7 @@ configure_docker_mirror() {
   ]
 }
 EOF
-    if [ $? -eq 0 ]; then
+    then
         Show 0 "修改配置文件成功"
         Show 2 "重启 Docker 服务"
         sudo systemctl daemon-reload
@@ -1357,7 +1371,7 @@ configure_docker_proxy() {
     echo "1. HTTP / HTTPS"
     echo "2. SOCKS5"
     echo "3. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" type
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" type
     case $type in
         1)
             proxy_type=http
@@ -1373,7 +1387,7 @@ configure_docker_proxy() {
             ;;
     esac
     # 输入代理地址
-    read -p "$(echo -e "${GREEN}输入代理地址 (Ex: 127.0.0.1:7890): ${NC}")" proxy_ip_port
+    read -r -p "$(echo -e "${GREEN}输入代理地址 (Ex: 127.0.0.1:7890): ${NC}")" proxy_ip_port
 
     # 配置文件路径
     CONFIG_FILE="/etc/systemd/system/docker.service.d/proxy.conf"
@@ -1456,7 +1470,7 @@ update_docker_mirrors() {
     )
 
     # 设置配置目录，默认为"/opt/docker_pull"
-    local config_dir=${1:-"/opt/docker_pull"}
+    local config_dir="/opt/docker_pull"
     local mirrors_file="${config_dir}/docker_mirrors.txt"
 
     # 创建配置目录
@@ -1466,7 +1480,8 @@ update_docker_mirrors() {
     printf '%s\n' "${mirrors[@]}" > "${mirrors_file}"
 
     # 创建临时文件用于存储可用的镜像源
-    local temp_file=$(mktemp)
+    local temp_file
+    temp_file=$(mktemp)
 
     Show 2 "开始检测镜像源可用性"
     for mirror in "${mirrors[@]}"; do
@@ -1492,7 +1507,7 @@ update_docker_mirrors() {
 # 拉取 Docker 镜像
 pull_docker_image() {
     # 提示用户输入要拉取的Docker镜像名称
-    read -p "$(echo -e "${YELLOW}请输入要拉取的Docker镜像名称: ${NC}")" image_name
+    read -r -p "$(echo -e "${YELLOW}请输入要拉取的Docker镜像名称: ${NC}")" image_name
 
     # 检查输入是否为空
     if [ -z "${image_name}" ]; then
@@ -1500,7 +1515,7 @@ pull_docker_image() {
     fi
 
     # 设置配置目录，默认为"/opt/docker_pull"
-    local config_dir=${2:-"/opt/docker_pull"}
+    local config_dir="/opt/docker_pull"
     local mirrors_file="${config_dir}/docker_mirrors.txt"
 
     # 创建配置目录
@@ -1591,7 +1606,8 @@ pull_docker_image() {
             done
 
             # 如果成功拉取 hello-world，尝试拉取用户指定的镜像
-            if [ $? -eq 0 ]; then
+            # if [ $? -eq 0 ]; then
+            if wait $pid; then
                 Show 0 "${mirror} 镜像源连通性测试正常！正在为您下载镜像"
                 timeout=200
                 for i in {1..2}; do
@@ -1658,7 +1674,7 @@ config_docker_compose() {
     echo "1. 安装 Docker-compose"
     echo "2. 卸载 Docker-compose"
     echo "3. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
 
     case $choice in
         1)
@@ -1680,16 +1696,15 @@ config_docker_compose() {
 install_docker_compose() {
     Show 2 "开始安装 docker-compose"
     if [ -f "/usr/local/bin/docker-compose" ]; then
-        read -p "已安装 docker-compose, 是否卸载? (y/n)" yn
+        read -r -p "已安装 docker-compose, 是否卸载? (y/n)" yn
         if [[ $yn == "y" || $yn == "Y" ]]; then
             remove_docker_compose
         fi
     fi
     Show 2 "开始下载 docker-compose"
     check_curl
-    sudo curl -L "https://gitee.com/yijingsec/compose/releases/download/$(curl -s https://gitee.com/api/v5/repos/yijingsec/compose/releases/latest | grep -E -o '\"tag_name\":\"([^\"]+)\"' | awk -F\" '{print $4}')/docker-compose-$(uname -s | tr A-Z a-z)-$(uname -m)" -o /usr/local/bin/docker-compose
-    sudo chmod +x /usr/local/bin/docker-compose
-    if [ $? -eq 0 ]; then
+    sudo curl -L "https://gitee.com/yijingsec/compose/releases/download/$(curl -s https://gitee.com/api/v5/repos/yijingsec/compose/releases/latest | grep -E -o '\"tag_name\":\"([^\"]+)\"' | awk -F\" '{print $4}')/docker-compose-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)" -o /usr/local/bin/docker-compose
+    if sudo chmod +x /usr/local/bin/docker-compose; then
         Show 0 "安装 docker-compose 成功"
         Show 2 "安装 docker-compose 版本:"
         sudo docker-compose --version
@@ -1729,7 +1744,7 @@ config_vulfocus() {
     echo "1. 安装 Vulfocus"
     echo "2. 卸载 Vulfocus"
     echo "3. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
 
     case $choice in
         1)
@@ -1750,7 +1765,7 @@ config_vulfocus() {
 # 安装vulfocus
 install_vulfocus() {
     Show 2 "开始安装 vulfocus"
-    read -p "$(echo -e "${YELLOW}输入启动vulfocus的主机地址: ${NC}")" host_ip
+    read -r -p "$(echo -e "${YELLOW}输入启动vulfocus的主机地址: ${NC}")" host_ip
 
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
@@ -1766,7 +1781,7 @@ install_vulfocus() {
     action "拉取 vulfocus 镜像成功" "拉取 vulfocus 镜像失败"
 
     Show 2 "开始启动 vulfocus"
-    sudo docker run -d -p 88:80 --name vulfocus --restart always -v /var/run/docker.sock:/var/run/docker.sock -e VUL_IP=${host_ip} registry.cn-hangzhou.aliyuncs.com/mingy123/vulfocus:latest
+    sudo docker run -d -p 88:80 --name vulfocus --restart always -v /var/run/docker.sock:/var/run/docker.sock -e VUL_IP="${host_ip}" registry.cn-hangzhou.aliyuncs.com/mingy123/vulfocus:latest
     action "启动 vulfocus 成功" "启动 vulfocus 失败"
 
     # 打印访问信息
@@ -1794,7 +1809,7 @@ config_arl() {
     echo "4. 卸载 ARL"
     echo "5. 添加指纹"
     echo "6. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
 
     case $choice in
         1)
@@ -1824,7 +1839,7 @@ config_arl() {
 # 安装灯塔ARL
 install_arl() {
     Show 2 "开始安装灯塔ARL"
-    read -p "$(echo -e "${YELLOW}输入启动灯塔ARL的主机地址: ${NC}")" host_ip
+    read -r -p "$(echo -e "${YELLOW}输入启动灯塔ARL的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
         Show 1 "请输入正确的IP地址"
@@ -1842,7 +1857,8 @@ install_arl() {
     # sudo curl -Ls "https://gitee.com/yijingsec/ARL/releases/download/$(curl -s https://gitee.com/api/v5/repos/yijingsec/ARL/releases/latest | grep -E -o '\"tag_name\":\"([^\"]+)\"' | awk -F\" '{print $4}')/docker.zip" -o /opt/docker_arl/docker.zip && cd /opt/docker_arl && unzip -o docker.zip
 
     check_curl
-    local latest_tag_name=$(curl -s https://gitee.com/api/v5/repos/yijingsec/ARL/releases/latest | grep -E -o '"tag_name":"([^\"]+)"' | awk -F\" '{print $4}')
+    local latest_tag_name
+    latest_tag_name=$(curl -s https://gitee.com/api/v5/repos/yijingsec/ARL/releases/latest | grep -E -o '"tag_name":"([^\"]+)"' | awk -F\" '{print $4}')
     Show 0 "发现最新版本ARL: ${latest_tag_name}"
     Show 2 "开始下载 ARL 压缩包..."
     local download_url="https://gitee.com/yijingsec/ARL/releases/download/${latest_tag_name}/docker.zip"
@@ -1857,9 +1873,8 @@ install_arl() {
     check_docker_compose
 
     Show 2 "开始启动 ARL 服务"
-    sudo $COMPOSE_CMD up -d
     # 检查命令是否成功执行
-    if [ $? -eq 0 ]; then
+    if sudo "$COMPOSE_CMD" up -d; then
         Show 0 "成功启动 ARL 服务"
         Show 0 "访问地址: https://${host_ip}:5003"
         Show 0 "默认用户: admin"
@@ -1874,9 +1889,8 @@ stop_arl() {
     Show 2 "停止灯塔ARL开始"
     check_docker_compose
     cd /opt/docker_arl
-    sudo $COMPOSE_CMD ps | grep arl_ | grep Up >/dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        sudo $COMPOSE_CMD stop
+    if sudo "$COMPOSE_CMD" ps | grep arl_ | grep Up >/dev/null 2>&1; then
+        sudo "$COMPOSE_CMD" stop
         Show 0 "停止灯塔ARL完成"
     else
         Show 2 "灯塔ARL服务已停止"
@@ -1886,7 +1900,7 @@ stop_arl() {
 # 启动灯塔ARL
 start_arl() {
     Show 2 "启动灯塔ARL开始"
-    read -p "$(echo -e "${YELLOW}输入启动灯塔ARL的主机地址: ${NC}")" host_ip
+    read -r -p "$(echo -e "${YELLOW}输入启动灯塔ARL的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
         Show 1 "请输入正确的IP地址"
@@ -1896,10 +1910,9 @@ start_arl() {
 
     Show 2 "启动灯塔ARL服务"
     cd /opt/docker_arl
-    sudo $COMPOSE_CMD ps -a | grep arl_ | grep Exited >/dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        sudo $COMPOSE_CMD up -d
-        if [ $? -eq 0 ]; then
+    
+    if sudo "$COMPOSE_CMD" ps -a | grep arl_ | grep Exited >/dev/null 2>&1; then
+        if sudo "$COMPOSE_CMD" up -d; then
             Show 0 "启动灯塔ARL成功"
             Show 0 "访问地址: https://${host_ip}:5003"
             Show 0 "默认用户: admin"
@@ -1920,13 +1933,13 @@ remove_arl() {
 
     Show 2 "停止灯塔ARL服务"
     cd /opt/docker_arl
-    sudo $COMPOSE_CMD down
+    sudo "$COMPOSE_CMD" down
     Show 2 "删除 arl_db 卷"
     sudo docker volume rm arl_db
     Show 2 "删除 docker_arl 目录"
     cd ~
     sudo rm -rf /opt/docker_arl
-    read -p "是否删除ARL镜像? (y/n)" yn
+    read -r -p "是否删除ARL镜像? (y/n)" yn
     if [[ $yn == "y" || $yn == "Y" ]]; then
         sudo docker rmi registry.cn-hangzhou.aliyuncs.com/mingy123/arl:latest
         sudo docker rmi registry.cn-hangzhou.aliyuncs.com/mingy123/rabbitmq:3.8.19-management-alpine
@@ -1939,11 +1952,11 @@ remove_arl() {
 # 给ARL添加指纹
 add_fingerprint_to_arl() {
     Show 2 "开始给ARL添加指纹"
-    read -p "$(echo -e "${YELLOW}请输入ARL的IP地址: ${NC}")" arl_ip
+    read -r -p "$(echo -e "${YELLOW}请输入ARL的IP地址: ${NC}")" arl_ip
     if [ -z "${arl_ip}" ]; then
         Show 1 "请输入正确的ARL_IP地址"
     fi
-    read -p "$(echo -e "${YELLOW}请输入ARL的密码: ${NC}")" arl_pass
+    read -r -p "$(echo -e "${YELLOW}请输入ARL的密码: ${NC}")" arl_pass
     if [ -z "${arl_pass}" ]; then
         Show 1 "请输入正确的ARL密码"
     fi
@@ -1956,9 +1969,9 @@ add_fingerprint_to_arl() {
     cd /opt/docker_arl/ARL-Finger-ADD
     Show 2 "开始添加指纹"
     if command -v python3 &>/dev/null; then
-        python3 ARL-Finger-ADD.py https://${arl_ip}:5003/ admin ${arl_pass}
+        python3 ARL-Finger-ADD.py "https://${arl_ip}:5003/" admin "${arl_pass}"
     elif command -v python &>/dev/null; then
-        python ARL-Finger-ADD.py https://${arl_ip}:5003/ admin ${arl_pass}
+        python ARL-Finger-ADD.py "https://${arl_ip}:5003/" admin "${arl_pass}"
     else
         Show 1 "Python3未安装, 请先安装Python3"
     fi
@@ -1971,7 +1984,7 @@ config_metasploit() {
     echo "1. 安装 Metasploit-framework"
     echo "2. 卸载 Metasploit-framework"
     echo "3. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
 
     case $choice in
         1)
@@ -2039,7 +2052,7 @@ config_viper() {
     echo "5. 关闭 Viper"
     echo "6. 卸载 Viper"
     echo "7. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-7): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-7): ${NC}")" choice
     case $choice in
         1)
             install_viper
@@ -2073,7 +2086,7 @@ install_viper() {
     # 检查Docker是否安装
     Show 2 "开始安装 Viper"
     check_docker
-    read -p "$(echo -e "${YELLOW}输入启动Viper的主机地址: ${NC}")" host_ip
+    read -r -p "$(echo -e "${YELLOW}输入启动Viper的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
         Show 1 "请输入正确的IP地址"
@@ -2100,11 +2113,11 @@ services:
     command: ["VIPER_PASSWORD"]
 EOF
 
-    read -p "$(echo -e "${YELLOW}输入VIPER密码: ${NC}")" VIPER_PASSWORD
+    read -r -p "$(echo -e "${YELLOW}输入VIPER密码: ${NC}")" VIPER_PASSWORD
     sed -i "s/VIPER_PASSWORD/${VIPER_PASSWORD}/g" docker-compose.yml
     cd /root/VIPER
     check_docker_compose
-    sudo $COMPOSE_CMD up -d
+    sudo "$COMPOSE_CMD" up -d
     Show 2 "正在等待系统启动"
     sleep 15
     Show 0 "访问地址: https://${host_ip}:60000 登录到服务器"
@@ -2119,14 +2132,14 @@ update_viper_version() {
     check_docker_compose
     Show 2 "移除所有容器"
     cd /root/VIPER
-    sudo $COMPOSE_CMD down
+    sudo "$COMPOSE_CMD" down
     Show 2 "删除数据文件"
     rm -rf ./db/*
     rm -f ./module/*
     Show 2 "拉取最新镜像"
-    sudo $COMPOSE_CMD pull
+    sudo "$COMPOSE_CMD" pull
     Show 2 "启动容器"
-    sudo $COMPOSE_CMD up -d
+    sudo "$COMPOSE_CMD" up -d
     Show 0 "更新Viper完成"
 }
 
@@ -2134,13 +2147,13 @@ update_viper_version() {
 update_viper_password() {
     Show 2 "开始更新Viper密码"
     cd /root/VIPER
-    read -p "$(echo -e "${YELLOW}输入VIPER密码: ${NC}")" VIPER_PASSWORD
+    read -r -p "$(echo -e "${YELLOW}输入VIPER密码: ${NC}")" VIPER_PASSWORD
     Show 2 "更新docker-compose.yml文件"
     sed -i "s/VIPER_PASSWORD/${VIPER_PASSWORD}/g" docker-compose.yml
     check_docker_compose
     Show 2 "更新Viper容器"
-    sudo $COMPOSE_CMD down
-    sudo $COMPOSE_CMD up -d
+    sudo "$COMPOSE_CMD" down
+    sudo "$COMPOSE_CMD" up -d
     Show 0 "更新Viper密码完成"
 }
 
@@ -2149,7 +2162,7 @@ start_viper() {
     Show 2 "开始启动Viper"
     cd /root/VIPER
     check_docker_compose
-    sudo $COMPOSE_CMD start
+    sudo "$COMPOSE_CMD" start
     Show 0 "启动Viper完成"
 }
 
@@ -2158,7 +2171,7 @@ stop_viper() {
     Show 2 "开始关闭Viper"
     cd /root/VIPER
     check_docker_compose
-    sudo $COMPOSE_CMD stop
+    sudo "$COMPOSE_CMD" stop
     Show 0 "关闭Viper完成"
 }
 
@@ -2168,7 +2181,7 @@ remove_viper() {
     cd /root/VIPER
     check_docker_compose
     Show 2 "删除Viper容器"
-    sudo $COMPOSE_CMD down
+    sudo "$COMPOSE_CMD" down
     Show 2 "删除Viper目录"
     cd ~ && sudo rm -rf /root/VIPER
     Show 0 "卸载Viper完成"
@@ -2183,7 +2196,7 @@ config_empire() {
     echo "4. 启动 Empire"
     echo "5. 卸载 Empire"
     echo "6. 返回主菜单"
-    read -p "请输入选择(1-6): " choice
+    read -r -p "请输入选择(1-6): " choice
     case $choice in
         1)
             install_empire
@@ -2213,7 +2226,7 @@ config_empire() {
 install_empire() {
     Show 2 "开始安装 Empire"
     check_docker
-    read -p "$(echo -e "${YELLOW}输入启动 Empire 的主机地址: ${NC}")" host_ip
+    read -r -p "$(echo -e "${YELLOW}输入启动 Empire 的主机地址: ${NC}")" host_ip
     if [ -z "${host_ip}" ]; then
         Show 1 "请输入正确的IP地址"
     fi
@@ -2260,7 +2273,7 @@ remove_empire() {
     docker stop ps-empire
     docker rm ps-empire -f
     Show 2 "删除Empire容器完成"
-    read -p "是否要删除镜像? (y/n)" yn
+    read -r -p "是否要删除镜像? (y/n)" yn
     if [[ $yn == "y" || $yn == "Y" ]]; then
         docker rmi registry.cn-hangzhou.aliyuncs.com/mingy123/empire:latest
         Show 0 "删除Empire镜像完成"
@@ -2277,7 +2290,7 @@ config_starkiller() {
     echo "4. 启动 Starkiller"
     echo "5. 卸载 Starkiller"
     echo "6. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
     case $choice in
         1)
             install_starkiller
@@ -2306,7 +2319,7 @@ config_starkiller() {
 # 安装 Starkiller
 install_starkiller() {
     Show 2 "安装Starkiller开始"
-    read -p "$(echo -e "${YELLOW}输入启动Starkiller的主机地址: ${NC}")" host_ip
+    read -r -p "$(echo -e "${YELLOW}输入启动Starkiller的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
         Show 1 "请输入正确的IP地址"
@@ -2330,8 +2343,8 @@ install_starkiller() {
 update_starkiller() {
     Show 2 "更新Starkiller开始"
     Show 2 "开始拉取最新Starkiller镜像"
-    docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/starkiller:latest
-    if [ $? -eq 0 ]; then
+    
+    if docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/starkiller:latest; then
         Show 0 "拉取最新Starkiller镜像成功"
         Show 0 "更新Starkiller成功,请启动Starkiller"
     else
@@ -2357,14 +2370,13 @@ start_starkiller() {
         Show 0 "Starkiller未启动"
         Show 2 "启动Starkiller开始"
         # 提示用户输入主机地址
-        read -p "$(echo -e "${YELLOW}输入启动Starkiller的主机地址: ${NC}")" host_ip
+        read -r -p "$(echo -e "${YELLOW}输入启动Starkiller的主机地址: ${NC}")" host_ip
         # 检查是否输入了IP地址
         if [ -z "${host_ip}" ]; then
             Show 1 "请输入正确的IP地址"
         fi
         # 启动ps-starkiller容器
-        docker start ps-starkiller > /dev/null
-        if [ $? -eq 0 ]; then
+        if docker start ps-starkiller > /dev/null; then
             Show 0 "启动Starkiller完成"
             Show 0 "服务地址: http://${host_ip}:4173"
             Show 0 "默认用户: empireadmin"
@@ -2378,10 +2390,9 @@ start_starkiller() {
 # 卸载 Starkiller
 remove_starkiller() {
     Show 2 "卸载Starkiller开始"
-    docker rm ps-starkiller -f
-    if [ $? -eq 0 ]; then
+    if docker rm ps-starkiller -f; then
         Show 0 "删除Starkiller容器完成"
-        read -p "是否要删除镜像? (y/n)" yn
+        read -r -p "是否要删除镜像? (y/n)" yn
         if [[ $yn == "y" || $yn == "Y" ]]; then
             docker rmi registry.cn-hangzhou.aliyuncs.com/mingy123/starkiller:latest
             Show 0 "删除Starkiller镜像完成"
@@ -2404,7 +2415,7 @@ config_hfish() {
     echo "5. 卸载 HFish"
     echo "6. 获取数据库信息"
     echo "7. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-7): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-7): ${NC}")" choice
     case $choice in
         1)
             install_hfish
@@ -2440,7 +2451,7 @@ install_hfish() {
     # 检查Docker是否安装
     check_docker
 
-    read -p "$(echo -e "${YELLOW}输入启动HFish的主机地址: ${NC}")" host_ip
+    read -r -p "$(echo -e "${YELLOW}输入启动HFish的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
         Show 1 "请输入正确的IP地址"
@@ -2471,12 +2482,12 @@ services:
       - MYSQL_ROOT_PASSWORD=123456
 EOF
 
-    # read -p "输入MySQL数据库密码(回车默认为123456): " MYSQL_PASSWORD
+    # read -r -p "输入MySQL数据库密码(回车默认为123456): " MYSQL_PASSWORD
     # sed -i "s/123456/${MYSQL_PASSWORD}/g" docker-compose.yml
     Show 2 "拉取HFish镜像并启动HFish容器"
     cd /opt/hfish
     check_docker_compose
-    sudo $COMPOSE_CMD up -d
+    sudo "$COMPOSE_CMD" up -d
     Show 2 "正在等待HFish容器启动"
     sleep 3
     check_jq
@@ -2496,8 +2507,7 @@ EOF
 update_hfish() {
     Show 2 "更新HFish开始"
     Show 2 "开始拉取最新HFish镜像"
-    docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/hfish-server:latest
-    if [ $? -eq 0 ]; then
+    if docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/hfish-server:latest; then
         Show 0 "拉取最新HFish镜像成功"
         Show 0 "更新HFish成功"
     else
@@ -2511,22 +2521,21 @@ stop_hfish() {
     Show 2 "停止HFish开始"
     cd /opt/hfish
     check_docker_compose
-    sudo $COMPOSE_CMD stop
+    sudo "$COMPOSE_CMD" stop
     action "停止HFish成功" "停止HFish失败"
 }
 
 # 启动 HFish
 start_hfish() {
     Show 2 "启动HFish开始"
-    read -p "$(echo -e "${YELLOW}输入启动HFish的主机地址: ${NC}")" host_ip
+    read -r -p "$(echo -e "${YELLOW}输入启动HFish的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
         Show 1 "请输入正确的IP地址"
     fi
     cd /opt/hfish
     check_docker_compose
-    sudo $COMPOSE_CMD start
-    if [ $? -eq 0 ]; then
+    if sudo "$COMPOSE_CMD" start; then
         Show 0 "启动HFish完成"
         Show 0 "访问地址: https://${host_ip}:4433/web 登录到服务器"
         Show 0 "用户名: admin"
@@ -2540,12 +2549,11 @@ remove_hfish() {
     Show 2 "删除HFish容器"
     cd /opt/hfish
     check_docker_compose
-    sudo $COMPOSE_CMD down
-    if [ $? -eq 0 ]; then
+    if sudo "$COMPOSE_CMD" down; then
         Show 0 "删除HFish容器完成"
         Show 2 "删除HFish目录"
         rm -rf /opt/hfish
-        read -p "是否要删除镜像? (y/n)" yn
+        read -r -p "是否要删除镜像? (y/n)" yn
         if [[ $yn == "y" || $yn == "Y" ]]; then
             docker rmi registry.cn-hangzhou.aliyuncs.com/mingy123/hfish-server:latest
             docker rmi registry.cn-hangzhou.aliyuncs.com/mingy123/mysql:8.0
@@ -2576,7 +2584,7 @@ config_dnscat2() {
     echo "2. 启动 Dnscat2 (直连模式)"
     echo "3. 启动 Dnscat2 (中继模式)"
     echo "4. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-4): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-4): ${NC}")" choice
     case $choice in
         1)
             install_dnscat2
@@ -2599,8 +2607,7 @@ config_dnscat2() {
 # 安装dnscat2
 install_dnscat2() {
     Show 2 "安装Dnscat2开始"
-    docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/dnscat2:v0.07
-    if [ $? -eq 0 ]; then
+    if docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/dnscat2:v0.07; then
         Show 0 "拉取最新Dnscat2镜像成功"
         Show 0 "安装Dnscat2成功, 请启动Dnscat2"
     else
@@ -2619,7 +2626,7 @@ start_dnscat2_direct_mode() {
 # 启动Dnscat2中继模式
 start_dnscat2_relay_mode() {
     Show 2 "启动Dnscat2(中继模式)开始"
-    read -p "$(echo -e "${YELLOW}输入启动Dnscat2的子域名: ${NC}")" subdomain
+    read -r -p "$(echo -e "${YELLOW}输入启动Dnscat2的子域名: ${NC}")" subdomain
     if [ -z "${subdomain}" ]; then
         Show 1 "请输入正确的子域名"
     fi
@@ -2635,7 +2642,7 @@ config_beef() {
     echo "3. 启动 Beef"
     echo "4. 卸载 Beef"
     echo "5. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
 
     case $choice in
         1)
@@ -2662,7 +2669,7 @@ config_beef() {
 # 安装Beef
 install_beef() {
     Show 2 "安装Beef开始"
-    read -p "$(echo -e "${YELLOW}输入启动Beef的主机地址: ${NC}")" host_ip
+    read -r -p "$(echo -e "${YELLOW}输入启动Beef的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
         Show 1 "请输入正确的IP地址"
@@ -2672,8 +2679,7 @@ install_beef() {
     action "拉取最新Beef镜像成功" "拉取最新Beef镜像失败"
 
     Show 2 "启动Beef容器服务"
-    docker run -dit --name beef -p 3000:3000 registry.cn-shanghai.aliyuncs.com/yijingsec/beef:latest
-    if [ $? -eq 0 ]; then
+    if docker run -dit --name beef -p 3000:3000 registry.cn-shanghai.aliyuncs.com/yijingsec/beef:latest; then
         Show 0 "启动Beef容器服务成功"
         Show 0 "访问地址: http://${host_ip}:3000/ui/panel 登录到服务器"
         Show 0 "用户名: beef"
@@ -2693,13 +2699,13 @@ stop_beef() {
 # 启动Beef
 start_beef() {
     Show 2 "启动Beef开始"
-    read -p "$(echo -e "${YELLOW}输入启动Beef的主机地址: ${NC}")" host_ip
+    read -r -p "$(echo -e "${YELLOW}输入启动Beef的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
         Show 1 "请输入正确的IP地址"
     fi
-    docker start beef
-    if [ $? -eq 0 ]; then
+    
+    if docker start beef; then
         Show 0 "启动Beef成功"
         Show 0 "访问地址: http://${host_ip}:3000/ui/panel 登录到服务器"
         Show 0 "默认用户: beef"
@@ -2712,10 +2718,9 @@ start_beef() {
 # 卸载Beef
 remove_beef() {
     Show 2 "卸载Beef开始"
-    docker rm beef -f
-    if [ $? -eq 0 ]; then
+    if docker rm beef -f; then
         Show 0 "删除Beef容器成功"
-        read -p "是否要删除镜像? (y/n)" yn
+        read -r -p "是否要删除镜像? (y/n)" yn
         if [[ $yn == "y" || $yn == "Y" ]]; then
             docker rmi registry.cn-shanghai.aliyuncs.com/yijingsec/beef:latest
             Show 0 "删除Beef镜像成功"
@@ -2735,7 +2740,7 @@ config_bluelotus() {
     echo "3. 启动 Bluelotus"
     echo "4. 卸载 Bluelotus"
     echo "5. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
     case $choice in
         1)
             install_bluelotus
@@ -2761,7 +2766,7 @@ config_bluelotus() {
 # 安装 Bluelotus
 install_bluelotus() {
     Show 2 "安装Bluelotus开始"
-    read -p "$(echo -e "${YELLOW}输入启动Bluelotus的主机地址: ${NC}")" host_ip
+    read -r -p "$(echo -e "${YELLOW}输入启动Bluelotus的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
         Show 1 "请输入正确的IP地址"
@@ -2771,8 +2776,8 @@ install_bluelotus() {
     action "拉取最新Bluelotus镜像成功" "拉取最新Bluelotus镜像失败"
 
     Show 2 "启动Bluelotus容器服务"
-    docker run -dit --name bluelotus -p 5080:80 registry.cn-shanghai.aliyuncs.com/yijingsec/bluelotus:latest
-    if [ $? -eq 0 ]; then
+    
+    if docker run -dit --name bluelotus -p 5080:80 registry.cn-shanghai.aliyuncs.com/yijingsec/bluelotus:latest; then
         Show 0 "安装Bluelotus成功"
         Show 0 "访问地址: http://${host_ip}:5080/login.php 登录到服务器"
         Show 0 "默认密码: bluelotus"
@@ -2791,14 +2796,13 @@ stop_bluelotus() {
 # 启动Bluelotus
 start_bluelotus() {
     Show 2 "启动Bluelotus开始"
-    read -p "$(echo -e "${YELLOW}输入启动Bluelotus的主机地址: ${NC}")" host_ip
+    read -r -p "$(echo -e "${YELLOW}输入启动Bluelotus的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
         Show 1 "请输入正确的IP地址"
     fi
     Show 2 "启动Bluelotus容器服务"
-    docker start bluelotus
-    if [ $? -eq 0 ]; then
+    if docker start bluelotus; then
         Show 0 "启动Bluelotus成功"
         Show 0 "访问地址: http://${host_ip}:5080/login.php 登录到服务器"
         Show 0 "默认密码: bluelotus"
@@ -2810,10 +2814,9 @@ start_bluelotus() {
 # 卸载Bluelotus
 remove_bluelotus() {
     Show 2 "卸载Bluelotus开始"
-    docker rm bluelotus -f
-    if [ $? -eq 0 ]; then
+    if docker rm bluelotus -f; then
         Show 0 "删除Bluelotus容器成功"
-        read -p "是否要删除镜像? (y/n)" yn
+        read -r -p "是否要删除镜像? (y/n)" yn
         if [[ $yn == "y" || $yn == "Y" ]]; then
             docker rmi registry.cn-shanghai.aliyuncs.com/yijingsec/bluelotus:latest
             Show 0 "删除Bluelotus镜像成功"
@@ -2830,7 +2833,7 @@ config_ctfd() {
     echo "1. 安装 CTFd"
     echo "2. 卸载 CTFd"
     echo "3. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
     case $choice in
         1)
             install_ctfd
@@ -2852,13 +2855,13 @@ install_ctfd() {
     Show 2 "开始安装CTFd"
     # 检查Docker是否安装
     check_docker
-    read -p "$(echo -e "${YELLOW}输入启动CTFd的主机地址: ${NC}")" host_ip
+    read -r -p "$(echo -e "${YELLOW}输入启动CTFd的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
         Show 1 "请输入正确的IP地址"
     fi
 
-    read -p "$(echo -e "${YELLOW}输入启动CTFd的主机端口: ${NC}")" host_port
+    read -r -p "$(echo -e "${YELLOW}输入启动CTFd的主机端口: ${NC}")" host_port
     if [ -z "${host_port}" ]; then
         Show 1 "请输入正确的端口号"
     fi
@@ -2877,7 +2880,7 @@ remove_ctfd() {
 
     Show 2 "删除CTFd目录"
     rm -rf /opt/CTFd
-    read -p "是否要删除镜像? (y/n)" yn
+    read -r -p "是否要删除镜像? (y/n)" yn
     if [[ $yn == "y" || $yn == "Y" ]]; then
         docker rmi ctfd/ctfd
         Show 0 "删除镜像成功"
@@ -2891,7 +2894,7 @@ config_awvs() {
     echo "1. 安装 AWVS"
     echo "2. 卸载 AWVS"
     echo "3. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
     case $choice in
         1)
             install_awvs
@@ -2913,13 +2916,13 @@ install_awvs() {
     echo "开始安装AWVS"
     Show 2 "检查Docker是否安装"
     check_docker
-    read -p "$(echo -e "${YELLOW}输入启动AWVS的主机地址: ${NC}")" host_ip
+    read -r -p "$(echo -e "${YELLOW}输入启动AWVS的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
         Show 1 "请输入正确的IP地址"
     fi
 
-    read -p "$(echo -e "${YELLOW}输入启动AWVS的主机端口: ${NC}")" host_port
+    read -r -p "$(echo -e "${YELLOW}输入启动AWVS的主机端口: ${NC}")" host_port
     if [ -z "${host_port}" ]; then
         Show 1 "请输入正确的端口号"
     fi
@@ -2928,11 +2931,11 @@ install_awvs() {
     action "拉取AWVS镜像成功" "拉取AWVS镜像失败"
 
     Show 2 "启动AWVS容器服务"
-    docker run -dit -p ${host_port}:3443 --name yijingsec-awvs --cap-add LINUX_IMMUTABLE registry.cn-shanghai.aliyuncs.com/yijingsec/awvs:latest
+    docker run -dit -p "${host_port}:3443" --name yijingsec-awvs --cap-add LINUX_IMMUTABLE registry.cn-shanghai.aliyuncs.com/yijingsec/awvs:latest
     while true; do
         sleep 3
-        docker ps | grep "yijingsec-awvs" > /dev/null 2>&1
-        if [ $? -eq 0 ]; then
+        
+        if docker ps | grep "yijingsec-awvs" > /dev/null 2>&1; then
             Show 0 "容器启动成功"
             break
         fi
@@ -2946,10 +2949,9 @@ install_awvs() {
 remove_awvs() {
     Show 2 "开始卸载AWVS"
     Show 2 "删除AWVS容器"
-    docker rm yijingsec-awvs -f
-    if [ $? -eq 0 ]; then
+    if docker rm yijingsec-awvs -f; then
         Show 0 "删除AWVS容器成功"
-        read -p "是否要删除镜像? (y/n)" yn
+        read -r -p "是否要删除镜像? (y/n)" yn
         if [[ $yn == "y" || $yn == "Y" ]]; then
             docker rmi registry.cn-shanghai.aliyuncs.com/yijingsec/awvs:latest
         fi
@@ -2965,7 +2967,7 @@ config_ocr_api_server() {
     echo "1. 安装 ocr_api_server"
     echo "2. 卸载 ocr_api_server"
     echo "3. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
     case $choice in
         1)
             install_ocr_api_server
@@ -2986,10 +2988,10 @@ config_ocr_api_server() {
 install_ocr_api_server() {
     Show 2 "开始安装ocr_api_server"
     # 接收用户输入作为host_ip
-    read -p "$(echo -e "${YELLOW}输入启动ocr_api_server的主机地址: ${NC}")" host_ip
+    read -r -p "$(echo -e "${YELLOW}输入启动ocr_api_server的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
-    if validate_ip $host_ip; then
-        Show 0 "你的IP地址为: $host_ip"
+    if validate_ip "$host_ip"; then
+        Show 0 "你的IP地址为: ${host_ip}"
     else
         return 1
     fi
@@ -3018,10 +3020,9 @@ install_ocr_api_server() {
 remove_ocr_api_server() {
     Show 2 "开始卸载ocr_api_server"
     Show 2 "删除ocr_api_server容器"
-    sudo docker rm -f ocr_api_server
-    if [ $? -eq 0 ]; then
+    if sudo docker rm -f ocr_api_server; then
         Show 0 "删除ocr_api_server容器成功"
-        read -p "是否要删除镜像? (y/n)" yn
+        read -r -p "是否要删除镜像? (y/n)" yn
         if [[ $yn == "y" || $yn == "Y" ]]; then
             docker rmi registry.cn-shanghai.aliyuncs.com/yijingsec/ocr_api_server:latest
             Show 0 "删除镜像成功"
@@ -3041,7 +3042,7 @@ config_ohmyzsh() {
     echo "4. 配置 oh-my-zsh 主题"
     echo "5. 配置 oh-my-zsh 插件"
     echo "6. 返回主菜单"
-    read -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
     case $choice in
         1)
             install_ohmyzsh
@@ -3094,8 +3095,8 @@ install_ohmyzsh() {
         fi
 
         # 替换默认的 GitHub 源为 Gitee
-        sed -i 's|REPO=${REPO:-ohmyzsh/ohmyzsh}|REPO=${REPO:-mirrors/oh-my-zsh}|' install.sh
-        sed -i 's|REMOTE=${REMOTE:-https://github.com/${REPO}.git}|REMOTE=${REMOTE:-https://gitee.com/${REPO}.git}|' install.sh
+        sed -i "s|REPO=${REPO:-ohmyzsh/ohmyzsh}|REPO=${REPO:-mirrors/oh-my-zsh}|" install.sh
+        sed -i "s|REMOTE=${REMOTE:-https://github.com/${REPO}.git}|REMOTE=${REMOTE:-https://gitee.com/${REPO}.git}|" install.sh
         sh install.sh
         Show 0 "安装oh-my-zsh成功"
     else
@@ -3107,11 +3108,14 @@ install_ohmyzsh() {
 config_ohmyzsh_theme() {
     Show 2 "开始配置oh-my-zsh主题"
     Show 2 "设置oh-my-zsh主题为ys"
-    sed -i 's|ZSH_THEME="robbyrussell"|ZSH_THEME="ys"|g' ${HOME}/.zshrc
+    sed -i 's|ZSH_THEME="robbyrussell"|ZSH_THEME="ys"|g' "${HOME}/.zshrc"
 
     Show 2 "设置oh-my-zsh主题ys的提示符"
-    sed -i 's|%(#,%{\$bg\[yellow\]%}%{\$fg\[black\]%}%n%{\$reset_color%},%{\$fg\[cyan\]%}%n) \\|%(#,%{\$fg\[red\]%}%n%{\$reset_color%},%{\$fg\[cyan\]%}%n) \\|g' ${HOME}/.oh-my-zsh/themes/ys.zsh-theme
-    sed -i 's|%{$reset_color%}in \\|%{$fg[blue]%}✅ \\|g' ${HOME}/.oh-my-zsh/themes/ys.zsh-theme
+    # sed -i 's|%(#,%{\$bg\[yellow\]%}%{\$fg\[black\]%}%n%{\$reset_color%},%{\$fg\[cyan\]%}%n) \\|%(#,%{\$fg\[red\]%}%n%{\$reset_color%},%{\$fg\[cyan\]%}%n) \\|g' "${HOME}/.oh-my-zsh/themes/ys.zsh-theme"
+    # sed -i 's|%{$reset_color%}in \\|%{$fg[blue]%}✅ \\|g' "${HOME}/.oh-my-zsh/themes/ys.zsh-theme"
+    
+    sed -i "s|%(#,%{\\\$bg\[yellow\]%}%{\\\$fg\[black\]%}%n%{\\\$reset_color%},%{\\\$fg\[cyan\]%}%n) \\\\|%(#,%{\\\$fg\[red\]%}%n%{\\\$reset_color%},%{\\\$fg\[cyan\]%}%n) \\\\|g" "${HOME}/.oh-my-zsh/themes/ys.zsh-theme"
+    sed -i "s|%{\\\$reset_color%}in \\\\|%{\\\$fg\[blue\]%}✅ \\\\|g" "${HOME}/.oh-my-zsh/themes/ys.zsh-theme"
     Show 0 "oh-my-zsh主题配置完成"
 }
 
@@ -3122,7 +3126,7 @@ config_ohmyzsh_plugin() {
 
     local syntax_highlighting_dir="${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
     if [ -d "$syntax_highlighting_dir" ]; then
-        if [ "$(ls -A $syntax_highlighting_dir)" ]; then
+        if [ "$(ls -A "$syntax_highlighting_dir")" ]; then
             Show 0 "zsh-syntax-highlighting 目录已存在且不为空，跳过安装"
         else
             Show 0 "zsh-syntax-highlighting 目录已存在且为空，正在安装..."
@@ -3137,7 +3141,7 @@ config_ohmyzsh_plugin() {
     # 安装 oh-my-zsh 插件 zsh-autosuggestions
     local autosuggestions_dir="${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
     if [ -d "$autosuggestions_dir" ]; then
-        if [ "$(ls -A $autosuggestions_dir)" ]; then
+        if [ "$(ls -A "$autosuggestions_dir")" ]; then
             Show 0 "zsh-autosuggestions 目录已存在且不为空，跳过安装"
         else
             Show 0 "zsh-autosuggestions 目录已存在且为空，正在安装..."
@@ -3149,7 +3153,7 @@ config_ohmyzsh_plugin() {
     fi
 
     Show 2 "启用 oh-my-zsh 插件"
-    sed -i 's|plugins=(git)|plugins=(git zsh-syntax-highlighting zsh-autosuggestions)|g' ${HOME}/.zshrc
+    sed -i 's|plugins=(git)|plugins=(git zsh-syntax-highlighting zsh-autosuggestions)|g' "${HOME}/.zshrc"
 
     Show 2 "配置 oh-my-zsh 完成"
 }
@@ -3189,7 +3193,7 @@ show_menu() {
     # 特殊处理的项数组
     special_items=("")
     for i in "${!menu_options[@]}"; do
-        if [[ " ${special_items[*]} " =~ " ${menu_options[i]} " ]]; then
+        if [[ ${special_items[*]} =~ ${menu_options[i]} ]]; then
             # 如果当前项在特殊处理项数组中，使用特殊颜色
             echo -e "$((i + 1)). ${aCOLOUR[7]}${menu_options[i]}${NO_COLOR}"
         else
@@ -3248,14 +3252,13 @@ project_update_check() {
         Show 3 "$(Warn "检测到项目有更新")"
         Show 3 "$(Warn "远程仓库的最新提交为: $REMOTE_LATEST")"
         Show 3 "$(Warn "本地仓库的当前提交为: $LOCAL_CURRENT")"
-        read -p "$(echo -e "${YELLOW}>>> 是否要更新到最新项目? (y/n) >>> ${NC}")" yn
+        read -r -p "$(echo -e "${YELLOW}>>> 是否要更新到最新项目? (y/n) >>> ${NC}")" yn
         if [[ $yn == "y" || $yn == "Y" ]]; then
             git restore .
-            git pull
-            if [[ $? -eq 0 ]]; then
+            if git pull; then
                 Show 0 "更新项目成功"
                 Show 3 "按任意键继续..."
-                read -n 1
+                read -r -n 1
             else
                 Show 1 "更新项目失败，请重试"
             fi
@@ -3267,12 +3270,12 @@ project_update_check
 
 while true; do
     show_menu
-    read -p "$(echo -e "${GREEN}>>> 请输入选项的序号(输入q退出) >>> ${NC}")" choice
-    # read -p ">>> 请输入选项的序号(输入q退出) >>> " choice
+    read -r -p "$(echo -e "${GREEN}>>> 请输入选项的序号(输入q退出) >>> ${NC}")" choice
+    # read -r -p ">>> 请输入选项的序号(输入q退出) >>> " choice
     if [[ $choice == 'q' || $choice == 'Q' ]]; then
         break
     fi
-    handle_choice $choice
+    handle_choice "$choice"
     Show 3 "按任意键继续..."
-    read -n 1 # 等待用户按键
+    read -r -n 1 # 等待用户按键
 done
