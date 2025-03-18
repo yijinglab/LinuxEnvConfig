@@ -261,7 +261,7 @@ enable_ssh() {
     else
         Show 2 "openssh-server 未安装，正在安装..."
         sudo apt-get update
-        sudo apt-get install openssh-server -y
+        sudo apt-get install openssh-server -y >& /dev/null
         action "openssh-server 安装成功" "openssh-server 安装失败"
     fi
 
@@ -276,7 +276,7 @@ enable_ssh() {
     # 显示 SSH 服务状态
     Show 2 "检查 SSH 服务状态..."
     sudo systemctl status ssh
-    Show 0 "启用SSH 服务成功"
+    Show 0 "启用 SSH 服务成功"
 }
 
 # 设置nameserver
