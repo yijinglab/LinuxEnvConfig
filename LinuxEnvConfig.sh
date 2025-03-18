@@ -515,7 +515,7 @@ check_oracle_jdk() {
 
     Show 2 "下载 ${JDK_NAME} 文件"
     
-    if wget -q --show-progress "$JDK_URL" -O "$JDK_NAME"; then
+    if ! wget -q --show-progress "$JDK_URL" -O "$JDK_NAME"; then
         rm -f "$JDK_NAME" >/dev/null 2>&1
         Show 1  "下载 ${JDK_NAME} 文件失败"
     else
