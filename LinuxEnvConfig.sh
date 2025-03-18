@@ -86,17 +86,9 @@ action() {
 validate_ip() {
     local ip="$1"
     # 正则表达式匹配IPv4地址
-    local regex='^([0-9]{1,3}\.){3}[0-9]{1,3}$'
+    local regex='^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])$'
 
     if [[ $ip =~ $regex ]]; then
-        # 进一步检查每个八位组是否在0-255之间
-        IFS='.' read -r -a octets <<< "$ip"
-        for octet in "${octets[@]}"; do
-            if ((octet > 255 || octet < 0)); then
-                Show 2 "错误: IP地址中的每个部分必须在0到255之间。"
-                return 1
-            fi
-        done
         return 0
     else
         Show 2 "错误: 请输入正确的IP地址格式。"
