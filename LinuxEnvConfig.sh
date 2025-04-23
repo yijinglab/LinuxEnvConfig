@@ -947,6 +947,7 @@ configure_condarc() {
 channels:
   - defaults
 show_channel_urls: true
+auto_activate_base: false
 channel_alias: ${mirror_url}
 default_channels:
   - ${mirror_url}/pkgs/main
@@ -984,6 +985,7 @@ configure_conda_user() {
 channels:
   - defaults
 show_channel_urls: true
+auto_activate_base: false
 channel_alias: ${mirror_url}
 default_channels:
   - ${mirror_url}/pkgs/main
