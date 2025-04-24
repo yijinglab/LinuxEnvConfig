@@ -3124,11 +3124,11 @@ config_ohmyzsh_plugin() {
             Show 0 "zsh-syntax-highlighting 目录已存在且不为空，跳过安装"
         else
             Show 0 "zsh-syntax-highlighting 目录已存在且为空，正在安装..."
-            git clone https://gitclone.com/github.com/zsh-users/zsh-syntax-highlighting.git "$syntax_highlighting_dir"
+            git clone https://gitee.com/yijingsec/zsh-syntax-highlighting.git "$syntax_highlighting_dir"
         fi
     else
         Show 2 "zsh-syntax-highlighting 未安装，正在安装..."
-        git clone https://gitclone.com/github.com/zsh-users/zsh-syntax-highlighting.git "$syntax_highlighting_dir"
+        git clone https://gitee.com/yijingsec/zsh-syntax-highlighting.git "$syntax_highlighting_dir"
     fi
 
     Show 2 "安装oh-my-zsh插件zsh-autosuggestions"
@@ -3139,11 +3139,11 @@ config_ohmyzsh_plugin() {
             Show 0 "zsh-autosuggestions 目录已存在且不为空，跳过安装"
         else
             Show 0 "zsh-autosuggestions 目录已存在且为空，正在安装..."
-            git clone https://gitclone.com/github.com/zsh-users/zsh-autosuggestions.git "$autosuggestions_dir"
+            git clone https://gitee.com/yijingsec/zsh-autosuggestions.git "$autosuggestions_dir"
         fi
     else
         Show 2 "zsh-autosuggestions 未安装，正在安装..."
-        git clone https://gitclone.com/github.com/zsh-users/zsh-autosuggestions.git "$autosuggestions_dir"
+        git clone https://gitee.com/yijingsec/zsh-autosuggestions "$autosuggestions_dir"
     fi
 
     Show 2 "启用 oh-my-zsh 插件"
