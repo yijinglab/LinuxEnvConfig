@@ -1713,6 +1713,22 @@ config_docker_compose() {
 
 # 安装Docker-compose
 install_docker_compose() {
+    echo -e "${YELLOW}[+] 请选择Docker-compose的安装源: ${NC}"
+    echo "1. Gitee"
+    echo "2. Github"
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-2): ${NC}")" choice
+
+    # 根据用户选择设置 Docker 软件源
+    if [[ "$choice" == "1" ]]; then
+        Show 2 "选择从Gitee下载安装Docker-compose"
+        local docker_compose_url="https://gitee.com/yijingsec/compose/releases/download/$(curl -s https://gitee.com/api/v5/repos/yijingsec/compose/releases/latest | grep -E -o '\"tag_name\":\"([^\"]+)\"' | awk -F\" '{print $4}')/docker-compose-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)"
+    elif [[ "$choice" == "2" ]]; then
+        Show 2 "选择从Github下载安装Docker-compose"
+        local docker_compose_url="https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep '\"tag_name\":' | sed -E 's/.*\"([^\"]+)\".*/\1/')/docker-compose-$(uname -s)-$(uname -m)"
+    else
+        Show 1 "输入错误, 退出安装"
+    fi
+
     Show 2 "开始安装 docker-compose"
     if [ -f "/usr/local/bin/docker-compose" ]; then
         read -r -p "已安装 docker-compose, 是否卸载? (y/n)" yn
@@ -1722,7 +1738,8 @@ install_docker_compose() {
     fi
     Show 2 "开始下载 docker-compose"
     check_curl
-    sudo curl -L "https://gitee.com/yijingsec/compose/releases/download/$(curl -s https://gitee.com/api/v5/repos/yijingsec/compose/releases/latest | grep -E -o '\"tag_name\":\"([^\"]+)\"' | awk -F\" '{print $4}')/docker-compose-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)" -o /usr/local/bin/docker-compose
+    # sudo curl -L "$docker_compose_url" -o /usr/local/bin/docker-compose
+    sudo wget -q --show-progress "$docker_compose_url" -O /usr/local/bin/docker-compose
     if sudo chmod +x /usr/local/bin/docker-compose; then
         Show 0 "安装 docker-compose 成功"
         Show 2 "安装 docker-compose 版本:"
