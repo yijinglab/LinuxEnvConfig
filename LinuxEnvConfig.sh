@@ -869,6 +869,7 @@ install_miniconda3() {
     echo "3. 中国科大 miniconda"
     echo "4. 浙江大学 miniconda"
     echo "5. 南京大学 miniconda"
+    echo "6. 官方源 miniconda"
     read -r -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
 
     # 根据用户选择设置 Miniconda3 软件源
@@ -887,6 +888,9 @@ install_miniconda3() {
     elif [[ "$choice" == "5" ]]; then
         Show 2 "选择使用南京大学 miniconda 软件源"
         local mirror_url="https://mirrors.nju.edu.cn/anaconda"
+    elif [[ "$choice" == "6" ]]; then
+        Show 2 "选择使用官方源 miniconda 软件源"
+        local mirror_url="https://repo.anaconda.com"
     else
         Show 1 "输入错误, 退出安装"
     fi
@@ -1011,6 +1015,7 @@ configure_conda_mirror() {
     echo "3. 中国科大 miniconda"
     echo "4. 浙江大学 miniconda"
     echo "5. 南京大学 miniconda"
+    echo "6. 官方源 miniconda"
     read -r -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
 
     # 根据用户选择设置 Miniconda3 软件源
@@ -1029,6 +1034,9 @@ configure_conda_mirror() {
     elif [[ "$choice" == "5" ]]; then
         Show 2 "选择使用南京大学 miniconda 软件源"
         local mirror_url="https://mirrors.nju.edu.cn/anaconda"
+    elif [[ "$choice" == "6" ]]; then
+        Show 2 "选择使用官方源 miniconda 软件源"
+        local mirror_url="https://repo.anaconda.com"
     else
         Show 1 "输入错误, 退出安装"
     fi
