@@ -1312,16 +1312,14 @@ configure_docker_mirror() {
     if sudo tee /etc/docker/daemon.json <<-'EOF'
 {
   "registry-mirrors": [
-    "https://docker.fxxk.dedyn.io",
     "https://docker.m.daocloud.io",
-    "https://docker.1panel.live",
     "https://docker.1ms.run",
+    "https://docker.1panel.live",
     "https://docker.xuanyuan.me",
-    "https://hub.urlsa.us.kg",
-    "https://docker.urlsa.us.kg",
-    "https://06009bb76e000fc60fd1c01a26a6dfe0.mirror.swr.myhuaweicloud.com",
-    "https://fl37993c.mirror.aliyuncs.com",
-    "https://registry.docker-cn.com"
+    "https://docker.fxxk.dedyn.io",
+    "https://docker.adysec.com",
+    "https://docker.jsdelivr.fyi",
+    "https://dockerhub.anzu.vip"
   ]
 }
 EOF
