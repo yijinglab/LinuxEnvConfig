@@ -70,6 +70,7 @@ sudo bash LinuxEnvConfig.sh
 4. 清华大学
 5. 北京大学
 6. 中国科大
+7. 官方APT源
 
 ### 配置 JDK
 
