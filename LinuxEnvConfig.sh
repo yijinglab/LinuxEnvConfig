@@ -771,7 +771,8 @@ config_apt_source() {
     echo "4. 清华大学"
     echo "5. 北京大学"
     echo "6. 中国科大"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
+    echo "7. 官方APT源"
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-7): ${NC}")" choice
 
     # 根据用户选择设置 APT 软件源
     if [[ "$choice" == "1" ]]; then
@@ -798,6 +799,10 @@ config_apt_source() {
         Show 2 "选择使用中国科大APT软件源"
         local mirror_url="https://mirrors.ustc.edu.cn"
         local kali_mirror="0"
+    elif [[ "$choice" == "7" ]]; then
+        Show 2 "选择使用官方APT软件源"
+        local mirror_url="http://archive.ubuntu.com"
+        local kali_mirror="2"
     else
         Show 1 "输入错误, 退出安装"
     fi
@@ -825,6 +830,12 @@ EOF
             sudo tee /etc/apt/sources.list <<-EOF
 deb https://mirrors.aliyun.com/kali kali-rolling main contrib non-free non-free-firmware
 # deb-src https://mirrors.aliyun.com/kali kali-rolling main contrib non-free non-free-firmware
+EOF
+        elif [[ "$kali_mirror" == "2" ]]; then
+            sudo mv /etc/apt/sources.list /etc/apt/sources.list.bak
+            sudo tee /etc/apt/sources.list <<-EOF
+deb http://http.kali.org/kali kali-rolling main contrib non-free non-free-firmware
+# deb-src http://http.kali.org/kali kali-rolling main contrib non-free non-free-firmware
 EOF
         fi
     else
@@ -870,7 +881,7 @@ install_miniconda3() {
     echo "4. 浙江大学 miniconda"
     echo "5. 南京大学 miniconda"
     echo "6. 官方源 miniconda"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
 
     # 根据用户选择设置 Miniconda3 软件源
     if [[ "$choice" == "1" ]]; then
@@ -1016,7 +1027,7 @@ configure_conda_mirror() {
     echo "4. 浙江大学 miniconda"
     echo "5. 南京大学 miniconda"
     echo "6. 官方源 miniconda"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
 
     # 根据用户选择设置 Miniconda3 软件源
     if [[ "$choice" == "1" ]]; then
