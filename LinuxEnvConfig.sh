@@ -1237,6 +1237,9 @@ install_docker() {
 
         Show 2 "设置 Docker 软件源"
         sudo install -d /etc/apt/keyrings
+        if [[ "$choice" == "6" ]]; then
+            sudo curl -fsSL "${mirror_url}/linux/${repo_name}/gpg" | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        fi
         sudo curl -fsSL "${mirror_url}/docker-ce/linux/${repo_name}/gpg" | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
         sudo chmod a+r /etc/apt/keyrings/docker.gpg
         
@@ -1293,6 +1296,9 @@ install_docker() {
         fi
 
         Show 2 "设置 Docker 软件源"
+        if [[ "$choice" == "5" ]]; then
+            sudo curl -fsSL "${mirror_url}/linux/debian/gpg" | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        fi
         curl -fsSL "${mirror_url}/docker-ce/linux/debian/gpg" | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
         sudo chmod a+r /etc/apt/keyrings/docker.gpg
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] ${mirror_url}/docker-ce/linux/debian/ bookworm stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
