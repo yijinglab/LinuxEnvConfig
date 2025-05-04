@@ -821,18 +821,21 @@ config_apt_source() {
     elif [[ "$(lsb_release -cs)" == "kali-rolling" ]]; then
         if [[ "$kali_mirror" == "0" ]]; then
             sudo mv /etc/apt/sources.list /etc/apt/sources.list.bak
+            sudo wget https://archive.kali.org/archive-keyring.gpg -O /usr/share/keyrings/kali-archive-keyring.gpg >/dev/null 2>&1
             sudo tee /etc/apt/sources.list <<-EOF
 deb ${mirror_url}/kali kali-rolling main contrib non-free non-free-firmware
 # deb-src ${mirror_url}/kali kali-rolling main contrib non-free non-free-firmware
 EOF
         elif [[ "$kali_mirror" == "1" ]]; then
             sudo mv /etc/apt/sources.list /etc/apt/sources.list.bak
+            sudo wget https://archive.kali.org/archive-keyring.gpg -O /usr/share/keyrings/kali-archive-keyring.gpg >/dev/null 2>&1
             sudo tee /etc/apt/sources.list <<-EOF
 deb https://mirrors.aliyun.com/kali kali-rolling main contrib non-free non-free-firmware
 # deb-src https://mirrors.aliyun.com/kali kali-rolling main contrib non-free non-free-firmware
 EOF
         elif [[ "$kali_mirror" == "2" ]]; then
             sudo mv /etc/apt/sources.list /etc/apt/sources.list.bak
+            sudo wget https://archive.kali.org/archive-keyring.gpg -O /usr/share/keyrings/kali-archive-keyring.gpg >/dev/null 2>&1
             sudo tee /etc/apt/sources.list <<-EOF
 deb http://http.kali.org/kali kali-rolling main contrib non-free non-free-firmware
 # deb-src http://http.kali.org/kali kali-rolling main contrib non-free non-free-firmware
