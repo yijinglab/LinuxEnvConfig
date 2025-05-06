@@ -273,3 +273,13 @@ sudo bash LinuxEnvConfig.sh
 4. 配置 oh-my-zsh 主题
 5. 配置 oh-my-zsh 插件
 6. 返回主菜单
+
+### 配置crAPI
+
+> **crAPI**: OWASP crAPI（Completely Ridiculous API）是由OWASP（开放 Web 应用安全项目）推出的一个专门用于 API 安全测试和学习的靶场项目。API（应用程序编程接口）在各类软件系统中扮演着至关重要的角色。然而，API 的安全问题也日益凸显。OWASP crAPI 正是为了帮助安全专业人员、开发人员和爱好者更好地理解和实践 API 安全测试而设计的。它提供了一个模拟真实 API 环境的平台，让用户可以在其中尝试各种攻击技术，学习如何发现和修复 API 中的安全漏洞。
+
+1. 安装 crAPI 靶场
+2. 卸载 crAPI 靶场
+3. 停止 crAPI 靶场
+4. 启动 crAPI 靶场
+5. 返回主菜单
