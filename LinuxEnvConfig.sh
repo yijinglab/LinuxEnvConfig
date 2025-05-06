@@ -139,6 +139,7 @@ menu_options=(
     "配置 AWVS"
     "配置 ocr_api_server"
     "配置 oh-my-zsh"
+    "配置 crAPI"
 )
 
 commands=(
@@ -162,6 +163,7 @@ commands=(
     ["配置 AWVS"]="config_awvs"
     ["配置 ocr_api_server"]="config_ocr_api_server"
     ["配置 oh-my-zsh"]="config_ohmyzsh"
+    ["配置 crAPI"]="config_crAPI"
 )
 
 # 检查jq命令是否安装
@@ -3215,6 +3217,122 @@ uninstall_ohmyzsh() {
     Show 2 "卸载oh-my-zsh开始"
     zsh -c "source ~/.zshrc;uninstall_oh_my_zsh"
     Show 2 "卸载oh-my-zsh完成"
+}
+
+# 配置crAPI靶场
+config_crAPI() {
+    echo -e "${YELLOW}[+] 请选择操作: ${NC}"
+    echo "1. 安装 crAPI 靶场"
+    echo "2. 卸载 crAPI 靶场"
+    echo "3. 停止 crAPI 靶场"
+    echo "4. 启动 crAPI 靶场"
+    echo "5. 返回主菜单"
+    read -r -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
+    case $choice in
+        1)
+            install_crapi
+            ;;
+        2)
+            uninstall_crapi
+            ;;
+        3)
+            stop_crapi
+            ;;
+        4)
+            start_crapi
+            ;;
+        5)
+            Show 2 "退出到主菜单"
+            ;;
+        *)
+            Show 2 "无效的选择"
+            ;;
+    esac
+}
+
+# 安装crAPI靶场
+install_crapi() {
+    Show 2 "开始安装crAPI靶场"
+
+    # 检查Docker是否安装
+    check_docker
+
+    # 安装crAPI靶场
+    Show 2 "获取crAPI靶场docker-compose.yml文件"
+    sudo mkdir -p crAPI
+    sudo wget -q --show-progress https://gitee.com/yijingsec/crAPI/releases/download/v1.1.5/docker-compose.yml -O crAPI/docker-compose.yml
+    action "获取crAPI靶场docker-compose.yml文件成功" "获取crAPI靶场docker-compose.yml文件失败"
+
+    Show 2 "开始安装crAPI靶场"
+    sudo docker compose -f crAPI/docker-compose.yml up -d
+
+    Show 2 "等待crAPI靶场启动"
+    sleep 5
+    Show 2 "检查crAPI靶场是否启动成功"
+
+    # 检查crapi靶场容器状态是否都为running
+    containers_status=$(sudo docker compose -f crAPI/docker-compose.yml ps --format "{{.Name}}:{{.State}}")
+    all_up=true
+    exited_containers=()
+
+    while IFS=: read -r name status; do
+        if [[ "$status" = "running" ]]; then
+            all_up=true
+            Show 2 "容器 $name 状态: $status"
+        elif [[ "$status" == "exited" ]]; then
+            exited_containers+=("$name")
+            all_up=false
+            Show 2 "容器 $name 状态: $status"
+        fi
+    done <<< "$containers_status"
+
+    if $all_up; then
+        Show 0 "crAPI靶场安装成功, 所有容器均已启动"
+    else
+        if [ ${#exited_containers[@]} -gt 0 ]; then
+            Show 2 "错误: 以下容器已退出:"
+            for container in "${exited_containers[@]}"; do
+                echo "- $container"
+            done
+            Show 2 "请检查日志以获取更多信息"
+            exit 1
+        else
+            Show 2 "错误: 部分容器未成功启动"
+            exit 1
+        fi
+    fi
+}
+
+# 卸载crAPI靶场
+uninstall_crapi() {
+    Show 2 "开始卸载crAPI靶场"
+    if  [ ! -d "crAPI" ]; then
+        Show 1 "crAPI靶场目录不存在, 请先安装crAPI靶场"
+    fi
+    sudo docker compose -f crAPI/docker-compose.yml down
+    action "卸载crAPI靶场成功" "卸载crAPI靶场失败"
+    Show 2 "删除crAPI靶场目录"
+    sudo rm -rf crAPI
+}
+
+# 停止crAPI靶场
+stop_crapi() {
+    Show 2 "停止crAPI靶场"
+    if  [ ! -d "crAPI" ]; then
+        Show 1 "crAPI靶场目录不存在, 请先安装crAPI靶场"
+    fi
+    sudo docker compose -f crAPI/docker-compose.yml stop
+    action "停止crAPI靶场成功" "停止crAPI靶场失败"
+}
+
+# 启动crAPI靶场
+start_crapi() {
+    Show 2 "启动crAPI靶场"
+    if  [ ! -d "crAPI" ]; then
+        Show 1 "crAPI靶场目录不存在, 请先安装crAPI靶场"
+    fi
+    sudo docker compose -f crAPI/docker-compose.yml up -d
+    action "启动crAPI靶场成功" "启动crAPI靶场失败"
 }
 
 # 显示菜单
