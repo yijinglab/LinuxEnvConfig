@@ -277,7 +277,7 @@ enable_ssh() {
 
     # 显示 SSH 服务状态
     Show 2 "检查 SSH 服务状态..."
-    sudo systemctl status ssh
+    sudo systemctl --no-pager status ssh
     Show 0 "启用 SSH 服务成功"
 }
 
