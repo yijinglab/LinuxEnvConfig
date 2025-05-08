@@ -14,43 +14,40 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# author: mingy
-# LinuxEnvConfig
-# Ubuntu / Debian / Kali Linux 基础环境配置脚本
+# 脚本名称: LinuxEnvConfig.sh
+# 功能描述: Linux 基础环境配置脚本
+# 适用系统: Ubuntu/Debian/Kali Linux
+# 作者: mingy
+
 
 set -e
-# UNAME_M="$(uname -m)"
-# readonly UNAME_M
-
-# UNAME_U="$(uname -s)"
-# readonly UNAME_U
 
 # COLORS
 readonly COLOUR_RESET='\e[0m'
 readonly aCOLOUR=(
-    '\e[38;5;154m' # 绿色 - 用于行、项目符号和分隔符 0
-    '\e[1m'        # 粗体白色 - 用于主要描述
-    '\e[90m'       # 灰色 - 用于版权信息
-    '\e[91m'       # 红色 - 用于更新通知警告
-    '\e[33m'       # 黄色 - 用于强调
-    '\e[34m'       # 蓝色
-    '\e[35m'       # 品红
-    '\e[36m'       # 青色
-    '\e[37m'       # 浅灰色
-    '\e[92m'       # 浅绿色9
-    '\e[93m'       # 浅黄色
-    '\e[94m'       # 浅蓝色
-    '\e[95m'       # 浅品红
-    '\e[96m'       # 浅青色
-    '\e[97m'       # 白色
-    '\e[40m'       # 背景黑色
-    '\e[41m'       # 背景红色
-    '\e[42m'       # 背景绿色
-    '\e[43m'       # 背景黄色
-    '\e[44m'       # 背景蓝色19
-    '\e[45m'       # 背景品红
-    '\e[46m'       # 背景青色21
-    '\e[47m'       # 背景浅灰色
+    '\e[38;5;154m' # 0绿色 - 用于行、项目符号和分隔符
+    '\e[1m'        # 1粗体白色 - 用于主要描述
+    '\e[90m'       # 2灰色 - 用于版权信息
+    '\e[91m'       # 3红色 - 用于更新通知警告
+    '\e[33m'       # 4黄色 - 用于强调
+    '\e[34m'       # 5蓝色
+    '\e[35m'       # 6品红
+    '\e[36m'       # 7青色
+    '\e[37m'       # 8浅灰色
+    '\e[92m'       # 9浅绿色
+    '\e[93m'       # 10浅黄色
+    '\e[94m'       # 11浅蓝色
+    '\e[95m'       # 12浅品红
+    '\e[96m'       # 13浅青色
+    '\e[97m'       # 14白色
+    '\e[40m'       # 15背景黑色
+    '\e[41m'       # 16背景红色
+    '\e[42m'       # 17背景绿色
+    '\e[43m'       # 18背景黄色
+    '\e[44m'       # 19背景蓝色
+    '\e[45m'       # 20背景品红
+    '\e[46m'       # 21背景青色
+    '\e[47m'       # 22背景浅灰色
 )
 
 readonly GREEN_LINE=" ${aCOLOUR[0]}─────────────────────────────────────────────────────$COLOUR_RESET"
@@ -58,34 +55,36 @@ readonly GREEN_LINE=" ${aCOLOUR[0]}───────────────
 # readonly GREEN_SEPARATOR="${aCOLOUR[0]}:$COLOUR_RESET"
 
 Show() {
-    # OK
-    if (($1 == 0)); then
-        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[0]}  OK  $COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $2"
-    # FAILED
-    elif (($1 == 1)); then
-        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[3]}FAILED$COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $2"
-        exit 1
-    # INFO
-    elif (($1 == 2)); then
-        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[0]} INFO $COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $2"
-    # NOTICE
-    elif (($1 == 3)); then
-        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[4]}NOTICE$COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $2"
-    fi
+    local level=$1
+    local message=$2
+    
+    case $level in
+        # OK
+        0)  echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[0]}  OK  $COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $message" ;;
+        # FAILED
+        1)  echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[3]}FAILED$COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $message"
+            exit 1 ;;
+        # INFO
+        2)  echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[0]} INFO $COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $message" ;;
+        # NOTICE
+        3)  echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[4]}NOTICE$COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $message" ;;
+    esac
 }
 
 action() {
+    local success_msg=$1
+    local error_msg=$2
+
     if [ $? -eq 0 ]; then
-		Show 0 "$1"
+		Show 0 "$success_msg"
 	else
-		Show 1 "$2"
+		Show 1 "$error_msg"
 	fi
 }
 
 # 检查输入是否是有效的IPv4地址
 validate_ip() {
-    local ip="$1"
-    # 正则表达式匹配IPv4地址
+    local ip=$1
     local regex='^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])$'
 
     if [[ $ip =~ $regex ]]; then
@@ -110,10 +109,12 @@ ColorReset() {
 
 # 定义红色文本
 RED='\033[0;31m'
+# 定义绿色文本
+GREEN='\033[0;32m'
+# 定义黄色文本
+YELLOW="\e[33m"
 # 无颜色
 NC='\033[0m'
-GREEN='\033[0;32m'
-YELLOW="\e[33m"
 
 declare -a menu_options
 declare -A commands
@@ -166,40 +167,16 @@ commands=(
     ["配置 crAPI"]="config_crAPI"
 )
 
-# 检查jq命令是否安装
-check_jq() {
-    if ! command -v jq &> /dev/null; then
-        Show 2 "jq 未安装，正在安装..."
-        sudo apt-get install jq -y &> /dev/null
-        action "jq 安装成功" "jq 安装失败"
-    fi
-}
-
-# 检查wget命令是否安装
-check_wget() {
-    if ! command -v wget &> /dev/null; then
-        Show 2 "wget 未安装，正在安装..."
-        sudo apt-get install wget -y &> /dev/null
-        action "wget 安装成功" "wget 安装失败"
-    fi
-}
-
-# 检查curl命令是否安装
-check_curl() {
-    if ! command -v curl &> /dev/null; then
-        Show 2 "curl 未安装，正在安装..."
-        sudo apt-get install curl -y &> /dev/null
-        action "curl 安装成功" "curl 安装失败"
-    fi
-}
-
-# 检查unzip命令是否安装
-check_unzip() {
-    if ! command -v unzip &> /dev/null; then
-        Show 2 "unzip 未安装，正在安装..."
-        sudo apt-get install unzip -y &> /dev/null
-        action "unzip 安装成功" "unzip 安装失败"
-    fi
+# 检查依赖工具是否安装
+install_dependencies() {
+    local tools=("$@")
+    for tool in "${tools[@]}"; do
+        if ! command -v "$tool" &> /dev/null; then
+            Show 2 "安装 $tool..."
+            sudo apt-get install -y "$tool" &> /dev/null
+            action "安装 $tool 成功" "安装 $tool 失败"
+        fi
+    done
 }
 
 # 基础配置
@@ -212,32 +189,16 @@ basic_config() {
     echo "5. 获取当前主机网卡及IP地址信息"
     echo "6. 解除DNS协议53端口占用"
     echo "7. 返回主菜单"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-7): ${NC}")" choice
+    read -r -p "$(echo -e "${RED}(基础配置)${NC} : ${GREEN}请输入序号(1-7) >> ${NC}")" choice
     case $choice in
-        1)
-            enable_root_user
-            ;;
-        2)
-            enable_ssh
-            ;;
-        3)
-            root_ssh_login
-            ;;
-        4)
-            config_nameserver
-            ;;
-        5)
-            get_ip_addr
-            ;;
-        6)
-            unlock_dns_port
-            ;;
-        7)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "无效的选择"
-            ;;
+        1)  enable_root_user ;;
+        2)  enable_ssh ;;
+        3)  root_ssh_login ;;
+        4)  config_nameserver ;;
+        5)  get_ip_addr ;;
+        6)  unlock_dns_port ;;
+        7)  Show 2 "返回主菜单" ;;
+        *)  Show 2 "无效的选择" ;;
     esac
 }
 
@@ -375,46 +336,32 @@ config_jdk() {
     echo "2. 安装 OpenJDK"
     echo "3. 删除当前JDK环境"
     echo "4. 返回主菜单"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-4): ${NC}")" choice
+    read -r -p "$(echo -e "${RED}(配置JDK)${NC} : ${GREEN}请输入序号(1-4) >> ${NC}")" choice
     case $choice in
         1)
             echo -e "${YELLOW}[+] 选择OracleJDK安装源: ${NC}"
             echo "1. study.yijinglab.com"
             echo "2. www.injdk.cn"
             echo "3. 返回主菜单"
-            read -r -p "$(echo -e "${GREEN}请输入序号(1-3): ${NC}")" version
+            read -r -p "$(echo -e "${RED}(配置JDK/安装OracleJDK)${NC} : ${GREEN}请输入序号(1-3) >> ${NC}")" version
             case $version in
-                1)
+                1)  
                     Show 2 "选择 study.yijinglab.com"
                     read -r -p "$(echo -e "${GREEN}请输入客户端密钥(教学平台->课程云盘->客户端密钥): ${NC}")" client_key
                     if [ -z "$client_key" ]; then
                         Show 1 "客户端密钥不能为空"
                     fi
                     ;;
-                2)
-                    Show 2 "选择 injdk.cn"
-                    ;;
-                3)
-                    Show 2 "退出到主菜单"
-                    ;;
-                *)
-                    Show 1 "无效的选择"
-                    ;;
+                2)  Show 2 "选择 injdk.cn" ;;
+                3)  Show 2 "返回主菜单" ;;
+                *)  Show 1 "无效的选择" ;;
             esac
             install_oracle_jdk
             ;;
-        2)
-            install_openjdk
-            ;;
-        3)
-            remove_jdk
-            ;;
-        4)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "无效的选择"
-            ;;
+        2)  install_openjdk ;;
+        3)  remove_jdk ;;
+        4)  Show 2 "返回主菜单" ;;
+        *)  Show 2 "无效的选择" ;;
     esac
 }
 
@@ -432,12 +379,13 @@ GetTempUrl() {
         "15010001:参数不正确"
     )
 
+    install_dependencies "jq"
+
     # 构建请求的数据
-    check_jq
     data=$(jq -n --arg token "$token" --arg ExeName "$ExeName" '{token: $token, tempUrl: $ExeName}')
 
     # 发送POST请求
-    check_curl
+    install_dependencies "curl"
     resp=$(curl -s -X POST -H "Content-Type: application/json" -d "$data" "$url_api")
 
     # 解析JSON响应
@@ -480,7 +428,7 @@ install_oracle_jdk() {
     echo "5. Oracle JDK 22 LTS"
     echo "6. Oracle JDK 23 LTS"
     echo "7. 返回主菜单"
-    read -r -p "$(echo -e "${GREEN}请输入序号(1-7): ${NC}")" version
+    read -r -p "$(echo -e "${RED}(配置JDK/安装OracleJDK)${NC} : ${GREEN}请输入序号(1-7) >> ${NC}")" version
     case $version in
         1|2|3|4|5|6)
             local index=$((version - 1))
@@ -493,12 +441,8 @@ install_oracle_jdk() {
             fi
             check_oracle_jdk
             ;;
-        7)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "输入的序号无效"
-            ;;
+        7)  Show 2 "返回主菜单" ;;
+        *)  Show 2 "无效的选择" ;;
     esac
 }
 
@@ -513,7 +457,7 @@ check_oracle_jdk() {
         Show 2 "不存在 ${JDK_NAME} 文件"
     fi
 
-    check_wget
+    install_dependencies "wget"
 
     Show 2 "下载 ${JDK_NAME} 文件"
     
@@ -577,8 +521,8 @@ install_openjdk() {
     echo "3. OpenJDK 21 LTS"
     echo "4. OpenJDK 22 LTS"
     echo "5. OpenJDK 23 LTS"
-    echo "6. 返回到主菜单"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
+    echo "6. 返回主菜单"
+    read -r -p "$(echo -e "${RED}(配置JDK/安装OpenJDK)${NC} : ${GREEN}请输入序号(1-6) >> ${NC}")" choice
 
     case $choice in
         1)
@@ -611,12 +555,8 @@ install_openjdk() {
             JDK_URL="https://mirrors.huaweicloud.com/openjdk/${JDK_VER}/openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
             check_openjdk
             ;;
-        6)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "输入的序号无效"
-            ;;
+        6)  Show 2 "返回主菜单" ;;
+        *)  Show 2 "无效的选择" ;;
     esac
 }
 
@@ -629,7 +569,7 @@ check_openjdk() {
         rm -f "openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
     fi
 
-    check_wget
+    install_dependencies "wget"
 
     Show 2 "开始下载 OpenJDK 文件"
     wget -q --show-progress "$JDK_URL"
@@ -726,6 +666,7 @@ remove_jdk() {
 config_apt_source_version(){
     local version=$1
     local source_url=$2
+    local type=$3
     Show 2 "开始配置APT源"
     if [ -f "/etc/apt/sources.list.bak" ]; then
         Show 2 "已存在APT源配置文件备份, 跳过备份"
@@ -734,20 +675,35 @@ config_apt_source_version(){
         sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
     fi
 
-    # sudo sed -i 's/^deb .*$/#&/g' /etc/apt/sources.list
-
+    # 根据系统类型配置源
     Show 2 "修改APT源配置文件"
-    sudo tee /etc/apt/sources.list <<-EOF
+    case $type in
+        "ubuntu")
+            sudo tee /etc/apt/sources.list <<-EOF
 # 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释
 deb $source_url/ubuntu $version main restricted universe multiverse
-# deb-src $source_url/ubuntu $version main restricted universe multiverse
 deb $source_url/ubuntu $version-updates main restricted universe multiverse
-# deb-src $source_url/ubuntu $version-updates main restricted universe multiverse
 deb $source_url/ubuntu $version-backports main restricted universe multiverse
-# deb-src $source_url/ubuntu $version-backports main restricted universe multiverse
 deb $source_url/ubuntu $version-security main restricted universe multiverse
+# deb-src $source_url/ubuntu $version main restricted universe multiverse
+# deb-src $source_url/ubuntu $version-updates main restricted universe multiverse
+# deb-src $source_url/ubuntu $version-backports main restricted universe multiverse
 # deb-src $source_url/ubuntu $version-security main restricted universe multiverse
 EOF
+            ;;
+        "debian")
+            sudo tee /etc/apt/sources.list <<-EOF
+deb $source_url/debian $version main contrib non-free
+deb $source_url/debian $version-updates main contrib non-free
+deb $source_url/debian $version-backports main contrib non-free
+deb $source_url/debian-security $version/updates main contrib non-free
+# deb-src $source_url/debian $version main contrib non-free
+# deb-src $source_url/debian $version-updates main contrib non-free
+# deb-src $source_url/debian $version-backports main contrib non-free
+# deb-src $source_url/debian-security $version/updates main contrib non-free
+EOF
+            ;;
+    esac
     action "APT源配置文件修改成功" "APT源配置文件修改失败"
 
     Show 2 "更新APT源"
@@ -755,11 +711,11 @@ EOF
     action "APT源更新成功" "APT源更新失败"
 
     Show 2 "安装软件源管理工具"
-    sudo apt-get install -y software-properties-common >/dev/null
+    sudo apt-get install -y software-properties-common >&/dev/null
     action "软件源管理工具安装成功" "软件源管理工具安装失败"
 
     Show 2 "添加Python源"
-    sudo add-apt-repository ppa:deadsnakes/ppa -y >/dev/null
+    sudo add-apt-repository ppa:deadsnakes/ppa -y >&/dev/null
     action "Python源添加成功" "Python源添加失败"
     Show 0 "APT源配置成功"
 }
@@ -773,79 +729,112 @@ config_apt_source() {
     echo "4. 清华大学"
     echo "5. 北京大学"
     echo "6. 中国科大"
-    echo "7. 官方APT源"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-7): ${NC}")" choice
+    echo "7. 官方APT源 - Ubuntu"
+    echo "8. 官方APT源 - Debian"
+    echo "9. 返回主菜单"
+    read -r -p "$(echo -e "${RED}(配置APT源)${NC} : ${GREEN}请输入序号(1-9) >> ${NC}")" choice
 
-    # 根据用户选择设置 APT 软件源
-    if [[ "$choice" == "1" ]]; then
-        Show 2 "选择使用华为云APT软件源"
-        local mirror_url="https://mirrors.huaweicloud.com"
-        local kali_mirror="1"
-    elif [[ "$choice" == "2" ]]; then
-        Show 2 "选择使用阿里云APT软件源"
-        local mirror_url="https://mirrors.aliyun.com"
-        local kali_mirror="0"
-    elif [[ "$choice" == "3" ]]; then
-        Show 2 "选择使用腾讯云APT软件源"
-        local mirror_url="https://mirrors.cloud.tencent.com"
-        local kali_mirror="0"
-    elif [[ "$choice" == "4" ]]; then
-        Show 2 "选择使用清华大学APT软件源"
-        local mirror_url="https://mirrors.tuna.tsinghua.edu.cn"
-        local kali_mirror="0"
-    elif [[ "$choice" == "5" ]]; then
-        Show 2 "选择使用北京大学APT软件源"
-        local mirror_url="https://mirrors.pku.edu.cn"
-        local kali_mirror="1"
-    elif [[ "$choice" == "6" ]]; then
-        Show 2 "选择使用中国科大APT软件源"
-        local mirror_url="https://mirrors.ustc.edu.cn"
-        local kali_mirror="0"
-    elif [[ "$choice" == "7" ]]; then
-        Show 2 "选择使用官方APT软件源"
-        local mirror_url="http://archive.ubuntu.com"
-        local kali_mirror="2"
-    else
-        Show 1 "输入错误, 退出安装"
-    fi
+    # 根据用户选择设置APT软件源
+    case $choice in
+        1)
+            Show 2 "选择使用华为云APT软件源"
+            local mirror_url="https://mirrors.huaweicloud.com"
+            local kali_mirror="1"
+            ;;
+        2)
+            Show 2 "选择使用阿里云APT软件源"
+            local mirror_url="https://mirrors.aliyun.com"
+            local kali_mirror="0"
+            ;;
+        3)
+            Show 2 "选择使用腾讯云APT软件源"
+            local mirror_url="https://mirrors.cloud.tencent.com"
+            local kali_mirror="0"
+            ;;
+        4)
+            Show 2 "选择使用清华大学APT软件源"
+            local mirror_url="https://mirrors.tuna.tsinghua.edu.cn"
+            local kali_mirror="0"
+            ;;
+        5)
+            Show 2 "选择使用北京大学APT软件源"
+            local mirror_url="https://mirrors.pku.edu.cn"
+            local kali_mirror="1"
+            ;;
+        6)
+            Show 2 "选择使用中国科大APT软件源"
+            local mirror_url="https://mirrors.ustc.edu.cn"
+            local kali_mirror="0"
+            ;;
+        7)
+            Show 2 "选择使用Ubuntu官方APT软件源"
+            local mirror_url="http://archive.ubuntu.com"
+            local kali_mirror="2"
+            ;;
+        8)
+            Show 2 "选择使用Debian官方APT软件源"
+            local mirror_url="http://deb.debian.org"
+            local kali_mirror="2"
+            ;;
+        9)
+            Show 2 "返回主菜单"
+            return
+            ;;
+        *)
+            Show 2 "无效的选择"
+            return
+            ;;
+    esac
+ 
+    # 配置Kali Linux的APT软件源
+    configure_kali_apt_source() {
+        local mirror_type=$1
+        local mirror_url=$2
+
+        if [ -f "/etc/apt/sources.list.bak" ]; then
+            Show 2 "已存在APT源配置文件备份, 跳过备份"
+        else
+            Show 2 "备份/etc/apt/sources.list文件"
+            if ! sudo mv /etc/apt/sources.list /etc/apt/sources.list.bak; then
+                Show 1 "备份原有APT源失败"
+                return 1
+            fi
+        fi
+
+        if ! sudo wget -q https://archive.kali.org/archive-keyring.gpg -O /usr/share/keyrings/kali-archive-keyring.gpg; then
+            Show 1 "下载Kali GPG密钥失败"
+            return 1
+        fi
+
+        case $mirror_type in
+            0) local kali_mirror_url="$mirror_url/kali" ;;
+            1) local kali_mirror_url="https://mirrors.aliyun.com/kali" ;;
+            2) local kali_mirror_url="http://http.kali.org/kali" ;;
+        esac
+
+        sudo tee /etc/apt/sources.list <<-EOF
+deb ${kali_mirror_url} kali-rolling main contrib non-free non-free-firmware
+# deb-src ${kali_mirror_url} kali-rolling main contrib non-free non-free-firmware
+EOF
+    }
 
     Show 2 "根据当前系统版本类型, 自动配置APT源"
-    if [[ "$(lsb_release -rs)" == "18.04" ]]; then
-        config_apt_source_version "bionic" "$mirror_url"
-    elif [[ "$(lsb_release -rs)" == "20.04" ]]; then
-        config_apt_source_version "focal" "$mirror_url"
-    elif [[ "$(lsb_release -rs)" == "22.04" ]]; then
-        config_apt_source_version "jammy" "$mirror_url"
-    elif [[ "$(lsb_release -rs)" == "23.04" ]]; then
-        config_apt_source_version "lunar" "$mirror_url"
-    elif [[ "$(lsb_release -rs)" == "24.04" ]]; then
-        config_apt_source_version "noble" "$mirror_url"
-    elif [[ "$(lsb_release -cs)" == "kali-rolling" ]]; then
-        if [[ "$kali_mirror" == "0" ]]; then
-            sudo mv /etc/apt/sources.list /etc/apt/sources.list.bak
-            sudo wget https://archive.kali.org/archive-keyring.gpg -O /usr/share/keyrings/kali-archive-keyring.gpg >/dev/null 2>&1
-            sudo tee /etc/apt/sources.list <<-EOF
-deb ${mirror_url}/kali kali-rolling main contrib non-free non-free-firmware
-# deb-src ${mirror_url}/kali kali-rolling main contrib non-free non-free-firmware
-EOF
-        elif [[ "$kali_mirror" == "1" ]]; then
-            sudo mv /etc/apt/sources.list /etc/apt/sources.list.bak
-            sudo wget https://archive.kali.org/archive-keyring.gpg -O /usr/share/keyrings/kali-archive-keyring.gpg >/dev/null 2>&1
-            sudo tee /etc/apt/sources.list <<-EOF
-deb https://mirrors.aliyun.com/kali kali-rolling main contrib non-free non-free-firmware
-# deb-src https://mirrors.aliyun.com/kali kali-rolling main contrib non-free non-free-firmware
-EOF
-        elif [[ "$kali_mirror" == "2" ]]; then
-            sudo mv /etc/apt/sources.list /etc/apt/sources.list.bak
-            sudo wget https://archive.kali.org/archive-keyring.gpg -O /usr/share/keyrings/kali-archive-keyring.gpg >/dev/null 2>&1
-            sudo tee /etc/apt/sources.list <<-EOF
-deb http://http.kali.org/kali kali-rolling main contrib non-free non-free-firmware
-# deb-src http://http.kali.org/kali kali-rolling main contrib non-free non-free-firmware
-EOF
-        fi
-    else
-        Show 1 "不支持的系统版本, 请手动配置APT源"
-    fi
+    case "$(lsb_release -cs)" in
+        kali-rolling)
+            # Kali
+            configure_kali_apt_source "$kali_mirror_type" "$mirror_url" ;;
+        bionic|focal|jammy|lunar|noble)
+            # Ubuntu (18.04, 20.04, 22.04, 23.04, 24.04)
+            config_apt_source_version "$(lsb_release -cs)" "$mirror_url" "ubuntu" ;;
+        buster|bullseye|bookworm|trixie)
+            # Debian (10, 11, 12, 13)
+            config_apt_source_version "$(lsb_release -cs)" "$mirror_url" "debian" ;;
+        *)
+            Show 1 "不支持的系统版本, 请手动配置APT源: $(uname -vm)"
+            return 1
+            ;;
+    esac
+    Show 0 "APT源配置成功"
 }
 
 # 配置Miniconda3
@@ -855,23 +844,13 @@ config_miniconda3() {
     echo "2. 卸载 Miniconda3"
     echo "3. 配置 Miniconda3 软件源"
     echo "4. 返回主菜单"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-4): ${NC}")" choice
+    read -r -p "$(echo -e "${RED}(配置miniconda3)${NC} : ${GREEN}请输入序号(1-4) >> ${NC}")" choice
     case $choice in
-        1)
-            install_miniconda3
-            ;;
-        2)
-            remove_miniconda3
-            ;;
-        3)
-            configure_conda_mirror
-            ;;
-        4)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "无效的选择"
-            ;;
+        1)  install_miniconda3 ;;
+        2)  remove_miniconda3 ;;
+        3)  configure_conda_mirror ;;
+        4)  Show 2 "返回主菜单" ;;
+        *)  Show 2 "无效的选择" ;;
     esac
 }
 
@@ -886,7 +865,7 @@ install_miniconda3() {
     echo "4. 浙江大学 miniconda"
     echo "5. 南京大学 miniconda"
     echo "6. 官方源 miniconda"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
+    read -r -p "$(echo -e "${RED}(配置miniconda3/安装miniconda3)${NC} : ${GREEN}请输入序号(1-6) >> ${NC}")" choice
 
     # 根据用户选择设置 Miniconda3 软件源
     if [[ "$choice" == "1" ]]; then
@@ -920,7 +899,7 @@ install_miniconda3() {
         rm -f "$install_script" >/dev/null 2>&1
     fi
 
-    check_wget
+    install_dependencies "wget"
 
     Show 2 "下载 miniconda3 安装脚本"
     sudo wget -q --show-progress "${mirror_url}/miniconda/Miniconda3-latest-Linux-x86_64.sh" -O "$install_script"
@@ -1032,7 +1011,7 @@ configure_conda_mirror() {
     echo "4. 浙江大学 miniconda"
     echo "5. 南京大学 miniconda"
     echo "6. 官方源 miniconda"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
+    read -r -p "$(echo -e "${RED}(配置miniconda3/配置miniconda3软件源)${NC} : ${GREEN}请输入序号(1-6) >> ${NC}")" choice
 
     # 根据用户选择设置 Miniconda3 软件源
     if [[ "$choice" == "1" ]]; then
@@ -1151,44 +1130,20 @@ config_docker() {
     echo "9. 更新 Docker 镜像源列表"
     echo "10. 拉取 Docker 镜像"
     echo "11. 返回主菜单"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-11): ${NC}")" choice
+    read -r -p "$(echo -e "${RED}(配置Docker)${NC} : ${GREEN}请输入序号(1-11) >> ${NC}")" choice
     case $choice in
-        1)
-            install_docker
-            ;;
-        2)
-            remove_docker
-            ;;
-        3)
-            configure_docker_mirror
-            ;;
-        4)
-            get_docker_mirror_config
-            ;;
-        5)
-            unconfigure_docker_mirror
-            ;;
-        6)
-            configure_docker_proxy
-            ;;
-        7)
-            get_docker_proxy_config
-            ;;
-        8)
-            unconfigure_docker_proxy
-            ;;
-        9)
-            update_docker_mirrors
-            ;;
-        10)
-            pull_docker_image
-            ;;
-        11)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "无效的选择"
-            ;;
+        1) install_docker ;;
+        2) remove_docker ;;
+        3) configure_docker_mirror ;;
+        4) get_docker_mirror_config ;;
+        5) unconfigure_docker_mirror ;;
+        6) configure_docker_proxy ;;
+        7) get_docker_proxy_config ;;
+        8) unconfigure_docker_proxy ;;
+        9) update_docker_mirrors ;;
+        10) pull_docker_image ;;
+        11) Show 2 "返回主菜单" ;;
+        *) Show 2 "无效的选择" ;;
     esac
 }
 
@@ -1215,7 +1170,7 @@ install_docker() {
         echo "4. 华为云 Docker-CE"
         echo "5. 腾讯云 Docker-CE"
         echo "6. 官方源 Docker-CE"
-        read -r -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
+        read -r -p "$(echo -e "${RED}(配置Docker/配置Docker镜像源)${NC} : ${GREEN}请输入序号(1-6) >> ${NC}")" choice
 
         # 根据用户选择设置 Docker 软件源
         if [[ "$choice" == "1" ]]; then
@@ -1278,7 +1233,7 @@ install_docker() {
         echo "3. 华为云 Docker-CE"
         echo "4. 腾讯云 Docker-CE"
         echo "5. 官方源 Docker-CE"
-        read -r -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
+        read -r -p "$(echo -e "${RED}(配置Docker/配置Docker镜像源)${NC} : ${GREEN}请输入序号(1-5) >> ${NC}")" choice
 
         # 根据用户选择设置 Docker 软件源
         if [[ "$choice" == "1" ]]; then
@@ -1379,7 +1334,7 @@ get_docker_mirror_config() {
     if [ -f "/etc/docker/daemon.json" ]; then
         cat /etc/docker/daemon.json
     else
-        Show 1 "未找到Docker国内镜像源配置文件"
+        Show 3 "未找到Docker国内镜像源配置文件"
     fi
 }
 
@@ -1401,20 +1356,12 @@ configure_docker_proxy() {
     echo "1. HTTP / HTTPS"
     echo "2. SOCKS5"
     echo "3. 返回主菜单"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" type
+    read -r -p "$(echo -e "${RED}(配置Docker/配置Docker网络代理)${NC} : ${GREEN}请输入序号(1-3) >> ${NC}")" type
     case $type in
-        1)
-            proxy_type=http
-            ;;
-        2)
-            proxy_type=socks5
-            ;;
-        3)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "输入的序号无效"
-            ;;
+        1) proxy_type=http ;;
+        2) proxy_type=socks5 ;;
+        3) Show 2 "返回主菜单" ;;
+        *) Show 2 "无效的选择" ;;
     esac
     # 输入代理地址
     read -r -p "$(echo -e "${GREEN}输入代理地址 (Ex: 127.0.0.1:7890): ${NC}")" proxy_ip_port
@@ -1452,7 +1399,7 @@ get_docker_proxy_config() {
     if [ -f "/etc/systemd/system/docker.service.d/proxy.conf" ]; then
         cat /etc/systemd/system/docker.service.d/proxy.conf
     else
-        Show 1 "未找到Docker网络代理配置文件"
+        Show 3 "未找到Docker网络代理配置文件"
     fi
 }
 
@@ -1704,21 +1651,13 @@ config_docker_compose() {
     echo "1. 安装 Docker-compose"
     echo "2. 卸载 Docker-compose"
     echo "3. 返回主菜单"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
+    read -r -p "$(echo -e "${RED}(配置Docker-compose)${NC} : ${GREEN}请输入序号(1-3) >> ${NC}")" choice
 
     case $choice in
-        1)
-            install_docker_compose
-            ;;
-        2)
-            remove_docker_compose
-            ;;
-        3)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "无效的选择"
-            ;;
+        1) install_docker_compose ;;
+        2) remove_docker_compose ;;
+        3) Show 2 "返回主菜单" ;;
+        *) Show 2 "无效的选择" ;;
     esac
 }
 
@@ -1727,7 +1666,7 @@ install_docker_compose() {
     echo -e "${YELLOW}[+] 请选择Docker-compose的安装源: ${NC}"
     echo "1. Gitee"
     echo "2. Github"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-2): ${NC}")" choice
+    read -r -p "$(echo -e "${RED}(配置Docker-compose/安装Docker-compose)${NC} : ${GREEN}请输入序号(1-2) >> ${NC}")" choice
 
     # 根据用户选择设置 Docker 软件源
     if [[ "$choice" == "1" ]]; then
@@ -1748,7 +1687,6 @@ install_docker_compose() {
         fi
     fi
     Show 2 "开始下载 docker-compose"
-    check_curl
     # sudo curl -L "$docker_compose_url" -o /usr/local/bin/docker-compose
     sudo wget -q --show-progress "$docker_compose_url" -O /usr/local/bin/docker-compose
     if sudo chmod +x /usr/local/bin/docker-compose; then
@@ -1791,21 +1729,13 @@ config_vulfocus() {
     echo "1. 安装 Vulfocus"
     echo "2. 卸载 Vulfocus"
     echo "3. 返回主菜单"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
+    read -r -p "$(echo -e "${RED}(配置Vulfocus)${NC} : ${GREEN}请输入序号(1-3) >> ${NC}")" choice
 
     case $choice in
-        1)
-            install_vulfocus
-            ;;
-        2)
-            remove_vulfocus
-            ;;
-        3)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "无效的选择"
-            ;;
+        1) install_vulfocus ;;
+        2) remove_vulfocus ;;
+        3) Show 2 "返回主菜单" ;;
+        *) Show 2 "无效的选择" ;;
     esac
 }
 
@@ -1856,30 +1786,16 @@ config_arl() {
     echo "4. 卸载 ARL"
     echo "5. 添加指纹"
     echo "6. 返回主菜单"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
+    read -r -p "$(echo -e "${RED}(配置ARL)${NC} : ${GREEN}请输入序号(1-6) >> ${NC}")" choice
 
     case $choice in
-        1)
-            install_arl
-            ;;
-        2)
-            stop_arl
-            ;;
-        3)
-            start_arl
-            ;;
-        4)
-            remove_arl
-            ;;
-        5)
-            add_fingerprint_to_arl
-            ;;
-        6)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "无效的选择"
-            ;;
+        1) install_arl ;;
+        2) stop_arl ;;
+        3) start_arl ;;
+        4) remove_arl ;;
+        5) add_fingerprint_to_arl ;;
+        6) Show 2 "返回主菜单" ;;
+        *) Show 2 "无效的选择" ;;
     esac
 }
 
@@ -1903,7 +1819,7 @@ install_arl() {
     # 获取最新版本的 ARL 下载链接并下载
     # sudo curl -Ls "https://gitee.com/yijingsec/ARL/releases/download/$(curl -s https://gitee.com/api/v5/repos/yijingsec/ARL/releases/latest | grep -E -o '\"tag_name\":\"([^\"]+)\"' | awk -F\" '{print $4}')/docker.zip" -o /opt/docker_arl/docker.zip && cd /opt/docker_arl && unzip -o docker.zip
 
-    check_curl
+    install_dependencies "curl"
     local latest_tag_name
     latest_tag_name=$(curl -s https://gitee.com/api/v5/repos/yijingsec/ARL/releases/latest | grep -E -o '"tag_name":"([^\"]+)"' | awk -F\" '{print $4}')
     Show 0 "发现最新版本ARL: ${latest_tag_name}"
@@ -1914,7 +1830,7 @@ install_arl() {
 
     Show 2 "开始解压 ARL 压缩包"
     cd /opt/docker_arl
-    check_unzip
+    install_dependencies "unzip"
     unzip -o docker.zip
 
     check_docker_compose
@@ -2031,21 +1947,13 @@ config_metasploit() {
     echo "1. 安装 Metasploit-framework"
     echo "2. 卸载 Metasploit-framework"
     echo "3. 返回主菜单"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
+    read -r -p "$(echo -e "${RED}(配置Metasploit-framework)${NC} : ${GREEN}请输入序号(1-3) >> ${NC}")" choice
 
     case $choice in
-        1)
-            install_metasploit
-            ;;
-        2)
-            remove_metasploit
-            ;;
-        3)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "无效的选择"
-            ;;
+        1) install_metasploit ;;
+        2) remove_metasploit ;;
+        3) Show 2 "返回主菜单" ;;
+        *) Show 2 "无效的选择" ;;
     esac
 }
 
@@ -2054,7 +1962,7 @@ install_metasploit() {
     Show 2 "开始安装 Metasploit-framework"
     if [[ "$(lsb_release -is)" == "Ubuntu" ]]; then
         Show 2 "当前系统为 Ubuntu"
-        check_wget
+        install_dependencies "wget"
         Show 2 "下载 Metasploit-framework"
         wget -q --show-progress https://gitee.com/yijingsec/metasploit-omnibus/raw/master/config/templates/metasploit-framework-wrappers/msfupdate.erb -O msfinstall && chmod 755 msfinstall
         action "下载Metasploit安装脚本完成" "下载Metasploit安装脚本失败"
@@ -2066,7 +1974,7 @@ install_metasploit() {
         Show 2 "当前系统为 Kali"
         Show 2 "配置 Kali APT 源"
         sudo echo "deb https://mirrors.tuna.tsinghua.edu.cn/kali kali-rolling main non-free contrib" | sudo tee -a /etc/apt/sources.list > /dev/null
-        check_wget > /dev/null
+        install_dependencies "wget"
         Show 2 "导入 Kali APT 源的 GPG 公钥"
         wget -qO - https://archive.kali.org/archive-key.asc | sudo apt-key add -
         Show 2 "更新 APT 软件包列表"
@@ -2099,32 +2007,16 @@ config_viper() {
     echo "5. 关闭 Viper"
     echo "6. 卸载 Viper"
     echo "7. 返回主菜单"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-7): ${NC}")" choice
+    read -r -p "$(echo -e "${RED}(配置Viper)${NC} : ${GREEN}请输入序号(1-7) >> ${NC}")" choice
     case $choice in
-        1)
-            install_viper
-            ;;
-        2)
-            update_viper_version
-            ;;
-        3)
-            update_viper_password
-            ;;
-        4)
-            start_viper
-            ;;
-        5)
-            stop_viper
-            ;;
-        6)
-            remove_viper
-            ;;
-        7)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "无效的选择"
-            ;;
+        1) install_viper ;;
+        2) update_viper_version ;;
+        3) update_viper_password ;;
+        4) start_viper ;;
+        5) stop_viper ;;
+        6) remove_viper ;;
+        7) Show 2 "返回主菜单" ;;
+        *) Show 2 "无效的选择" ;;
     esac
 }
 
@@ -2243,29 +2135,15 @@ config_empire() {
     echo "4. 启动 Empire"
     echo "5. 卸载 Empire"
     echo "6. 返回主菜单"
-    read -r -p "请输入选择(1-6): " choice
+    read -r -p "$(echo -e "${RED}(配置Empire)${NC} : ${GREEN}请输入序号(1-6) >> ${NC}")" choice
     case $choice in
-        1)
-            install_empire
-            ;;
-        2)
-            update_empire
-            ;;
-        3)
-            stop_empire
-            ;;
-        4)
-            start_empire
-            ;;
-        5)
-            remove_empire
-            ;;
-        6)
-            echo "退出到主菜单"
-            ;;
-        *)
-            echo "无效的选择"
-            ;;
+        1) install_empire ;;
+        2) update_empire ;;
+        3) stop_empire ;;
+        4) start_empire ;;
+        5) remove_empire ;;
+        6) echo "返回主菜单" ;;
+        *) echo "无效的选择" ;;
     esac
 }
 
@@ -2337,29 +2215,15 @@ config_starkiller() {
     echo "4. 启动 Starkiller"
     echo "5. 卸载 Starkiller"
     echo "6. 返回主菜单"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
+    read -r -p "$(echo -e "${RED}(配置Starkiller)${NC} : ${GREEN}请输入序号(1-6) >> ${NC}")" choice
     case $choice in
-        1)
-            install_starkiller
-            ;;
-        2)
-            update_starkiller
-            ;;
-        3)
-            stop_starkiller
-            ;;
-        4)
-            start_starkiller
-            ;;
-        5)
-            remove_starkiller
-            ;;
-        6)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "无效的选择"
-            ;;
+        1) install_starkiller ;;
+        2) update_starkiller ;;
+        3) stop_starkiller ;;
+        4) start_starkiller ;;
+        5) remove_starkiller ;;
+        6) Show 2 "返回主菜单" ;;
+        *) Show 2 "无效的选择" ;;
     esac
 }
 
@@ -2462,32 +2326,16 @@ config_hfish() {
     echo "5. 卸载 HFish"
     echo "6. 获取数据库信息"
     echo "7. 返回主菜单"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-7): ${NC}")" choice
+    read -r -p "$(echo -e "${RED}(配置HFish)${NC} : ${GREEN}请输入序号(1-7) >> ${NC}")" choice
     case $choice in
-        1)
-            install_hfish
-            ;;
-        2)
-            update_hfish
-            ;;
-        3)
-            stop_hfish
-            ;;
-        4)
-            start_hfish
-            ;;
-        5)
-            remove_hfish
-            ;;
-        6)
-            get_hfish_db_info
-            ;;
-        7)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "无效的选择"
-            ;;
+        1) install_hfish ;;
+        2) update_hfish ;;
+        3) stop_hfish ;;
+        4) start_hfish ;;
+        5) remove_hfish ;;
+        6) get_hfish_db_info ;;
+        7) Show 2 "返回主菜单" ;;
+        *) Show 2 "无效的选择" ;;
     esac
 }
 
@@ -2537,7 +2385,7 @@ EOF
     sudo ${COMPOSE_CMD} up -d
     Show 2 "正在等待HFish容器启动"
     sleep 3
-    check_jq
+    install_dependencies "jq"
     MySQL_IP=$(docker network inspect hfish_default | jq -r '.[].Containers | to_entries[] | select(.value.Name == "mysql8") | .value.IPv4Address' | awk -F/ '{print $1}')
     Show 0 "访问地址: https://${host_ip}:4433/web"
     Show 0 "用户名: admin"
@@ -2615,7 +2463,7 @@ remove_hfish() {
 # 获取HFish数据库配置信息
 get_hfish_db_info() {
     Show 2 "HFish数据库信息如下: "
-    check_jq
+    install_dependencies "jq"
     MySQL_IP=$(docker network inspect hfish_default | jq -r '.[].Containers | to_entries[] | select(.value.Name == "mysql8") | .value.IPv4Address' | awk -F/ '{print $1}')
     Show 0 "MySQL IP 地 址: ${MySQL_IP}"
     Show 0 "MySQL 端 口 号: 3306"
@@ -2631,23 +2479,13 @@ config_dnscat2() {
     echo "2. 启动 Dnscat2 (直连模式)"
     echo "3. 启动 Dnscat2 (中继模式)"
     echo "4. 返回主菜单"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-4): ${NC}")" choice
+    read -r -p "$(echo -e "${RED}(配置Dnscat2)${NC} : ${GREEN}请输入序号(1-4) >> ${NC}")" choice
     case $choice in
-        1)
-            install_dnscat2
-            ;;
-        2)
-            start_dnscat2_direct_mode
-            ;;
-        3)
-            start_dnscat2_relay_mode
-            ;;
-        4)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "无效的选择"
-            ;;
+        1) install_dnscat2 ;;
+        2) start_dnscat2_direct_mode ;;
+        3) start_dnscat2_relay_mode ;;
+        4) Show 2 "返回主菜单" ;;
+        *) Show 2 "无效的选择" ;;
     esac
 }
 
@@ -2689,27 +2527,15 @@ config_beef() {
     echo "3. 启动 Beef"
     echo "4. 卸载 Beef"
     echo "5. 返回主菜单"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
+    read -r -p "$(echo -e "${RED}(配置Beef)${NC} : ${GREEN}请输入序号(1-5) >> ${NC}")" choice
 
     case $choice in
-        1)
-            install_beef
-            ;;
-        2)
-            stop_beef
-            ;;
-        3)
-            start_beef
-            ;;
-        4)
-            remove_beef
-            ;;
-        5)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "无效的选择"
-            ;;
+        1) install_beef ;;
+        2) stop_beef ;;
+        3) start_beef ;;
+        4) remove_beef ;;
+        5) Show 2 "返回主菜单" ;;
+        *) Show 2 "无效的选择" ;;
     esac
 }
 
@@ -2787,26 +2613,14 @@ config_bluelotus() {
     echo "3. 启动 Bluelotus"
     echo "4. 卸载 Bluelotus"
     echo "5. 返回主菜单"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
+    read -r -p "$(echo -e "${RED}(配置Bluelotus)${NC} : ${GREEN}请输入序号(1-5) >> ${NC}")" choice
     case $choice in
-        1)
-            install_bluelotus
-            ;;
-        2)
-            stop_bluelotus
-            ;;
-        3)
-            start_bluelotus
-            ;;
-        4)
-            remove_bluelotus
-            ;;
-        5)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "无效的选择"
-            ;;
+        1) install_bluelotus ;;
+        2) stop_bluelotus ;;
+        3) start_bluelotus ;;
+        4) remove_bluelotus ;;
+        5) Show 2 "返回主菜单" ;;
+        *) Show 2 "无效的选择" ;;
     esac
 }
 
@@ -2880,20 +2694,12 @@ config_ctfd() {
     echo "1. 安装 CTFd"
     echo "2. 卸载 CTFd"
     echo "3. 返回主菜单"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
+    read -r -p "$(echo -e "${RED}(配置CTFd)${NC} : ${GREEN}请输入序号(1-3) >> ${NC}")" choice
     case $choice in
-        1)
-            install_ctfd
-            ;;
-        2)
-            remove_ctfd
-            ;;
-        3)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "无效的选择"
-            ;;
+        1) install_ctfd ;;
+        2) remove_ctfd ;;
+        3) Show 2 "返回主菜单" ;;
+        *) Show 2 "无效的选择" ;;
     esac
 }
 
@@ -2941,20 +2747,12 @@ config_awvs() {
     echo "1. 安装 AWVS"
     echo "2. 卸载 AWVS"
     echo "3. 返回主菜单"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
+    read -r -p "$(echo -e "${RED}(配置AWVS)${NC} : ${GREEN}请输入序号(1-3) >> ${NC}")" choice
     case $choice in
-        1)
-            install_awvs
-            ;;
-        2)
-            remove_awvs
-            ;;
-        3)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "无效的选择"
-            ;;
+        1) install_awvs ;;
+        2) remove_awvs ;;
+        3) Show 2 "返回主菜单" ;;
+        *) Show 2 "无效的选择" ;;
     esac
 }
 
@@ -3014,20 +2812,12 @@ config_ocr_api_server() {
     echo "1. 安装 ocr_api_server"
     echo "2. 卸载 ocr_api_server"
     echo "3. 返回主菜单"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-3): ${NC}")" choice
+    read -r -p "$(echo -e "${RED}(配置ocr_api_server)${NC} : ${GREEN}请输入序号(1-3) >> ${NC}")" choice
     case $choice in
-        1)
-            install_ocr_api_server
-            ;;
-        2)
-            remove_ocr_api_server
-            ;;
-        3)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "无效的选择"
-            ;;
+        1) install_ocr_api_server ;;
+        2) remove_ocr_api_server ;;
+        3) Show 2 "返回主菜单" ;;
+        *) Show 2 "无效的选择" ;;
     esac
 }
 
@@ -3089,29 +2879,15 @@ config_ohmyzsh() {
     echo "4. 配置 oh-my-zsh 主题"
     echo "5. 配置 oh-my-zsh 插件"
     echo "6. 返回主菜单"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-6): ${NC}")" choice
+    read -r -p "$(echo -e "${RED}(配置oh-my-zsh)${NC} : ${GREEN}请输入序号(1-6) >> ${NC}")" choice
     case $choice in
-        1)
-            install_ohmyzsh
-            ;;
-        2)
-            update_ohmyzsh
-            ;;
-        3)
-            uninstall_ohmyzsh
-            ;;
-        4)
-            config_ohmyzsh_theme
-            ;;
-        5)
-            config_ohmyzsh_plugin
-            ;;
-        6)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "无效的选择"
-            ;;
+        1) install_ohmyzsh ;;
+        2) update_ohmyzsh ;;
+        3) uninstall_ohmyzsh ;;
+        4) config_ohmyzsh_theme ;;
+        5) config_ohmyzsh_plugin ;;
+        6) Show 2 "返回主菜单" ;;
+        *) Show 2 "无效的选择" ;;
     esac
 }
 
@@ -3136,7 +2912,7 @@ install_ohmyzsh() {
         if [ -f "install.sh" ]; then
             Show 0 "install.sh文件已存在"
         else
-            check_wget
+            install_dependencies "wget"
             Show 0 "install.sh文件不存在, 正在下载..."
             wget -q --show-progress https://gitee.com/mirrors/oh-my-zsh/raw/master/tools/install.sh
         fi
@@ -3227,26 +3003,14 @@ config_crAPI() {
     echo "3. 停止 crAPI 靶场"
     echo "4. 启动 crAPI 靶场"
     echo "5. 返回主菜单"
-    read -r -p "$(echo -e "${GREEN}请输入选择(1-5): ${NC}")" choice
+    read -r -p "$(echo -e "${RED}(配置crAPI)${NC} : ${GREEN}请输入序号(1-5) >> ${NC}")" choice
     case $choice in
-        1)
-            install_crapi
-            ;;
-        2)
-            uninstall_crapi
-            ;;
-        3)
-            stop_crapi
-            ;;
-        4)
-            start_crapi
-            ;;
-        5)
-            Show 2 "退出到主菜单"
-            ;;
-        *)
-            Show 2 "无效的选择"
-            ;;
+        1) install_crapi ;;
+        2) uninstall_crapi ;;
+        3) stop_crapi ;;
+        4) start_crapi ;;
+        5) Show 2 "返回主菜单" ;;
+        *) Show 2 "无效的选择" ;;
     esac
 }
 
@@ -3429,16 +3193,33 @@ project_update_check() {
     fi
 }
 
-project_update_check
-
-while true; do
-    show_menu
-    read -r -p "$(echo -e "${GREEN}>>> 请输入选项的序号(输入q退出) >>> ${NC}")" choice
-    # read -r -p ">>> 请输入选项的序号(输入q退出) >>> " choice
-    if [[ $choice == 'q' || $choice == 'Q' ]]; then
-        break
+# 主程序入口
+main() {
+    # 检查是否为root用户
+    if [ "$(id -u)" -ne 0 ]; then
+        Show 1 "请使用root用户或sudo运行此脚本"
+        exit 1
     fi
-    handle_choice "$choice"
-    Show 3 "按任意键继续..."
-    read -r -n 1 # 等待用户按键
-done
+
+    # 检查系统
+    if ! grep -qEi "ubuntu|debian|kali" /etc/os-release; then
+        Show 1 "本脚本仅适用于Ubuntu / Debian / Kali系统"
+        exit 1
+    fi
+
+    # 项目更新检查
+    project_update_check
+
+    while true; do
+        show_menu
+        read -r -p "$(echo -e "${GREEN}>>> 请输入选项的序号(输入q退出) >>> ${NC}")" choice
+        if [[ $choice == 'q' || $choice == 'Q' ]]; then
+            break
+        fi
+        handle_choice "$choice"
+        Show 3 "按任意键继续..."
+        read -r -n 1
+    done
+}
+
+main "$@"
