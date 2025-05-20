@@ -1667,14 +1667,16 @@ install_docker_compose() {
     echo "1. Gitee"
     echo "2. Github"
     read -r -p "$(echo -e "${RED}(配置Docker-compose/安装Docker-compose)${NC} : ${GREEN}请输入序号(1-2) >> ${NC}")" choice
-
+    local docker_compose_url
     # 根据用户选择设置 Docker 软件源
     if [[ "$choice" == "1" ]]; then
         Show 2 "选择从Gitee下载安装Docker-compose"
-        local docker_compose_url="https://gitee.com/yijingsec/compose/releases/download/$(curl -s https://gitee.com/api/v5/repos/yijingsec/compose/releases/latest | grep -E -o '\"tag_name\":\"([^\"]+)\"' | awk -F\" '{print $4}')/docker-compose-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)"
+        docker_compose_url="https://gitee.com/yijingsec/compose/releases/download/$(curl -s https://gitee.com/api/v5/repos/yijingsec/compose/releases/latest | grep -E -o '\"tag_name\":\"([^\"]+)\"' | awk -F\" '{print $4}')/docker-compose-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)"
+        action "Gitee Docker-compose 下载地址: ${docker_compose_url}" "Gitee Docker-compose 下载地址获取失败"
     elif [[ "$choice" == "2" ]]; then
         Show 2 "选择从Github下载安装Docker-compose"
-        local docker_compose_url="https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep '\"tag_name\":' | sed -E 's/.*\"([^\"]+)\".*/\1/')/docker-compose-$(uname -s)-$(uname -m)"
+        docker_compose_url="https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep '\"tag_name\":' | sed -E 's/.*\"([^\"]+)\".*/\1/')/docker-compose-$(uname -s)-$(uname -m)"
+        action "Github Docker-compose 下载地址: ${docker_compose_url}" "Github Docker-compose 下载地址获取失败"
     else
         Show 1 "输入错误, 退出安装"
     fi
