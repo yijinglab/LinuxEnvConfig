@@ -822,7 +822,7 @@ EOF
     case "$(lsb_release -cs)" in
         kali-rolling)
             # Kali
-            configure_kali_apt_source "$kali_mirror_type" "$mirror_url" ;;
+            configure_kali_apt_source "$kali_mirror" "$mirror_url" ;;
         bionic|focal|jammy|lunar|noble)
             # Ubuntu (18.04, 20.04, 22.04, 23.04, 24.04)
             config_apt_source_version "$(lsb_release -cs)" "$mirror_url" "ubuntu" ;;
