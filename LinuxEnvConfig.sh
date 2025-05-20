@@ -72,10 +72,11 @@ Show() {
 }
 
 action() {
+    local exit_status=$?
     local success_msg=$1
     local error_msg=$2
 
-    if [ $? -eq 0 ]; then
+    if [ $exit_status -eq 0 ]; then
 		Show 0 "$success_msg"
 	else
 		Show 1 "$error_msg"
