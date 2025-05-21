@@ -1713,16 +1713,16 @@ check_docker_compose() {
     Show 2 "检查docker compose命令是否存在"
     if docker compose >/dev/null 2>&1; then
         Show 0 "docker compose 命令存在"
-        COMPOSE_CMD="docker compose"
+        COMPOSE_CMD=(docker compose)
         # 检查docker-compose命令是否存在
     elif command -v docker-compose >/dev/null 2>&1; then
         Show 0 "docker-compose 命令存在"
-        COMPOSE_CMD="docker-compose"
+        COMPOSE_CMD=(docker-compose)
     else
         Show 2 "docker-compose 命令不存在"
         # 安装docker-compose
         install_docker_compose
-        COMPOSE_CMD="docker-compose"
+        COMPOSE_CMD=(docker-compose)
     fi
 }
 
@@ -1840,7 +1840,7 @@ install_arl() {
 
     Show 2 "开始启动 ARL 服务"
     # 检查命令是否成功执行
-    if sudo ${COMPOSE_CMD} up -d; then
+    if sudo "${COMPOSE_CMD[@]}" up -d; then
         Show 0 "成功启动 ARL 服务"
         Show 0 "访问地址: https://${host_ip}:5003"
         Show 0 "默认用户: admin"
@@ -1855,8 +1855,8 @@ stop_arl() {
     Show 2 "停止灯塔ARL开始"
     check_docker_compose
     cd /opt/docker_arl
-    if sudo ${COMPOSE_CMD} ps | grep arl_ | grep Up >/dev/null 2>&1; then
-        sudo ${COMPOSE_CMD} stop
+    if sudo "${COMPOSE_CMD[@]}" ps | grep arl_ | grep Up >/dev/null 2>&1; then
+        sudo "${COMPOSE_CMD[@]}" stop
         Show 0 "停止灯塔ARL完成"
     else
         Show 2 "灯塔ARL服务已停止"
@@ -1877,8 +1877,8 @@ start_arl() {
     Show 2 "启动灯塔ARL服务"
     cd /opt/docker_arl
     
-    if sudo ${COMPOSE_CMD} ps -a | grep arl_ | grep Exited >/dev/null 2>&1; then
-        if sudo ${COMPOSE_CMD} up -d; then
+    if sudo "${COMPOSE_CMD[@]}" ps -a | grep arl_ | grep Exited >/dev/null 2>&1; then
+        if sudo "${COMPOSE_CMD[@]}" up -d; then
             Show 0 "启动灯塔ARL成功"
             Show 0 "访问地址: https://${host_ip}:5003"
             Show 0 "默认用户: admin"
@@ -1899,7 +1899,7 @@ remove_arl() {
 
     Show 2 "停止灯塔ARL服务"
     cd /opt/docker_arl
-    sudo ${COMPOSE_CMD} down
+    sudo "${COMPOSE_CMD[@]}" down
     Show 2 "删除 arl_db 卷"
     sudo docker volume rm arl_db
     Show 2 "删除 docker_arl 目录"
@@ -2059,7 +2059,7 @@ EOF
     sed -i "s/VIPER_PASSWORD/${VIPER_PASSWORD}/g" docker-compose.yml
     cd /root/VIPER
     check_docker_compose
-    sudo ${COMPOSE_CMD} up -d
+    sudo "${COMPOSE_CMD[@]}" up -d
     Show 2 "正在等待系统启动"
     sleep 15
     Show 0 "访问地址: https://${host_ip}:60000 登录到服务器"
@@ -2074,14 +2074,14 @@ update_viper_version() {
     check_docker_compose
     Show 2 "移除所有容器"
     cd /root/VIPER
-    sudo ${COMPOSE_CMD} down
+    sudo "${COMPOSE_CMD[@]}" down
     Show 2 "删除数据文件"
     rm -rf ./db/*
     rm -f ./module/*
     Show 2 "拉取最新镜像"
-    sudo ${COMPOSE_CMD} pull
+    sudo "${COMPOSE_CMD[@]}" pull
     Show 2 "启动容器"
-    sudo ${COMPOSE_CMD} up -d
+    sudo "${COMPOSE_CMD[@]}" up -d
     Show 0 "更新Viper完成"
 }
 
@@ -2094,8 +2094,8 @@ update_viper_password() {
     sed -i "s/VIPER_PASSWORD/${VIPER_PASSWORD}/g" docker-compose.yml
     check_docker_compose
     Show 2 "更新Viper容器"
-    sudo ${COMPOSE_CMD} down
-    sudo ${COMPOSE_CMD} up -d
+    sudo "${COMPOSE_CMD[@]}" down
+    sudo "${COMPOSE_CMD[@]}" up -d
     Show 0 "更新Viper密码完成"
 }
 
@@ -2104,7 +2104,7 @@ start_viper() {
     Show 2 "开始启动Viper"
     cd /root/VIPER
     check_docker_compose
-    sudo ${COMPOSE_CMD} start
+    sudo "${COMPOSE_CMD[@]}" start
     Show 0 "启动Viper完成"
 }
 
@@ -2113,7 +2113,7 @@ stop_viper() {
     Show 2 "开始关闭Viper"
     cd /root/VIPER
     check_docker_compose
-    sudo ${COMPOSE_CMD} stop
+    sudo "${COMPOSE_CMD[@]}" stop
     Show 0 "关闭Viper完成"
 }
 
@@ -2123,7 +2123,7 @@ remove_viper() {
     cd /root/VIPER
     check_docker_compose
     Show 2 "删除Viper容器"
-    sudo ${COMPOSE_CMD} down
+    sudo "${COMPOSE_CMD[@]}" down
     Show 2 "删除Viper目录"
     cd ~ && sudo rm -rf /root/VIPER
     Show 0 "卸载Viper完成"
@@ -2385,7 +2385,7 @@ EOF
     Show 2 "拉取HFish镜像并启动HFish容器"
     cd /opt/hfish
     check_docker_compose
-    sudo ${COMPOSE_CMD} up -d
+    sudo "${COMPOSE_CMD[@]}" up -d
     Show 2 "正在等待HFish容器启动"
     sleep 3
     install_dependencies "jq"
@@ -2419,7 +2419,7 @@ stop_hfish() {
     Show 2 "停止HFish开始"
     cd /opt/hfish
     check_docker_compose
-    sudo ${COMPOSE_CMD} stop
+    sudo "${COMPOSE_CMD[@]}" stop
     action "停止HFish成功" "停止HFish失败"
 }
 
@@ -2433,7 +2433,7 @@ start_hfish() {
     fi
     cd /opt/hfish
     check_docker_compose
-    if sudo ${COMPOSE_CMD} start; then
+    if sudo "${COMPOSE_CMD[@]}" start; then
         Show 0 "启动HFish完成"
         Show 0 "访问地址: https://${host_ip}:4433/web 登录到服务器"
         Show 0 "用户名: admin"
@@ -2447,7 +2447,7 @@ remove_hfish() {
     Show 2 "删除HFish容器"
     cd /opt/hfish
     check_docker_compose
-    if sudo ${COMPOSE_CMD} down; then
+    if sudo "${COMPOSE_CMD[@]}" down; then
         Show 0 "删除HFish容器完成"
         Show 2 "删除HFish目录"
         rm -rf /opt/hfish
