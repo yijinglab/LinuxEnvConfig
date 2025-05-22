@@ -708,15 +708,15 @@ EOF
     action "APT源配置文件修改成功" "APT源配置文件修改失败"
 
     Show 2 "更新APT源"
-    sudo apt-get update >/dev/null
+    sudo apt-get update >& /dev/null
     action "APT源更新成功" "APT源更新失败"
 
     Show 2 "安装软件源管理工具"
-    sudo apt-get install -y software-properties-common >&/dev/null
+    sudo apt-get install -y software-properties-common >& /dev/null
     action "软件源管理工具安装成功" "软件源管理工具安装失败"
 
     Show 2 "添加Python源"
-    sudo add-apt-repository ppa:deadsnakes/ppa -y >&/dev/null
+    sudo add-apt-repository ppa:deadsnakes/ppa -y >& /dev/null
     action "Python源添加成功" "Python源添加失败"
     Show 0 "APT源配置成功"
 }
@@ -817,6 +817,21 @@ config_apt_source() {
 deb ${kali_mirror_url} kali-rolling main contrib non-free non-free-firmware
 # deb-src ${kali_mirror_url} kali-rolling main contrib non-free non-free-firmware
 EOF
+
+        action "Kali Linux APT源配置成功" "Kali Linux APT源配置失败"
+
+        Show 2 "更新APT源"
+        sudo apt-get update >& /dev/null
+        action "APT源更新成功" "APT源更新失败"
+
+        Show 2 "安装软件源管理工具"
+        sudo apt-get install -y software-properties-common >& /dev/null
+        action "软件源管理工具安装成功" "软件源管理工具安装失败"
+
+        Show 2 "添加Python源"
+        sudo add-apt-repository ppa:deadsnakes/ppa -y >& /dev/null
+        action "Python源添加成功" "Python源添加失败"
+        Show 0 "APT源配置成功"
     }
 
     Show 2 "根据当前系统版本类型, 自动配置APT源"
