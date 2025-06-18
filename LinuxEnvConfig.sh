@@ -2736,11 +2736,12 @@ install_ctfd() {
     if [ -z "${host_port}" ]; then
         Show 1 "请输入正确的端口号"
     fi
-    Show 2 "创建CTFd目录"
-    mkdir -p /opt/CTFd && cd /opt/CTFd
+    Show 2 "拉取最新CTFd镜像"
+    docker pull ctfd/ctfd
+    action "拉取CTFd镜像成功" "拉取CTFd镜像失败"
     Show 2 "启动CTFd容器服务"
-    docker run --name ctfd -dit -p "${host_port}:8000" -v /opt/CTFd:/ ctfd/ctfd
-    Show 0 "访问地址: https://${host_ip}:${host_port}"
+    docker run --name ctfd -dit -p "${host_port}:8000" ctfd/ctfd
+    Show 0 "访问地址: http://${host_ip}:${host_port}"
 }
 
 # 卸载CTFd
@@ -2749,9 +2750,7 @@ remove_ctfd() {
     docker rm ctfd -f
     action "删除CTFd容器成功" "删除CTFd容器失败, 请检查容器是否存在"
 
-    Show 2 "删除CTFd目录"
-    rm -rf /opt/CTFd
-    read -r -p "是否要删除镜像? (y/n)" yn
+    read -r -p "是否要删除镜像? (y/n) " yn
     if [[ $yn == "y" || $yn == "Y" ]]; then
         docker rmi ctfd/ctfd
         Show 0 "删除镜像成功"
