@@ -218,29 +218,29 @@ enable_root_user() {
 
 # 启用 SSH 服务
 enable_ssh() {
-    Show 2 "启用 SSH 服务开始"
-    Show 2 "检查 openssh-server 是否安装..."
+    Show 2 "启用SSH服务开始"
+    Show 2 "检查openssh-server是否安装..."
     if dpkg -l | grep -q openssh-server; then
-        Show 0 "openssh-server 已安装"
+        Show 0 "已安装openssh-server"
     else
         Show 2 "openssh-server 未安装，正在安装..."
         sudo apt-get update
         sudo apt-get install openssh-server -y >& /dev/null
-        action "openssh-server 安装成功" "openssh-server 安装失败"
+        action "安装openssh-server成功" "安装openssh-server失败"
     fi
 
     Show 2 "开始启动 SSH 服务..."
     sudo systemctl start ssh >&/dev/null
-    action "启动 SSH 服务成功" "启动 SSH 服务失败"
+    action "启动SSH服务成功" "启动SSH服务失败"
 
     Show 2 "设置 SSH 服务开机自启..."
     sudo systemctl enable ssh >&/dev/null
-    action "设置 SSH 服务开机自启成功" "设置 SSH 服务开机自启失败"
+    action "设置SSH服务开机自启成功" "设置SSH服务开机自启失败"
 
     # 显示 SSH 服务状态
-    Show 2 "检查 SSH 服务状态..."
+    Show 2 "检查SSH服务状态..."
     sudo systemctl --no-pager status ssh
-    Show 0 "启用 SSH 服务成功"
+    Show 0 "启用SSH服务成功"
 }
 
 # 设置nameserver
@@ -256,8 +256,8 @@ config_nameserver() {
     if [[ $current_nameservers == *"${nameservers[0]}"* && $current_nameservers == *"${nameservers[1]}"* ]]; then
         Show 0 "名称服务器已设置为 (${nameservers[*]})。"
     else
-        # 备份当前的 resolv.conf 文件
-        Show 2 "备份当前的 resolv.conf 文件..."
+        # 备份当前的resolv.conf文件
+        Show 2 "备份当前的resolv.conf文件..."
         if [ -f /etc/resolv.conf.backup ]; then
             Show 2 "备份文件已存在，跳过备份步骤"
         else
@@ -265,7 +265,7 @@ config_nameserver() {
             sudo cp /etc/resolv.conf /etc/resolv.conf.backup
         fi
 
-        Show 2 "清空当前的 resolv.conf 文件"
+        Show 2 "清空当前的resolv.conf文件"
         true > /etc/resolv.conf
 
         # 添加新的名称服务器
@@ -449,7 +449,7 @@ install_oracle_jdk() {
 
 # 检查 Oracle JDK
 check_oracle_jdk() {
-    Show 2 "检查 Oracle JDK 安装情况"
+    Show 2 "检查OracleJDK安装情况"
     if [ -f "$JDK_NAME" ]; then
         Show 2 "存在 ${JDK_NAME} 文件"
         Show 2 "删除 ${JDK_NAME} 文件"
@@ -480,9 +480,9 @@ check_oracle_jdk() {
     fi
 
     # 解压JDK
-    Show 2 "开始解压 Oracle JDK 文件"
+    Show 2 "开始解压OracleJDK文件"
     sudo tar -xzf "$JDK_NAME" -C $JDK_DIR
-    action "解压 Oracle JDK 文件成功" "解压 Oracle JDK 文件失败"
+    action "解压OracleJDK文件成功" "解压OracleJDK文件失败"
 
     Show 2 "配置Java环境变量"
 
@@ -563,7 +563,7 @@ install_openjdk() {
 
 # 检查 OpenJDK
 check_openjdk() {
-    Show 2 "检查 OpenJDK 安装情况"
+    Show 2 "检查OpenJDK安装情况"
     if [ -f "openjdk-${JDK_VER}_linux-x64_bin.tar.gz" ]; then
         Show 2 "存在 openjdk-${JDK_VER}_linux-x64_bin.tar.gz 文件"
         Show 2 "删除 openjdk-${JDK_VER}_linux-x64_bin.tar.gz 文件"
@@ -572,15 +572,15 @@ check_openjdk() {
 
     install_dependencies "wget"
 
-    Show 2 "开始下载 OpenJDK 文件"
+    Show 2 "开始下载OpenJDK文件"
     wget -q --show-progress "$JDK_URL"
 
     # 检查是否下载成功
     if [ -f "openjdk-${JDK_VER}_linux-x64_bin.tar.gz" ]; then
-        Show 0 "下载 OpenJDK 文件成功"
+        Show 0 "下载OpenJDK文件成功"
     else
         rm -f "openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
-        Show 1 "下载 OpenJDK 文件失败"
+        Show 1 "下载OpenJDK文件失败"
     fi
 
     # 设置解压目录
@@ -594,11 +594,11 @@ check_openjdk() {
     fi
 
     # 解压JDK
-    Show 2 "开始解压缩 OpenJDK 文件"
+    Show 2 "开始解压缩OpenJDK文件"
     sudo tar -xzf "openjdk-${JDK_VER}_linux-x64_bin.tar.gz" -C ${JDK_DIR}
 
     # 检查解压是否成功
-    action "解压 OpenJDK 文件成功" "解压 OpenJDK 文件失败"
+    action "解压OpenJDK文件成功" "解压OpenJDK文件失败"
 
     # 配置Java和Javac
     Show 2 "配置Java环境变量"
@@ -885,79 +885,79 @@ install_miniconda3() {
 
     # 根据用户选择设置 Miniconda3 软件源
     if [[ "$choice" == "1" ]]; then
-        Show 2 "选择使用清华大学 miniconda 软件源"
+        Show 2 "选择使用清华大学miniconda软件源"
         local mirror_url="https://mirrors.tuna.tsinghua.edu.cn/anaconda"
     elif [[ "$choice" == "2" ]]; then
-        Show 2 "选择使用北京大学 miniconda 软件源"
+        Show 2 "选择使用北京大学miniconda软件源"
         local mirror_url="https://mirrors.pku.edu.cn/anaconda"
     elif [[ "$choice" == "3" ]]; then
-        Show 2 "选择使用中国科大 miniconda 软件源"
+        Show 2 "选择使用中国科大miniconda软件源"
         local mirror_url="https://mirrors.ustc.edu.cn/anaconda"
     elif [[ "$choice" == "4" ]]; then
-        Show 2 "选择使用浙江大学 miniconda 软件源"
+        Show 2 "选择使用浙江大学miniconda软件源"
         local mirror_url="https://mirrors.zju.edu.cn/anaconda"
     elif [[ "$choice" == "5" ]]; then
-        Show 2 "选择使用南京大学 miniconda 软件源"
+        Show 2 "选择使用南京大学miniconda软件源"
         local mirror_url="https://mirrors.nju.edu.cn/anaconda"
     elif [[ "$choice" == "6" ]]; then
-        Show 2 "选择使用官方源 miniconda 软件源"
+        Show 2 "选择使用官方源miniconda软件源"
         local mirror_url="https://repo.anaconda.com"
     else
         Show 1 "输入错误, 退出安装"
     fi
 
-    Show 2 "检查 miniconda3 安装脚本是否存在"
+    Show 2 "检查miniconda3安装脚本是否存在"
     local install_script="/opt/miniconda3.sh"
     local install_dir="/opt/miniconda3"
     if [ -f "$install_script" ]; then
-        Show 2 "存在 miniconda3 安装脚本"
-        Show 2 "删除 miniconda3 安装脚本"
+        Show 2 "存在miniconda3安装脚本"
+        Show 2 "删除miniconda3安装脚本"
         rm -f "$install_script" >/dev/null 2>&1
     fi
 
     install_dependencies "wget"
 
-    Show 2 "下载 miniconda3 安装脚本"
+    Show 2 "下载miniconda3安装脚本"
     sudo wget -q --show-progress "${mirror_url}/miniconda/Miniconda3-latest-Linux-x86_64.sh" -O "$install_script"
-    action "下载 miniconda3 安装脚本成功" "下载 miniconda3 安装脚本失败"
+    action "下载miniconda3安装脚本成功" "下载miniconda3安装脚本失败"
 
-    Show 2 "执行 miniconda3 安装脚本"
+    Show 2 "执行miniconda3安装脚本"
     if sudo bash "$install_script" -b -p "$install_dir" >/dev/null; then
-        Show 0 "miniconda3 安装成功"
+        Show 0 "安装miniconda3成功"
         Show 0 "安装目录: $install_dir"
     else
-        Show 1 "miniconda3 安装失败"
+        Show 1 "安装miniconda3失败"
     fi
 
-    Show 2 "初始化 conda"
+    Show 2 "初始化conda"
     if [ -f "$install_dir/bin/activate" ]; then
         # shellcheck disable=SC1091
         source "$install_dir/bin/activate"
     else
-        Show 1 "未找到 $install_dir/bin/activate 脚本，无法初始化 conda"
+        Show 1 "未找到 $install_dir/bin/activate 脚本, 无法初始化conda"
     fi
     $install_dir/bin/conda init bash
     $install_dir/bin/conda init zsh
-    Show 0 "初始化 conda 完成"
+    Show 0 "初始化conda完成"
 
     configure_condarc "$mirror_url" "$install_dir"
 
-    Show 2 "开始更新 conda"
+    Show 2 "开始更新conda"
     sudo $install_dir/bin/conda update conda -y >/dev/null
-    action "更新 conda 成功" "更新 conda 失败"
+    action "更新conda成功" "更新conda失败"
 
-    Show 2 "清理 conda 缓存"
+    Show 2 "清理conda缓存"
     sudo $install_dir/bin/conda clean -a -y >/dev/null
 
-    Show 2 "清理 conda 缓存完成"
-    Show 0 "安装 miniconda3 完成"
+    Show 2 "清理conda缓存完成"
+    Show 0 "安装miniconda3完成"
 }
 
 # 配置conda镜像源
 configure_condarc() {
     local mirror_url=$1
     local install_dir=$2
-    Show 2 "配置 conda 镜像源"
+    Show 2 "配置conda镜像源"
     cat <<EOF | sudo tee ~/.condarc > /dev/null
 channels:
   - defaults
@@ -977,7 +977,7 @@ custom_channels:
   pytorch: ${mirror_url}/cloud
   simpleitk: ${mirror_url}/cloud
 EOF
-    Show 0 "配置 conda 镜像源完成"
+    Show 0 "配置conda镜像源完成"
 
     users=$(ls /home)
     if [ -z "$users" ]; then
@@ -985,7 +985,7 @@ EOF
     else
         for user in $users; do
             su - "$user" -c "$install_dir/bin/conda init zsh;$install_dir/bin/conda init bash" 2>/dev/null
-            action "为用户 ${user} 配置 conda 环境" "为用户 ${user} 配置 conda 环境失败"
+            action "为用户 ${user} 配置conda环境" "为用户 ${user} 配置conda环境失败"
             configure_conda_user "$mirror_url" "$user"
         done
     fi
@@ -995,7 +995,7 @@ EOF
 configure_conda_user() {
     local mirror_url=$1
     local user=$2
-    Show 2 "为用户 $user 配置 conda 镜像源"
+    Show 2 "为用户 $user 配置conda镜像源"
     cat <<EOF | sudo tee "/home/$user/.condarc" > /dev/null
 channels:
   - defaults
@@ -1015,7 +1015,7 @@ custom_channels:
   pytorch: ${mirror_url}/cloud
   simpleitk: ${mirror_url}/cloud
 EOF
-    Show 0 "为用户 $user 配置 conda 镜像源完成"
+    Show 0 "为用户 $user 配置conda镜像源完成"
 }
 
 # 配置conda镜像源
@@ -1031,22 +1031,22 @@ configure_conda_mirror() {
 
     # 根据用户选择设置 Miniconda3 软件源
     if [[ "$choice" == "1" ]]; then
-        Show 2 "选择使用清华大学 miniconda 软件源"
+        Show 2 "选择使用清华大学miniconda软件源"
         local mirror_url="https://mirrors.tuna.tsinghua.edu.cn/anaconda"
     elif [[ "$choice" == "2" ]]; then
-        Show 2 "选择使用北京大学 miniconda 软件源"
+        Show 2 "选择使用北京大学miniconda软件源"
         local mirror_url="https://mirrors.pku.edu.cn/anaconda"
     elif [[ "$choice" == "3" ]]; then
-        Show 2 "选择使用中国科大 miniconda 软件源"
+        Show 2 "选择使用中国科大miniconda软件源"
         local mirror_url="https://mirrors.ustc.edu.cn/anaconda"
     elif [[ "$choice" == "4" ]]; then
-        Show 2 "选择使用浙江大学 miniconda 软件源"
+        Show 2 "选择使用浙江大学miniconda软件源"
         local mirror_url="https://mirrors.zju.edu.cn/anaconda"
     elif [[ "$choice" == "5" ]]; then
-        Show 2 "选择使用南京大学 miniconda 软件源"
+        Show 2 "选择使用南京大学miniconda软件源"
         local mirror_url="https://mirrors.nju.edu.cn/anaconda"
     elif [[ "$choice" == "6" ]]; then
-        Show 2 "选择使用官方源 miniconda 软件源"
+        Show 2 "选择使用官方源miniconda软件源"
         local mirror_url="https://repo.anaconda.com"
     else
         Show 1 "输入错误, 退出安装"
@@ -1058,7 +1058,7 @@ configure_conda_mirror() {
 
 # 卸载Miniconda3
 remove_miniconda3() {
-    Show 2 "开始卸载 miniconda3"
+    Show 2 "开始卸载miniconda3"
     local install_dir="/opt/miniconda3"
 
     # 定义要删除的文件和目录
@@ -1067,7 +1067,7 @@ remove_miniconda3() {
     # 定义要处理的配置文件
     declare -a config_files=(".bashrc" ".zshrc")
 
-    Show 2 "删除 miniconda3 文件和目录"
+    Show 2 "删除miniconda3文件和目录"
     for file in "${files[@]}"; do
         sudo rm -rf "${file}"
         action "删除 ${file} 成功" "删除 ${file} 失败"
@@ -1080,11 +1080,11 @@ remove_miniconda3() {
         Show 2 "检查配置文件: ${HOME}/${config}"
         if [ -f "${HOME}/${config}" ]; then
             # 使用sed命令删除配置文件中的conda初始化代码
-            Show 2 "删除 conda 初始化代码"
+            Show 2 "删除conda初始化代码"
             sudo sed -i "/${conda_init_start}/,/${conda_init_end}/d" "${HOME}/${config}"
 
             # 检查sed命令是否成功执行
-            action "移除 conda 初始化代码成功" "移除 conda 初始化代码失败"
+            action "移除conda初始化代码成功" "移除conda初始化代码失败"
         else
             Show 2 "未找到 ${config} 文件"
         fi
@@ -1103,11 +1103,11 @@ remove_miniconda3() {
                 Show 2 "检查配置文件: /home/${user}/${config}"
                 if [ -f "/home/${user}/${config}" ]; then
                     # 使用sed命令删除配置文件中的conda初始化代码
-                    Show 2 "移除 conda 初始化代码"
+                    Show 2 "移除conda初始化代码"
                     sudo sed -i "/${conda_init_start}/,/${conda_init_end}/d" "/home/${user}/${config}"
 
                     # 检查sed命令是否成功执行
-                    action "移除 conda 初始化代码成功" "移除 conda 初始化代码失败"
+                    action "移除conda初始化代码成功" "移除conda初始化代码失败"
                 else
                     Show 2 "未找到 ${config} 文件"
                 fi
@@ -1115,19 +1115,19 @@ remove_miniconda3() {
         done
     fi
 
-    Show 0 "卸载 mimiconda3 完成"
+    Show 0 "卸载miniconda3完成"
 }
 
 # 检查Docker
 check_docker() {
     Show 2 "检查Docker是否安装"
     if which docker > /dev/null 2>&1; then
-        Show 0 "Docker 已安装"
+        Show 0 "确定Docker已安装"
         Show 2 "启动Docker服务"
         systemctl start docker >& /dev/null
-        action "启动 Docker 服务成功" "启动 Docker 服务失败"
+        action "启动Docker服务成功" "启动Docker服务失败"
     else
-        Show 2 "Docker 未安装，开始安装"
+        Show 2 "Docker未安装, 开始安装"
         install_docker
     fi
 }
@@ -1190,28 +1190,28 @@ install_docker() {
 
         # 根据用户选择设置 Docker 软件源
         if [[ "$choice" == "1" ]]; then
-            Show 2 "选择使用清华大学 Docker-CE 镜像源"
+            Show 2 "选择使用清华大学Docker-CE镜像源"
             local mirror_url="https://mirrors.tuna.tsinghua.edu.cn"
         elif [[ "$choice" == "2" ]]; then
-            Show 2 "选择使用北京大学 Docker-CE 镜像源"
+            Show 2 "选择使用北京大学Docker-CE镜像源"
             local mirror_url="https://mirrors.pku.edu.cn"
         elif [[ "$choice" == "3" ]]; then
-            Show 2 "选择使用阿里云 Docker-CE 镜像源"
+            Show 2 "选择使用阿里云Docker-CE镜像源"
             local mirror_url="https://mirrors.aliyun.com"
         elif [[ "$choice" == "4" ]]; then
-            Show 2 "选择使用华为云 Docker-CE 镜像源"
+            Show 2 "选择使用华为云Docker-CE镜像源"
             local mirror_url="https://mirrors.huaweicloud.com"
         elif [[ "$choice" == "5" ]]; then
-            Show 2 "选择使用腾讯云 Docker-CE 镜像源"
+            Show 2 "选择使用腾讯云Docker-CE镜像源"
             local mirror_url="https://mirrors.cloud.tencent.com"
         elif [[ "$choice" == "6" ]]; then
-            Show 2 "选择使用官方源 Docker-CE 镜像源"
+            Show 2 "选择使用官方源Docker-CE镜像源"
             local mirror_url="https://download.docker.com"
         else
             Show 1 "输入错误, 退出安装"
         fi
 
-        Show 2 "设置 Docker 软件源"
+        Show 2 "设置Docker软件源"
         sudo install -d /etc/apt/keyrings
         if [[ "$choice" == "6" ]]; then
             sudo curl -fsSL "${mirror_url}/linux/${repo_name}/gpg" | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
@@ -1224,12 +1224,12 @@ install_docker() {
             VERSION_CODENAME=$(grep -E '^VERSION_CODENAME=' /etc/os-release | cut -d'=' -f2)
             if [ -n "$VERSION_CODENAME" ]; then
                 sudo echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] ${mirror_url}/docker-ce/linux/${repo_name} ${VERSION_CODENAME} stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-                action "设置 Docker 软件源成功" "设置 Docker 软件源失败"
+                action "设置Docker软件源成功" "设置Docker软件源失败"
             else
-                Show 1 "无法从 /etc/os-release 获取版本代号"
+                Show 1 "无法从/etc/os-release获取版本代号"
             fi
         else
-            Show 1 "未找到 /etc/os-release 文件，无法设置 Docker 软件源"
+            Show 1 "未找到/etc/os-release文件, 无法设置Docker软件源"
         fi
 
         Show 2 "更新软件包列表"
@@ -1242,7 +1242,7 @@ install_docker() {
 
     elif [[ "$(lsb_release -cs)" == "kali-rolling" ]]; then
         # 针对 Kali Rolling 的特定安装逻辑
-        Show 0 "检测到系统为 Kali Rolling"
+        Show 0 "检测到系统为: Kali Rolling"
         echo -e "${YELLOW}[+] 请选择要使用的镜像源: ${NC}"
         echo "1. 清华大学 Docker-CE"
         echo "2. 阿里云 Docker-CE"
@@ -1253,19 +1253,19 @@ install_docker() {
 
         # 根据用户选择设置 Docker 软件源
         if [[ "$choice" == "1" ]]; then
-            Show 2 "选择使用清华大学 Docker-CE 镜像源"
+            Show 2 "选择使用清华大学Docker-CE镜像源"
             local mirror_url="https://mirrors.tuna.tsinghua.edu.cn"
         elif [[ "$choice" == "2" ]]; then
-            Show 2 "选择使用阿里云 Docker-CE 镜像源"
+            Show 2 "选择使用阿里云Docker-CE镜像源"
             local mirror_url="https://mirrors.aliyun.com"
         elif [[ "$choice" == "3" ]]; then
-            Show 2 "选择使用华为云 Docker-CE 镜像源"
+            Show 2 "选择使用华为云Docker-CE镜像源"
             local mirror_url="https://mirrors.huaweicloud.com"
         elif [[ "$choice" == "4" ]]; then
-            Show 2 "选择使用腾讯云 Docker-CE 镜像源"
+            Show 2 "选择使用腾讯云Docker-CE镜像源"
             local mirror_url="https://mirrors.cloud.tencent.com"
         elif [[ "$choice" == "5" ]]; then
-            Show 2 "选择使用官方源 Docker-CE 镜像源"
+            Show 2 "选择使用官方源Docker-CE镜像源"
             local mirror_url="https://download.docker.com"
         else
             Show 1 "输入错误, 退出安装"
@@ -1278,39 +1278,39 @@ install_docker() {
         curl -fsSL "${mirror_url}/docker-ce/linux/debian/gpg" | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
         sudo chmod a+r /etc/apt/keyrings/docker.gpg
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] ${mirror_url}/docker-ce/linux/debian/ bookworm stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-        action "设置 Docker 软件源成功" "设置 Docker 软件源失败"
+        action "设置Docker软件源成功" "设置Docker软件源失败"
 
         Show 2 "更新软件包列表"
         sudo apt-get update >/dev/null
         action "更新软件包列表成功" "更新软件包列表失败"
 
-        Show 2 "安装Docker"
+        Show 2 "开始安装Docker"
         sudo apt-get install -y docker-ce docker-ce-cli containerd.io >/dev/null
         action "安装Docker成功" "安装Docker失败"
     else
         Show 1 "当前系统版本不支持"
     fi
 
-    Show 2 "安装 Docker 版本："
+    Show 2 "安装Docker版本: "
     docker --version
 }
 
 # 卸载Docker
 remove_docker() {
-    Show 2 "开始卸载 Docker"
-    Show 2 "卸载 Docker 相关软件"
+    Show 2 "开始卸载Docker"
+    Show 2 "卸载Docker相关软件"
     sudo apt-get remove -y docker-ce docker-ce-cli containerd.io
 
-    Show 2 "删除 Docker 数据目录"
+    Show 2 "删除Docker数据目录"
     sudo rm -rf /var/lib/docker
     sudo rm -rf /var/lib/containerd
     sudo rm -rf /etc/apt/keyrings/docker.gpg
     sudo rm -rf /etc/apt/sources.list.d/docker.list
 
-    Show 2 "删除 Docker 配置文件"
+    Show 2 "删除Docker配置文件"
     sudo rm -rf /etc/docker
 
-    Show 0 "成功卸载 Docker"
+    Show 0 "成功卸载Docker"
 }
 
 # 配置Docker为国内镜像源
@@ -1334,7 +1334,7 @@ configure_docker_mirror() {
 EOF
     then
         Show 0 "修改配置文件成功"
-        Show 2 "重启 Docker 服务"
+        Show 2 "重启Docker服务"
         sudo systemctl daemon-reload
         sudo systemctl restart docker
         Show 0 "配置Docker国内镜像源成功"
@@ -1599,7 +1599,6 @@ pull_docker_image() {
             done
 
             # 如果成功拉取 hello-world，尝试拉取用户指定的镜像
-            # if [ $? -eq 0 ]; then
             if wait $pid; then
                 Show 0 "${mirror} 镜像源连通性测试正常！正在为您下载镜像"
                 timeout=200
@@ -1697,44 +1696,44 @@ install_docker_compose() {
         Show 1 "输入错误, 退出安装"
     fi
 
-    Show 2 "开始安装 docker-compose"
+    Show 2 "开始安装docker-compose"
     if [ -f "/usr/local/bin/docker-compose" ]; then
-        read -r -p "已安装 docker-compose, 是否卸载? (y/n)" yn
+        read -r -p "已安装docker-compose, 是否卸载? (y/n)" yn
         if [[ $yn == "y" || $yn == "Y" ]]; then
             remove_docker_compose
         fi
     fi
-    Show 2 "开始下载 docker-compose"
+    Show 2 "开始下载docker-compose"
     # sudo curl -L "$docker_compose_url" -o /usr/local/bin/docker-compose
     sudo wget -q --show-progress "$docker_compose_url" -O /usr/local/bin/docker-compose
     if sudo chmod +x /usr/local/bin/docker-compose; then
-        Show 0 "安装 docker-compose 成功"
-        Show 2 "安装 docker-compose 版本:"
+        Show 0 "安装docker-compose成功"
+        Show 2 "安装docker-compose版本:"
         sudo docker-compose --version
     else
-        Show 1 "安装 docker-compose 失败"
+        Show 1 "安装docker-compose失败"
     fi
 }
 
 # 卸载Docker-compose
 remove_docker_compose() {
-    Show 2 "卸载 docker-compose 开始"
+    Show 2 "卸载docker-compose开始"
     sudo rm -rf /usr/local/bin/docker-compose
-    action "卸载 docker-compose 成功" "卸载 docker-compose 失败"
+    action "卸载docker-compose成功" "卸载docker-compose失败"
 }
 
 # 检查 docker compose 命令
 check_docker_compose() {
     Show 2 "检查docker compose命令是否存在"
     if docker compose >/dev/null 2>&1; then
-        Show 0 "docker compose 命令存在"
+        Show 0 "docker compose命令存在"
         COMPOSE_CMD=(docker compose)
         # 检查docker-compose命令是否存在
     elif command -v docker-compose >/dev/null 2>&1; then
-        Show 0 "docker-compose 命令存在"
+        Show 0 "docker-compose命令存在"
         COMPOSE_CMD=(docker-compose)
     else
-        Show 2 "docker-compose 命令不存在"
+        Show 2 "docker-compose命令不存在"
         # 安装docker-compose
         install_docker_compose
         COMPOSE_CMD=(docker-compose)
@@ -1759,7 +1758,7 @@ config_vulfocus() {
 
 # 安装vulfocus
 install_vulfocus() {
-    Show 2 "开始安装 vulfocus"
+    Show 2 "开始安装vulfocus"
     read -r -p "$(echo -e "${YELLOW}输入启动vulfocus的主机地址: ${NC}")" host_ip
 
     # 检查是否输入了IP地址
@@ -1771,13 +1770,13 @@ install_vulfocus() {
     check_docker
 
     # 安装vulfocus
-    Show 2 "开始拉取 vulfocus 镜像"
+    Show 2 "开始拉取vulfocus镜像"
     sudo docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/vulfocus:latest
-    action "拉取 vulfocus 镜像成功" "拉取 vulfocus 镜像失败"
+    action "拉取vulfocus镜像成功" "拉取vulfocus镜像失败"
 
-    Show 2 "开始启动 vulfocus"
+    Show 2 "开始启动vulfocus"
     sudo docker run -d -p 88:80 --name vulfocus --restart always -v /var/run/docker.sock:/var/run/docker.sock -e VUL_IP="${host_ip}" registry.cn-hangzhou.aliyuncs.com/mingy123/vulfocus:latest
-    action "启动 vulfocus 成功" "启动 vulfocus 失败"
+    action "启动vulfocus成功" "启动vulfocus失败"
 
     # 打印访问信息
     Show 0 "访问地址: http://${host_ip}:88"
@@ -1787,12 +1786,12 @@ install_vulfocus() {
 
 # 卸载vulfocus
 remove_vulfocus() {
-    Show 2 "开始卸载 vulfocus"
-    Show 2 "停止 vulfocus"
+    Show 2 "开始卸载vulfocus"
+    Show 2 "停止vulfocus"
     sudo docker stop vulfocus
-    Show 2 "删除 vulfocus"
+    Show 2 "删除vulfocus"
     sudo docker rm vulfocus
-    Show 0 "卸载 vulfocus 完成"
+    Show 0 "卸载vulfocus完成"
 }
 
 # 配置ARL
@@ -1829,9 +1828,9 @@ install_arl() {
     # 检查Docker是否安装
     check_docker
 
-    Show 2 "创建 docker_arl 目录"
+    Show 2 "创建docker_arl目录"
     sudo mkdir -p /opt/docker_arl
-    Show 2 "创建 arl_db 卷"
+    Show 2 "创建arl_db卷"
     sudo docker volume create arl_db
 
     # 获取最新版本的 ARL 下载链接并下载
@@ -1841,27 +1840,27 @@ install_arl() {
     local latest_tag_name
     latest_tag_name=$(curl -s https://gitee.com/api/v5/repos/yijingsec/ARL/releases/latest | grep -E -o '"tag_name":"([^\"]+)"' | awk -F\" '{print $4}')
     Show 0 "发现最新版本ARL: ${latest_tag_name}"
-    Show 2 "开始下载 ARL 压缩包..."
+    Show 2 "开始下载ARL压缩包..."
     local download_url="https://gitee.com/yijingsec/ARL/releases/download/${latest_tag_name}/docker.zip"
     curl -Ls "${download_url}" -o /opt/docker_arl/docker.zip
-    action "下载 ARL 压缩包成功" "下载 ARL 压缩包失败"
+    action "下载ARL压缩包成功" "下载ARL压缩包失败"
 
-    Show 2 "开始解压 ARL 压缩包"
+    Show 2 "开始解压ARL压缩包"
     cd /opt/docker_arl
     install_dependencies "unzip"
     unzip -o docker.zip
 
     check_docker_compose
 
-    Show 2 "开始启动 ARL 服务"
+    Show 2 "开始启动ARL服务"
     # 检查命令是否成功执行
     if sudo "${COMPOSE_CMD[@]}" up -d; then
-        Show 0 "成功启动 ARL 服务"
+        Show 0 "成功启动ARL服务"
         Show 0 "访问地址: https://${host_ip}:5003"
         Show 0 "默认用户: admin"
         Show 0 "默认密码: arlpass"
     else
-        Show 1 "启动 ARL 服务失败, 请重试"
+        Show 1 "启动ARL服务失败, 请重试"
     fi
 }
 
@@ -1915,9 +1914,9 @@ remove_arl() {
     Show 2 "停止灯塔ARL服务"
     cd /opt/docker_arl
     sudo "${COMPOSE_CMD[@]}" down
-    Show 2 "删除 arl_db 卷"
+    Show 2 "删除arl_db卷"
     sudo docker volume rm arl_db
-    Show 2 "删除 docker_arl 目录"
+    Show 2 "删除docker_arl目录"
     cd ~
     sudo rm -rf /opt/docker_arl
     read -r -p "是否删除ARL镜像? (y/n)" yn
@@ -1997,22 +1996,22 @@ install_metasploit() {
         wget -qO - https://archive.kali.org/archive-key.asc | sudo apt-key add -
         Show 2 "更新 APT 软件包列表"
         sudo apt-get update > /dev/null
-        Show 2 "安装 metasploit-framework"
+        Show 2 "安装metasploit-framework"
         sudo apt-get install metasploit-framework -y > /dev/null
-        action "安装 Metasploit-framework 完成" "安装 Metasploit-framework 失败"
+        action "安装Metasploit-framework完成" "安装Metasploit-framework失败"
     else
-        Show 1 "脚本不适用当前系统, 无法安装 Metasploit-framework"
+        Show 1 "脚本不适用当前系统, 无法安装Metasploit-framework"
     fi
-    Show 2 "安装 Metasploit 版本: "
+    Show 2 "安装Metasploit版本: "
     msfconsole --version
 }
 
 # 卸载Metasploit-framework
 remove_metasploit() {
-    Show 2 "开始卸载 Metasploit-framework"
+    Show 2 "开始卸载Metasploit-framework"
     sudo apt-get remove metasploit-framework -y > /dev/null
     sudo rm -rf /usr/share/keyrings/metasploit-framework.gpg > /dev/null
-    action "卸载 Metasploit-framework 完成" "卸载 Metasploit-framework 失败"
+    action "卸载Metasploit-framework完成" "卸载Metasploit-framework失败"
 }
 
 # 配置Viper
@@ -2041,7 +2040,7 @@ config_viper() {
 # 安装Viper
 install_viper() {
     # 检查Docker是否安装
-    Show 2 "开始安装 Viper"
+    Show 2 "开始安装Viper"
     check_docker
     read -r -p "$(echo -e "${YELLOW}输入启动Viper的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
@@ -2167,9 +2166,9 @@ config_empire() {
 
 # 安装empire
 install_empire() {
-    Show 2 "开始安装 Empire"
+    Show 2 "开始安装Empire"
     check_docker
-    read -r -p "$(echo -e "${YELLOW}输入启动 Empire 的主机地址: ${NC}")" host_ip
+    read -r -p "$(echo -e "${YELLOW}输入启动Empire的主机地址: ${NC}")" host_ip
     if [ -z "${host_ip}" ]; then
         Show 1 "请输入正确的IP地址"
     fi
@@ -2216,7 +2215,7 @@ remove_empire() {
     docker stop ps-empire
     docker rm ps-empire -f
     Show 2 "删除Empire容器完成"
-    read -r -p "是否要删除镜像? (y/n)" yn
+    read -r -p "是否要删除镜像? (y/n) " yn
     if [[ $yn == "y" || $yn == "Y" ]]; then
         docker rmi registry.cn-hangzhou.aliyuncs.com/mingy123/empire:latest
         Show 0 "删除Empire镜像完成"
