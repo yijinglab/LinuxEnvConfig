@@ -1758,6 +1758,7 @@ config_vulfocus() {
 
 # 安装vulfocus
 install_vulfocus() {
+    check_docker
     Show 2 "开始安装vulfocus"
     read -r -p "$(echo -e "${YELLOW}输入启动vulfocus的主机地址: ${NC}")" host_ip
 
@@ -1765,9 +1766,6 @@ install_vulfocus() {
     if [ -z "${host_ip}" ]; then
         Show 1 "请输入正确的IP地址"
     fi
-
-    # 检查Docker是否安装
-    check_docker
 
     # 安装vulfocus
     Show 2 "开始拉取vulfocus镜像"
@@ -1818,15 +1816,13 @@ config_arl() {
 
 # 安装灯塔ARL
 install_arl() {
-    Show 2 "开始安装灯塔ARL"
+    check_docker
+    Show 2 "开始安装灯塔ARL" 
     read -r -p "$(echo -e "${YELLOW}输入启动灯塔ARL的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
         Show 1 "请输入正确的IP地址"
     fi
-
-    # 检查Docker是否安装
-    check_docker
 
     Show 2 "创建docker_arl目录"
     sudo mkdir -p /opt/docker_arl
@@ -2039,9 +2035,8 @@ config_viper() {
 
 # 安装Viper
 install_viper() {
-    # 检查Docker是否安装
-    Show 2 "开始安装Viper"
     check_docker
+    Show 2 "开始安装Viper"
     read -r -p "$(echo -e "${YELLOW}输入启动Viper的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
@@ -2246,6 +2241,7 @@ config_starkiller() {
 
 # 安装 Starkiller
 install_starkiller() {
+    check_docker
     Show 2 "安装Starkiller开始"
     read -r -p "$(echo -e "${YELLOW}输入启动Starkiller的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
@@ -2358,11 +2354,8 @@ config_hfish() {
 
 # 安装 HFish
 install_hfish() {
-    Show 2 "开始安装HFish"
-
-    # 检查Docker是否安装
     check_docker
-
+    Show 2 "开始安装HFish"
     read -r -p "$(echo -e "${YELLOW}输入启动HFish的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
@@ -2508,7 +2501,8 @@ config_dnscat2() {
 
 # 安装dnscat2
 install_dnscat2() {
-    Show 2 "安装Dnscat2开始"
+    check_docker
+    Show 2 "开始安装Dnscat2"
     if docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/dnscat2:v0.07; then
         Show 0 "拉取最新Dnscat2镜像成功"
         Show 0 "安装Dnscat2成功, 请启动Dnscat2"
@@ -2558,7 +2552,8 @@ config_beef() {
 
 # 安装Beef
 install_beef() {
-    Show 2 "安装Beef开始"
+    check_docker
+    Show 2 "开始安装Beef"
     read -r -p "$(echo -e "${YELLOW}输入启动Beef的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
@@ -2643,7 +2638,8 @@ config_bluelotus() {
 
 # 安装 Bluelotus
 install_bluelotus() {
-    Show 2 "安装Bluelotus开始"
+    check_docker
+    Show 2 "开始安装Bluelotus"
     read -r -p "$(echo -e "${YELLOW}输入启动Bluelotus的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
@@ -2722,9 +2718,8 @@ config_ctfd() {
 
 # 安装CTFd
 install_ctfd() {
-    Show 2 "开始安装CTFd"
-    # 检查Docker是否安装
     check_docker
+    Show 2 "开始安装CTFd"
     read -r -p "$(echo -e "${YELLOW}输入启动CTFd的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
@@ -2774,9 +2769,8 @@ config_awvs() {
 
 # 安装AWVS
 install_awvs() {
-    echo "开始安装AWVS"
-    Show 2 "检查Docker是否安装"
     check_docker
+    Show 2 "开始安装AWVS"
     read -r -p "$(echo -e "${YELLOW}输入启动AWVS的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
@@ -2839,6 +2833,7 @@ config_ocr_api_server() {
 
 # 安装ocr_api_server
 install_ocr_api_server() {
+    check_docker
     Show 2 "开始安装ocr_api_server"
     # 接收用户输入作为host_ip
     read -r -p "$(echo -e "${YELLOW}输入启动ocr_api_server的主机地址: ${NC}")" host_ip
@@ -2848,9 +2843,6 @@ install_ocr_api_server() {
     else
         return 1
     fi
-
-    Show 2 "检查Docker是否安装"
-    check_docker
 
     # 安装ocr_api_server
     Show 2 "拉取最新ocr_api_server镜像"
@@ -3032,11 +3024,8 @@ config_crAPI() {
 
 # 安装crAPI靶场
 install_crapi() {
-    Show 2 "开始安装crAPI靶场"
-
-    # 检查Docker是否安装
     check_docker
-
+    Show 2 "开始安装crAPI靶场"
     # 安装crAPI靶场
     Show 2 "获取crAPI靶场docker-compose.yml文件"
     sudo mkdir -p crAPI
