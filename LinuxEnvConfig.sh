@@ -418,7 +418,7 @@ install_oracle_jdk() {
     # 定义常量
     local JDK_VERSIONS=("jdk1.8.0_421" "jdk-11.0.24" "jdk-17.0.12" "jdk-21.0.4" "jdk-22.0.2" "jdk-23.0.1")
     local JDK_NAMES=("jdk-8u421-linux-x64.tar.gz" "jdk-11.0.24_linux-x64_bin.tar.gz" "jdk-17.0.12_linux-x64_bin.tar.gz" "jdk-21.0.4_linux-x64_bin.tar.gz" "jdk-22.0.2_linux-x64_bin.tar.gz" "jdk-23_linux-x64_bin.tar.gz")
-    local JDK_URLS=("https://d.injdk.cn/d/download/oraclejdk/8/jdk-8u421-linux-x64.tar.gz" "https://d.injdk.cn/d/download/oraclejdk/11/jdk-11.0.24_linux-x64_bin.tar.gz" "https://d.injdk.cn/d/download/oraclejdk/17/jdk-17_linux-x64_bin.tar.gz" "https://d.injdk.cn/d/download/oraclejdk/21/jdk-21_linux-x64_bin.tar.gz" "https://d.injdk.cn/d/download/oraclejdk/22/jdk-22_linux-x64_bin.tar.gz" "https://d.injdk.cn/d/download/oraclejdk/23/jdk-23_linux-x64_bin.tar.gz")
+    local JDK_URLS=("https://d10.injdk.cn/openjdk/oraclejdk/8/jdk-8u421-linux-x64.tar.gz" "https://d10.injdk.cn/openjdk/oraclejdk/11/jdk-11.0.24_linux-x64_bin.tar.gz" "https://d10.injdk.cn/openjdk/oraclejdk/17/jdk-17_linux-x64_bin.tar.gz" "https://d10.injdk.cn/openjdk/oraclejdk/21/jdk-21_linux-x64_bin.tar.gz" "https://d10.injdk.cn/openjdk/oraclejdk/22/jdk-22_linux-x64_bin.tar.gz" "https://d10.injdk.cn/openjdk/oraclejdk/23/jdk-23_linux-x64_bin.tar.gz")
 
     Show 2 "安装Oracle JDK"
     echo -e "${YELLOW}[+] 选择想要安装的OracleJDK版本: ${NC}"
