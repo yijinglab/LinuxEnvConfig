@@ -174,7 +174,7 @@ install_dependencies() {
     for tool in "${tools[@]}"; do
         if ! command -v "$tool" &> /dev/null; then
             Show 2 "安装 $tool..."
-            sudo apt-get install -y "$tool" &> /dev/null
+            sudo apt-get install -y "$tool"
             action "安装 $tool 成功" "安装 $tool 失败"
         fi
     done
