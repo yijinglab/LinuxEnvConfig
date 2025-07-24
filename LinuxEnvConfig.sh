@@ -3198,6 +3198,21 @@ project_update_check() {
     fi
 }
 
+update_kali_gpg_key() {
+    # 如果系统为kali，则更新GPG密钥
+    if grep -qEi "kali-rolling" /etc/os-release; then
+        if ! sudo wget -q https://archive.kali.org/archive-keyring.gpg -O /usr/share/keyrings/kali-archive-keyring.gpg; then
+            Show 1 "下载Kali GPG密钥失败"
+            return 1
+        else
+            Show 0 "下载Kali GPG密钥成功"
+            Show 0 "开始更新APT源"
+            sudo apt update -y
+        fi
+    fi
+}
+
+
 # 主程序入口
 main() {
     # 检查是否为root用户
@@ -3214,6 +3229,9 @@ main() {
 
     # 项目更新检查
     project_update_check
+
+    # 更新Kali GPG密钥
+    update_kali_gpg_key
 
     while true; do
         show_menu
