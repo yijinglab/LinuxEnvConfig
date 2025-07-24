@@ -171,6 +171,9 @@ commands=(
 # 检查依赖工具是否安装
 install_dependencies() {
     local tools=("$@")
+    Show 0 "更新APT源"
+    sudo apt-get update -y
+    action "更新apt源成功" "更新apt源失败"
     for tool in "${tools[@]}"; do
         if ! command -v "$tool" &> /dev/null; then
             Show 2 "安装 $tool..."
