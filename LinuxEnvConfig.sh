@@ -711,15 +711,15 @@ EOF
     action "APT源配置文件修改成功" "APT源配置文件修改失败"
 
     Show 2 "更新APT源"
-    sudo apt-get update >& /dev/null
+    sudo apt-get update
     action "APT源更新成功" "APT源更新失败"
 
     Show 2 "安装软件源管理工具"
-    sudo apt-get install -y software-properties-common >& /dev/null
+    sudo apt-get install -y software-properties-common
     action "软件源管理工具安装成功" "软件源管理工具安装失败"
 
     Show 2 "添加Python源"
-    sudo add-apt-repository ppa:deadsnakes/ppa -y >& /dev/null
+    sudo add-apt-repository ppa:deadsnakes/ppa
     action "Python源添加成功" "Python源添加失败"
     Show 0 "APT源配置成功"
 }
@@ -842,8 +842,8 @@ EOF
         kali-rolling)
             # Kali
             configure_kali_apt_source "$kali_mirror" "$mirror_url" ;;
-        bionic|focal|jammy|lunar|noble)
-            # Ubuntu (18.04, 20.04, 22.04, 23.04, 24.04)
+        bionic|focal|jammy|lunar|noble|plucky)
+            # Ubuntu (18.04, 20.04, 22.04, 23.04, 24.04, 25.04)
             config_apt_source_version "$(lsb_release -cs)" "$mirror_url" "ubuntu" ;;
         buster|bullseye|bookworm|trixie)
             # Debian (10, 11, 12, 13)
@@ -2047,11 +2047,47 @@ install_viper() {
     fi
 
     Show 2 "创建安装目录"
-    mkdir -p /root/VIPER && cd /root/VIPER && rm -f docker-compose.* > /dev/null 2>&1
+    mkdir -p /root/VIPER/nginxconfig && cd /root/VIPER && rm -f docker-compose.* > /dev/null 2>&1
+
+    Show 2 "应用系统优化"
+
+    # Network stack tuning
+    sysctl -w net.ipv4.tcp_timestamps=0
+    sysctl -w net.ipv4.tcp_tw_reuse=1
+    sysctl -w net.ipv4.tcp_fin_timeout=3
+    sysctl -w net.ipv4.tcp_keepalive_time=1800
+    sysctl -w net.ipv4.tcp_rmem="4096 87380 8388608"
+    sysctl -w net.ipv4.tcp_wmem="4096 87380 8388608"
+    sysctl -w net.ipv4.tcp_max_syn_backlog=262144
+    sysctl -w net.ipv4.ip_local_port_range="1024 65535"
+    sysctl -w net.core.rmem_max=16777216
+    sysctl -w net.core.wmem_max=16777216
+    sysctl -w net.ipv4.tcp_window_scaling=0
+    sysctl -w net.ipv4.tcp_sack=0
+    sysctl -w net.core.netdev_max_backlog=30000
+    sysctl -w net.ipv4.tcp_no_metrics_save=1
+    sysctl -w net.core.somaxconn=262144
+    sysctl -w net.ipv4.tcp_syncookies=0
+    sysctl -w net.ipv4.tcp_max_orphans=262144
+    sysctl -w net.ipv4.tcp_synack_retries=2
+    sysctl -w net.ipv4.tcp_syn_retries=2
+
+    # File descriptor limits
+    echo "ulimit -HSn 65535" >> /etc/rc.local
+    echo "ulimit -HSn 65535" >> /root/.bash_profile
+    echo "ulimit -SHn 65535" >> /etc/profile
+    ulimit -SHn 65535
+
+    # Virtual memory settings
+    sysctl -w vm.max_map_count=262144
+
+    # Make rc.local executable if it exists
+    [ -f /etc/rc.local ] && chmod +x /etc/rc.local
+
+    Show 2 "系统优化完成"
 
     Show 2 "创建docker-compose.yml文件"
     tee docker-compose.yml <<-'EOF'
-version: "3"
 services:
   viper:
     image: registry.cn-shenzhen.aliyuncs.com/toys/viper:latest
@@ -2064,6 +2100,13 @@ services:
       - /root/VIPER/module:/root/viper/Docker/module
       - /root/VIPER/log:/root/viper/Docker/log
       - /root/VIPER/nginxconfig:/root/viper/Docker/nginxconfig
+    ulimits:
+      nofile:
+        soft: 65534
+        hard: 65534
+      nproc:
+        soft: 65534
+        hard: 65534
     command: ["VIPER_PASSWORD"]
 EOF
 
