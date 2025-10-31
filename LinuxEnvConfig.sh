@@ -3247,11 +3247,39 @@ project_update_check() {
 update_kali_gpg_key() {
     # 如果系统为kali，则更新GPG密钥
     if grep -qEi "kali-rolling" /etc/os-release; then
-        if sudo wget -q https://archive.kali.org/archive-keyring.gpg -O /usr/share/keyrings/kali-archive-keyring.gpg; then
-            Show 0 "下载Kali GPG密钥成功"
+        # 检查是否已存在GPG密钥
+        if [ -f /usr/share/keyrings/kali-archive-keyring.gpg ] && [ -r /usr/share/keyrings/kali-archive-keyring.gpg ]; then
+            # 获取密钥的哈希值
+            key_hash=$(sha256sum /usr/share/keyrings/kali-archive-keyring.gpg | cut -d' ' -f1)
+            if [ "$key_hash" == "42a247ff5a26869e3739b6d3ad125938bb5da8e7bb43ed0791d2a190cd09c64f" ]; then
+                Show 2 "Kali GPG密钥已下载"
+            else
+                if sudo wget --no-check-certificate -q https://archive.kali.org/archive-keyring.gpg -O /usr/share/keyrings/kali-archive-keyring.gpg; then
+                    new_key_hash=$(sha256sum /usr/share/keyrings/kali-archive-keyring.gpg | cut -d' ' -f1)
+                    if [ "$new_key_hash" == "42a247ff5a26869e3739b6d3ad125938bb5da8e7bb43ed0791d2a190cd09c64f" ]; then
+                        Show 0 "下载Kali GPG密钥成功"
+                    else
+                        Show 1 "下载的Kali GPG密钥哈希值不匹配"
+                        return 1
+                    fi
+                else
+                    Show 1 "下载Kali GPG密钥失败"
+                    return 1
+                fi
+            fi
         else
-            Show 1 "下载Kali GPG密钥失败"
-            return 1
+            if sudo wget --no-check-certificate -q https://archive.kali.org/archive-keyring.gpg -O /usr/share/keyrings/kali-archive-keyring.gpg; then
+                new_key_hash=$(sha256sum /usr/share/keyrings/kali-archive-keyring.gpg | cut -d' ' -f1)
+                if [ "$new_key_hash" == "42a247ff5a26869e3739b6d3ad125938bb5da8e7bb43ed0791d2a190cd09c64f" ]; then
+                    Show 0 "下载Kali GPG密钥成功"
+                else
+                    Show 1 "下载的Kali GPG密钥哈希值不匹配"
+                    return 1
+                fi
+            else
+                Show 1 "下载Kali GPG密钥失败"
+                return 1
+            fi
         fi
     fi
 }
