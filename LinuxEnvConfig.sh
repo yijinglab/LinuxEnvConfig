@@ -168,21 +168,6 @@ commands=(
     ["配置 crAPI"]="config_crAPI"
 )
 
-# 检查依赖工具是否安装
-install_dependencies() {
-    local tools=("$@")
-    Show 0 "更新APT源"
-    sudo apt-get update -y
-    action "更新apt源成功" "更新apt源失败"
-    for tool in "${tools[@]}"; do
-        if ! command -v "$tool" &> /dev/null; then
-            Show 2 "安装 $tool..."
-            sudo apt-get install -y "$tool"
-            action "安装 $tool 成功" "安装 $tool 失败"
-        fi
-    done
-}
-
 # 基础配置
 basic_config() {
     echo -e "${YELLOW}[+] 请选择操作: ${NC}"
@@ -383,13 +368,10 @@ GetTempUrl() {
         "15010001:参数不正确"
     )
 
-    install_dependencies "jq"
-
     # 构建请求的数据
     data=$(jq -n --arg token "$token" --arg ExeName "$ExeName" '{token: $token, tempUrl: $ExeName}')
 
     # 发送POST请求
-    install_dependencies "curl"
     resp=$(curl -s -X POST -H "Content-Type: application/json" -d "$data" "$url_api")
 
     # 解析JSON响应
@@ -460,8 +442,6 @@ check_oracle_jdk() {
     else
         Show 2 "不存在 ${JDK_NAME} 文件"
     fi
-
-    install_dependencies "wget"
 
     Show 2 "下载 ${JDK_NAME} 文件"
     
@@ -572,8 +552,6 @@ check_openjdk() {
         Show 2 "删除 openjdk-${JDK_VER}_linux-x64_bin.tar.gz 文件"
         rm -f "openjdk-${JDK_VER}_linux-x64_bin.tar.gz"
     fi
-
-    install_dependencies "wget"
 
     Show 2 "开始下载OpenJDK文件"
     wget -q --show-progress "$JDK_URL"
@@ -917,8 +895,6 @@ install_miniconda3() {
         Show 2 "删除miniconda3安装脚本"
         rm -f "$install_script" >/dev/null 2>&1
     fi
-
-    install_dependencies "wget"
 
     Show 2 "下载miniconda3安装脚本"
     sudo wget -q --show-progress "${mirror_url}/miniconda/Miniconda3-latest-Linux-x86_64.sh" -O "$install_script"
@@ -1835,7 +1811,6 @@ install_arl() {
     # 获取最新版本的 ARL 下载链接并下载
     # sudo curl -Ls "https://gitee.com/yijingsec/ARL/releases/download/$(curl -s https://gitee.com/api/v5/repos/yijingsec/ARL/releases/latest | grep -E -o '\"tag_name\":\"([^\"]+)\"' | awk -F\" '{print $4}')/docker.zip" -o /opt/docker_arl/docker.zip && cd /opt/docker_arl && unzip -o docker.zip
 
-    install_dependencies "curl"
     local latest_tag_name
     latest_tag_name=$(curl -s https://gitee.com/api/v5/repos/yijingsec/ARL/releases/latest | grep -E -o '"tag_name":"([^\"]+)"' | awk -F\" '{print $4}')
     Show 0 "发现最新版本ARL: ${latest_tag_name}"
@@ -1846,7 +1821,6 @@ install_arl() {
 
     Show 2 "开始解压ARL压缩包"
     cd /opt/docker_arl
-    install_dependencies "unzip"
     unzip -o docker.zip
 
     check_docker_compose
@@ -1978,7 +1952,6 @@ install_metasploit() {
     Show 2 "开始安装 Metasploit-framework"
     if [[ "$(lsb_release -is)" == "Ubuntu" ]]; then
         Show 2 "当前系统为 Ubuntu"
-        install_dependencies "wget"
         Show 2 "下载 Metasploit-framework"
         wget -q --show-progress https://gitee.com/yijingsec/metasploit-omnibus/raw/master/config/templates/metasploit-framework-wrappers/msfupdate.erb -O msfinstall && chmod 755 msfinstall
         action "下载Metasploit安装脚本完成" "下载Metasploit安装脚本失败"
@@ -1990,7 +1963,6 @@ install_metasploit() {
         Show 2 "当前系统为 Kali"
         Show 2 "配置 Kali APT 源"
         sudo echo "deb https://mirrors.tuna.tsinghua.edu.cn/kali kali-rolling main non-free contrib" | sudo tee -a /etc/apt/sources.list > /dev/null
-        install_dependencies "wget"
         Show 2 "导入 Kali APT 源的 GPG 公钥"
         wget -qO - https://archive.kali.org/archive-key.asc | sudo apt-key add -
         Show 2 "更新 APT 软件包列表"
@@ -2441,7 +2413,6 @@ EOF
     sudo "${COMPOSE_CMD[@]}" up -d
     Show 2 "正在等待HFish容器启动"
     sleep 3
-    install_dependencies "jq"
     MySQL_IP=$(docker network inspect hfish_default | jq -r '.[].Containers | to_entries[] | select(.value.Name == "mysql8") | .value.IPv4Address' | awk -F/ '{print $1}')
     Show 0 "访问地址: https://${host_ip}:4433/web"
     Show 0 "用户名: admin"
@@ -2519,7 +2490,6 @@ remove_hfish() {
 # 获取HFish数据库配置信息
 get_hfish_db_info() {
     Show 2 "HFish数据库信息如下: "
-    install_dependencies "jq"
     MySQL_IP=$(docker network inspect hfish_default | jq -r '.[].Containers | to_entries[] | select(.value.Name == "mysql8") | .value.IPv4Address' | awk -F/ '{print $1}')
     Show 0 "MySQL IP 地 址: ${MySQL_IP}"
     Show 0 "MySQL 端 口 号: 3306"
@@ -2966,7 +2936,6 @@ install_ohmyzsh() {
         if [ -f "install.sh" ]; then
             Show 0 "install.sh文件已存在"
         else
-            install_dependencies "wget"
             Show 0 "install.sh文件不存在, 正在下载..."
             wget -q --show-progress https://gitee.com/mirrors/oh-my-zsh/raw/master/tools/install.sh
         fi
@@ -3212,6 +3181,33 @@ handle_choice() {
     "${commands[${menu_options[$choice - 1]}]}"
 }
 
+# 安装项目依赖的基础工具
+install_project_dependencies() {
+    Show 2 "检查项目依赖的基础工具"
+    
+    # 定义必需的基础工具列表
+    local required_tools="git curl wget jq unzip"
+    local missing_tools=""
+    
+    # 检查哪些工具未安装
+    for tool in $required_tools; do
+        if ! command -v "$tool" >/dev/null 2>&1; then
+            missing_tools="$missing_tools $tool"
+        fi
+    done
+    
+    # 如果所有工具都已安装，直接返回
+    if [ -z "$missing_tools" ]; then
+        Show 2 "项目依赖工具已全部安装"
+        return 0
+    fi
+    
+    Show 2 "正在安装缺失的工具:$missing_tools"
+    sudo apt update
+    sudo apt install -y "$missing_tools"
+    action "项目依赖工具安装完成" "项目依赖工具安装失败"
+}
+
 # 项目更新检查
 project_update_check() {
     # 设置Gitee仓库的URL
@@ -3298,6 +3294,9 @@ main() {
         Show 1 "本脚本仅适用于Ubuntu / Debian / Kali系统"
         exit 1
     fi
+
+    # 安装项目依赖的基础工具
+    install_project_dependencies
 
     # 项目更新检查
     project_update_check
