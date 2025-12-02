@@ -3203,8 +3203,8 @@ install_project_dependencies() {
     fi
     
     Show 2 "正在安装缺失的工具:$missing_tools"
-    sudo apt update
-    sudo apt install -y "$missing_tools"
+    sudo apt update -y
+    sudo apt install -y $missing_tools
     action "项目依赖工具安装完成" "项目依赖工具安装失败"
 }
 
