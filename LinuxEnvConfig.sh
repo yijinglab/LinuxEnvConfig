@@ -174,7 +174,7 @@ basic_config() {
     echo "1. 启用ROOT用户"
     echo "2. 启用SSH服务"
     echo "3. 允许ROOT用户SSH登录"
-    echo "4. 设置NameServer"
+    echo "4. 设置DNS名称服务器"
     echo "5. 获取当前主机网卡及IP地址信息"
     echo "6. 解除DNS协议53端口占用"
     echo "7. 返回主菜单"
@@ -3208,6 +3208,47 @@ install_project_dependencies() {
     action "项目依赖工具安装完成" "项目依赖工具安装失败"
 }
 
+# 检查网络连接状态
+check_network_connection() {
+    Show 2 "检查网络连接状态"
+
+    # 第一步：检查基础网络连通性（ping IP）
+    if ! ping -c 1 -W 3 223.6.6.6 >/dev/null 2>&1; then
+        # 直接使用echo显示FAILED消息，避免调用Show 1导致退出
+        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[3]}FAILED$COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET 网络连接失败，无法访问外网"
+        Show 2 "可能的原因："
+        Show 2 "  - 网络线缆未连接"
+        Show 2 "  - WiFi 未连接"
+        Show 2 "  - 防火墙阻止连接"
+        Show 2 "  - 代理设置错误"
+        return 1
+    fi
+
+    # 第二步：检查DNS解析是否正常
+    if ! nslookup baidu.com >/dev/null 2>&1 && ! dig baidu.com >/dev/null 2>&1; then
+        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[3]}FAILED$COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET 网络连通正常，但DNS解析失败"
+        Show 2 "可能的原因："
+        Show 2 "  - DNS服务器配置错误"
+        Show 2 "  - DNS服务器不可达"
+        Show 2 "  - /etc/resolv.conf 配置问题"
+        Show 2 "建议: 使用脚本配置DNS服务器, 基础配置 -> 设置DNS名称服务器"
+        return 1
+    fi
+
+    # 第三步：验证HTTP连接是否正常
+    if ! curl --connect-timeout 5 -s --head "http://baidu.com" >/dev/null 2>&1; then
+        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[3]}FAILED$COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET 网络和DNS正常，但HTTP连接异常"
+        Show 2 "可能的原因："
+        Show 2 "  - 防火墙阻止HTTP连接"
+        Show 2 "  - 代理配置问题"
+        Show 2 "  - 网络限速或QoS限制"
+        return 1
+    fi
+
+    Show 0 "网络连接完全正常(网络连通性 + DNS解析 + HTTP访问)"
+    return 0
+}
+
 # 项目更新检查
 project_update_check() {
     # 设置Gitee仓库的URL
@@ -3283,6 +3324,12 @@ update_kali_gpg_key() {
 
 # 主程序入口
 main() {
+    # 检查网络连接
+    if ! check_network_connection; then
+        Show 1 "网络连接检查失败，脚本无法继续执行"
+        exit 1
+    fi
+    
     # 检查是否为root用户
     if [ "$(id -u)" -ne 0 ]; then
         Show 1 "请使用root用户或sudo运行此脚本"
