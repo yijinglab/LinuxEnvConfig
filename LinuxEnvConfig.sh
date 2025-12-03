@@ -856,31 +856,35 @@ install_miniconda3() {
     Show 2 "开始安装 miniconda3"
 
     echo -e "${YELLOW}[+] 请选择要使用的软件源: ${NC}"
-    echo "1. 清华大学 miniconda"
-    echo "2. 北京大学 miniconda"
-    echo "3. 中国科大 miniconda"
-    echo "4. 浙江大学 miniconda"
-    echo "5. 南京大学 miniconda"
-    echo "6. 官方源 miniconda"
-    read -r -p "$(echo -e "${RED}(配置miniconda3/安装miniconda3)${NC} : ${GREEN}请输入序号(1-6) >> ${NC}")" choice
+    echo "1. 中国科大 miniconda"
+    echo "2. 哈工大 miniconda"
+    echo "3. 北京大学 miniconda"
+    echo "4. 清华大学 miniconda"
+    echo "5. 浙江大学 miniconda"
+    echo "6. 南京大学 miniconda"
+    echo "7. 官方源 miniconda"
+    read -r -p "$(echo -e "${RED}(配置miniconda3/安装miniconda3)${NC} : ${GREEN}请输入序号(1-7) >> ${NC}")" choice
 
     # 根据用户选择设置 Miniconda3 软件源
     if [[ "$choice" == "1" ]]; then
-        Show 2 "选择使用清华大学miniconda软件源"
-        local mirror_url="https://mirrors.tuna.tsinghua.edu.cn/anaconda"
-    elif [[ "$choice" == "2" ]]; then
-        Show 2 "选择使用北京大学miniconda软件源"
-        local mirror_url="https://mirrors.pku.edu.cn/anaconda"
-    elif [[ "$choice" == "3" ]]; then
         Show 2 "选择使用中国科大miniconda软件源"
         local mirror_url="https://mirrors.ustc.edu.cn/anaconda"
+    elif [[ "$choice" == "2" ]]; then
+        Show 2 "选择使用哈工大miniconda软件源"
+        local mirror_url="https://mirrors.hit.edu.cn/anaconda"
+    elif [[ "$choice" == "3" ]]; then
+        Show 2 "选择使用北京大学miniconda软件源"
+        local mirror_url="https://mirrors.pku.edu.cn/anaconda"
     elif [[ "$choice" == "4" ]]; then
+        Show 2 "选择使用清华大学miniconda软件源"
+        local mirror_url="https://mirrors.tuna.tsinghua.edu.cn/anaconda"
+    elif [[ "$choice" == "5" ]]; then
         Show 2 "选择使用浙江大学miniconda软件源"
         local mirror_url="https://mirrors.zju.edu.cn/anaconda"
-    elif [[ "$choice" == "5" ]]; then
+    elif [[ "$choice" == "6" ]]; then
         Show 2 "选择使用南京大学miniconda软件源"
         local mirror_url="https://mirrors.nju.edu.cn/anaconda"
-    elif [[ "$choice" == "6" ]]; then
+    elif [[ "$choice" == "7" ]]; then
         Show 2 "选择使用官方源miniconda软件源"
         local mirror_url="https://repo.anaconda.com"
     else
@@ -896,9 +900,54 @@ install_miniconda3() {
         rm -f "$install_script" >/dev/null 2>&1
     fi
 
-    Show 2 "下载miniconda3安装脚本"
-    sudo wget -q --show-progress "${mirror_url}/miniconda/Miniconda3-latest-Linux-x86_64.sh" -O "$install_script"
-    action "下载miniconda3安装脚本成功" "下载miniconda3安装脚本失败"
+    # 临时禁用set -e，避免curl失败导致脚本退出
+    set +e
+    
+    # 检查URL状态码
+    local status_code
+    Show 3 "正在检查镜像源状态..."
+    status_code=$(curl -s -m 10 -o /dev/null -w "%{http_code}" "${mirror_url}/miniconda/Miniconda3-latest-Linux-x86_64.sh" 2>/dev/null)
+    Show 3 "检测到HTTP状态码: '$status_code'"
+    case $status_code in
+        200)
+            # 状态码为200则下载安装脚本
+            Show 2 "下载miniconda3安装脚本"
+            if sudo wget --show-progress "${mirror_url}/miniconda/Miniconda3-latest-Linux-x86_64.sh" -O "$install_script"; then
+                Show 0 "下载miniconda3安装脚本成功"
+            else
+                echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[3]}FAILED$COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET 下载miniconda3安装脚本失败"
+                Show 2 "错误详情：下载过程中断或网络异常"
+                return 1
+            fi
+            ;;
+        403)
+            echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[3]}FAILED$COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET 下载miniconda3安装脚本失败"
+            Show 2 "错误详情: 你的IP被ban了, 无法访问镜像源 (403)"
+            Show 2 "建议："
+            Show 2 "  1. 更换网络环境（如使用手机热点）"
+            Show 2 "  2. 等待一段时间后重试"
+            Show 2 "  3. 尝试使用其他镜像源"
+            return 1
+            ;;
+        404)
+            echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[3]}FAILED$COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET 下载miniconda3安装脚本失败"
+            Show 2 "错误详情：文件不存在 (404)"
+            Show 2 "建议：检查镜像源地址是否正确"
+            return 1
+            ;;
+        5**)
+            echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[3]}FAILED$COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET 下载miniconda3安装脚本失败"
+            Show 2 "错误详情：服务器内部错误 ($status_code)"
+            Show 2 "建议：稍后重试或尝试其他镜像源"
+            return 1
+            ;;
+        *)
+            echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[3]}FAILED$COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET 下载miniconda3安装脚本失败"
+            Show 2 "错误详情: 未知HTTP状态码 ($status_code)"
+            Show 2 "建议：检查网络连接或尝试其他镜像源"
+            return 1
+            ;;
+    esac
 
     Show 2 "执行miniconda3安装脚本"
     if sudo bash "$install_script" -b -p "$install_dir" >/dev/null; then
@@ -922,6 +971,13 @@ install_miniconda3() {
     configure_condarc "$mirror_url" "$install_dir"
 
     Show 2 "开始更新conda"
+    
+    if [ "$mirror_url" = "https://repo.anaconda.com" ]; then
+        Show 2 "使用官方源需要TOS授权"
+        sudo $install_dir/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+        sudo $install_dir/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+        sudo $install_dir/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/msys2
+    fi
     sudo $install_dir/bin/conda update conda -y >/dev/null
     action "更新conda成功" "更新conda失败"
 
@@ -930,6 +986,9 @@ install_miniconda3() {
 
     Show 2 "清理conda缓存完成"
     Show 0 "安装miniconda3完成"
+    
+    # 重新启用set -e
+    set -e
 }
 
 # 配置conda镜像源
@@ -937,7 +996,21 @@ configure_condarc() {
     local mirror_url=$1
     local install_dir=$2
     Show 2 "配置conda镜像源"
-    cat <<EOF | sudo tee ~/.condarc > /dev/null
+    
+    # 确定conda配置文件路径
+    local condarc_path
+    if [ "$EUID" -eq 0 ]; then
+        # 如果是root用户，配置root的condarc
+        condarc_path="/root/.condarc"
+        Show 3 "检测到root用户，配置文件路径: $condarc_path"
+    else
+        # 普通用户
+        condarc_path="$HOME/.condarc"
+        Show 3 "检测到普通用户，配置文件路径: $condarc_path"
+    fi
+    
+    # 写入conda配置文件
+    cat <<EOF | sudo tee "$condarc_path" >/dev/null
 channels:
   - defaults
 show_channel_urls: true
@@ -956,15 +1029,27 @@ custom_channels:
   pytorch: ${mirror_url}/cloud
   simpleitk: ${mirror_url}/cloud
 EOF
-    Show 0 "配置conda镜像源完成"
+    
+    # 验证文件是否写入成功
+    if [ -f "$condarc_path" ] && [ -s "$condarc_path" ]; then
+        Show 0 "配置conda镜像源完成"
+    else
+        Show 1 "配置conda镜像源失败"
+        Show 2 "错误详情：无法写入配置文件到 $condarc_path"
+        return 1
+    fi
 
     users=$(ls /home)
     if [ -z "$users" ]; then
         Show 2 "没有找到其他用户目录, 跳过其他用户配置"
     else
         for user in $users; do
-            su - "$user" -c "$install_dir/bin/conda init zsh;$install_dir/bin/conda init bash" 2>/dev/null
-            action "为用户 ${user} 配置conda环境" "为用户 ${user} 配置conda环境失败"
+            Show 2 "正在为用户 ${user} 配置conda环境..."
+            if su - "$user" -c "$install_dir/bin/conda init zsh;$install_dir/bin/conda init bash" 2>/dev/null; then
+                Show 0 "为用户 ${user} 配置conda环境成功"
+            else
+                Show 2 "为用户 ${user} 配置conda环境失败, 但继续配置镜像源"
+            fi
             configure_conda_user "$mirror_url" "$user"
         done
     fi
@@ -974,8 +1059,19 @@ EOF
 configure_conda_user() {
     local mirror_url=$1
     local user=$2
+    local user_condarc="/home/$user/.condarc"
+    
     Show 2 "为用户 $user 配置conda镜像源"
-    cat <<EOF | sudo tee "/home/$user/.condarc" > /dev/null
+    Show 2 "配置文件路径: $user_condarc"
+    
+    # 检查用户目录是否存在
+    if [ ! -d "/home/$user" ]; then
+        Show 2 "用户 $user 的家目录不存在，跳过配置"
+        return 1
+    fi
+    
+    # 写入用户conda配置文件
+    cat <<EOF | sudo tee "$user_condarc" >/dev/null
 channels:
   - defaults
 show_channel_urls: true
@@ -994,37 +1090,48 @@ custom_channels:
   pytorch: ${mirror_url}/cloud
   simpleitk: ${mirror_url}/cloud
 EOF
-    Show 0 "为用户 $user 配置conda镜像源完成"
+    
+    # 验证文件是否写入成功并设置正确的权限
+    if [ -f "$user_condarc" ] && [ -s "$user_condarc" ]; then
+        Show 0 "为用户 $user 配置conda镜像源完成"
+    else
+        Show 1 "为用户 $user 配置conda镜像源失败"
+    fi
 }
 
 # 配置conda镜像源
 configure_conda_mirror() {
     echo -e "${YELLOW}[+] 请选择要使用的软件源: ${NC}"
-    echo "1. 清华大学 miniconda"
-    echo "2. 北京大学 miniconda"
-    echo "3. 中国科大 miniconda"
-    echo "4. 浙江大学 miniconda"
-    echo "5. 南京大学 miniconda"
-    echo "6. 官方源 miniconda"
-    read -r -p "$(echo -e "${RED}(配置miniconda3/配置miniconda3软件源)${NC} : ${GREEN}请输入序号(1-6) >> ${NC}")" choice
+    echo "1. 中国科大 miniconda"
+    echo "2. 哈工大 miniconda"
+    echo "3. 北京大学 miniconda"
+    echo "4. 清华大学 miniconda"
+    echo "5. 浙江大学 miniconda"
+    echo "6. 南京大学 miniconda"
+    echo "7. 官方源 miniconda"
+    read -r -p "$(echo -e "${RED}(配置miniconda3/配置miniconda3软件源)${NC} : ${GREEN}请输入序号(1-7) >> ${NC}")" choice
 
     # 根据用户选择设置 Miniconda3 软件源
+
     if [[ "$choice" == "1" ]]; then
-        Show 2 "选择使用清华大学miniconda软件源"
-        local mirror_url="https://mirrors.tuna.tsinghua.edu.cn/anaconda"
-    elif [[ "$choice" == "2" ]]; then
-        Show 2 "选择使用北京大学miniconda软件源"
-        local mirror_url="https://mirrors.pku.edu.cn/anaconda"
-    elif [[ "$choice" == "3" ]]; then
         Show 2 "选择使用中国科大miniconda软件源"
         local mirror_url="https://mirrors.ustc.edu.cn/anaconda"
+    elif [[ "$choice" == "2" ]]; then
+        Show 2 "选择使用哈工大miniconda软件源"
+        local mirror_url="https://mirrors.hit.edu.cn/anaconda"
+    elif [[ "$choice" == "3" ]]; then
+        Show 2 "选择使用北京大学miniconda软件源"
+        local mirror_url="https://mirrors.pku.edu.cn/anaconda"
     elif [[ "$choice" == "4" ]]; then
+        Show 2 "选择使用清华大学miniconda软件源"
+        local mirror_url="https://mirrors.tuna.tsinghua.edu.cn/anaconda"
+    elif [[ "$choice" == "5" ]]; then
         Show 2 "选择使用浙江大学miniconda软件源"
         local mirror_url="https://mirrors.zju.edu.cn/anaconda"
-    elif [[ "$choice" == "5" ]]; then
+    elif [[ "$choice" == "6" ]]; then
         Show 2 "选择使用南京大学miniconda软件源"
         local mirror_url="https://mirrors.nju.edu.cn/anaconda"
-    elif [[ "$choice" == "6" ]]; then
+    elif [[ "$choice" == "7" ]]; then
         Show 2 "选择使用官方源miniconda软件源"
         local mirror_url="https://repo.anaconda.com"
     else
