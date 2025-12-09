@@ -3197,8 +3197,8 @@ check_network_connection() {
         Show 2 "  - DNS服务器配置错误"
         Show 2 "  - DNS服务器不可达"
         Show 2 "  - /etc/resolv.conf 配置问题"
-        Show 2 "建议: 使用脚本配置DNS服务器, 基础配置 -> 设置DNS名称服务器"
-        return 1
+        Show 2 "开始使用脚本配置DNS服务器, 基础配置 -> 设置DNS名称服务器"
+        config_nameserver
     fi
 
     # 第三步：验证HTTP连接是否正常
