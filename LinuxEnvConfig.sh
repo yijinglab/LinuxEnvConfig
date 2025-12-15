@@ -3176,8 +3176,6 @@ install_project_dependencies() {
 
 # 检查网络连接状态
 check_network_connection() {
-    Show 2 "检查网络连接状态"
-
     # 第一步：检查基础网络连通性（ping IP）
     if ! ping -c 1 -W 3 223.6.6.6 >/dev/null 2>&1; then
         # 直接使用echo显示FAILED消息，避免调用Show 1导致退出
@@ -3188,6 +3186,8 @@ check_network_connection() {
         Show 2 "  - 防火墙阻止连接"
         Show 2 "  - 代理设置错误"
         return 1
+    else
+        Show 2 "网络连通性正常"
     fi
 
     # 第二步：检查DNS解析是否正常
@@ -3199,16 +3199,54 @@ check_network_connection() {
         Show 2 "  - /etc/resolv.conf 配置问题"
         Show 2 "开始使用脚本配置DNS服务器, 基础配置 -> 设置DNS名称服务器"
         config_nameserver
+    else
+        Show 2 "DNS解析正常"
     fi
 
     # 第三步：验证HTTP连接是否正常
-    if ! curl --connect-timeout 5 -s --head "http://baidu.com" >/dev/null 2>&1; then
-        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[3]}FAILED$COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET 网络和DNS正常，但HTTP连接异常"
+    local failed_sites=()
+    local success_sites=()
+    local test_sites=(
+        "https://www.baidu.com"
+        "https://www.qq.com"
+        "https://www.google.com"
+        "https://github.com"
+    )
+    
+    Show 2 "开始测试HTTP/HTTPS连接"
+    
+    for site in "${test_sites[@]}"; do
+        if curl --connect-timeout 5 -s -L --head "$site" >/dev/null 2>&1; then
+            success_sites+=("$site")
+            Show 2 "✓ $site 连接成功"
+        else
+            failed_sites+=("$site")
+            Show 2 "✗ $site 连接失败"
+        fi
+    done
+    
+    # 至少需要一个站点成功连接才认为网络正常
+    if [ ${#success_sites[@]} -eq 0 ]; then
+        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[3]}FAILED$COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET HTTP连接异常 (0/${#test_sites[@]} 站点可达)"
         Show 2 "可能的原因："
-        Show 2 "  - 防火墙阻止HTTP连接"
+        Show 2 "  - 防火墙阻止HTTP/HTTPS连接"
         Show 2 "  - 代理配置问题"
         Show 2 "  - 网络限速或QoS限制"
+        Show 2 "  - SSL/TLS证书问题"
+        Show 2 "  - 网站服务异常"
+        
+        if [ ${#failed_sites[@]} -gt 0 ]; then
+            Show 2 "失败的站点："
+            for failed_site in "${failed_sites[@]}"; do
+                Show 2 "  - $failed_site"
+            done
+        fi
         return 1
+    else
+        Show 0 "HTTP连接正常 (${#success_sites[@]}/${#test_sites[@]} 站点可达)"
+        if [ ${#failed_sites[@]} -gt 0 ]; then
+            Show 2 "注意：部分站点不可达，可能是临时性问题"
+        fi
     fi
 
     Show 0 "网络连接完全正常(网络连通性 + DNS解析 + HTTP访问)"
@@ -3290,12 +3328,6 @@ update_kali_gpg_key() {
 
 # 主程序入口
 main() {
-    # 检查网络连接
-    if ! check_network_connection; then
-        Show 1 "网络连接检查失败，脚本无法继续执行"
-        exit 1
-    fi
-    
     # 检查是否为root用户
     if [ "$(id -u)" -ne 0 ]; then
         Show 1 "请使用root用户或sudo运行此脚本"
@@ -3308,14 +3340,82 @@ main() {
         exit 1
     fi
 
-    # 安装项目依赖的基础工具
-    install_project_dependencies
+    # 检查网络连接（非强制）
+    Show 2 "正在检查网络连接状态"
+    if ! check_network_connection; then
+        Show 1 "网络连接检查失败，但您可以继续使用脚本的其他功能"
+        Show 2 "以下功能可能会受到影响："
+        Show 2 "  - 项目更新检查"
+        Show 2 "  - APT软件包安装"
+        Show 2 "  - 需要网络的工具配置"
+        echo ""
+        read -r -p "$(echo -e "${YELLOW}网络检查失败，是否仍要继续? (y/n) ${NC}")" continue_without_network
+        if [[ ! $continue_without_network == "y" && ! $continue_without_network == "Y" ]]; then
+            Show 2 "用户选择退出"
+            exit 0
+        fi
+    else
+        Show 0 "网络连接检查通过"
+    fi
 
-    # 项目更新检查
-    project_update_check
+    echo ""
+    Show 0 "=== 预配置选项（可选） ==="
+    
+    # APT源配置（可选）
+    Show 0 "如果因为APT源无法更新从而导致脚本执行失败, 可尝试切换APT镜像源"
+    read -r -p "$(echo -e "${GREEN}是否要切换APT镜像源? (y/n) ${NC}")" yn
+    if [[ $yn == "y" || $yn == "Y" ]]; then
+        if config_apt_source; then
+            Show 0 "APT源配置完成"
+        else
+            Show 1 "APT源配置失败, 您仍可继续使用脚本的其他功能"
+        fi
+    else
+        Show 2 "跳过APT源配置"
+    fi
 
-    # 更新Kali GPG密钥
-    update_kali_gpg_key
+    # 项目依赖工具安装（可选）
+    read -r -p "$(echo -e "${GREEN}是否要安装项目依赖的基础工具? (y/n) ${NC}")" yn
+    if [[ $yn == "y" || $yn == "Y" ]]; then
+        # 安装项目依赖的基础工具
+        if install_project_dependencies; then
+            Show 0 "项目依赖工具安装完成"
+        else
+            Show 1 "项目依赖工具安装失败，您仍可继续使用脚本"
+        fi
+    else
+        Show 2 "跳过安装项目依赖的基础工具"
+    fi
+
+    # 项目更新检查（可选，需要网络）
+    read -r -p "$(echo -e "${GREEN}是否要检查项目更新? (y/n) ${NC}")" check_update
+    if [[ $check_update == "y" || $check_update == "Y" ]]; then
+        if check_network_connection >/dev/null 2>&1; then
+            project_update_check
+        else
+            Show 2 "网络不可用，跳过项目更新检查"
+        fi
+    else
+        Show 2 "跳过项目更新检查"
+    fi
+
+    # 更新Kali GPG密钥（可选，需要网络）
+    if grep -qi "kali" /etc/os-release; then
+        read -r -p "$(echo -e "${GREEN}是否要更新Kali GPG密钥? (y/n) ${NC}")" update_gpg
+        if [[ $update_gpg == "y" || $update_gpg == "Y" ]]; then
+            if check_network_connection >/dev/null 2>&1; then
+                update_kali_gpg_key
+            else
+                Show 2 "网络不可用, 跳过Kali GPG密钥更新"
+            fi
+        else
+            Show 2 "跳过Kali GPG密钥更新"
+        fi
+    fi
+
+    echo ""
+    Show 0 "=== 预配置完成，进入主菜单 ==="
+    read -r -n 1 -p "$(echo -e "${GREEN}按任意键继续...${NC}")"
 
     while true; do
         show_menu
