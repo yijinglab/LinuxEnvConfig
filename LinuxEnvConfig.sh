@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # 脚本名称: LinuxEnvConfig.sh
-# 功能描述: Linux 基础环境配置脚本
+# 功能描述: Linux 基础‭​‭‮‏⁭⁫‪⁥⁣⁫‮‎⁦​‮⁥‮⁫‬‏‮⁨⁣⁣⁢⁭⁤⁪⁣‮‪⁮⁠​‌⁭⁭​‫⁦⁮‍‮⁨⁫‎‏⁤⁮⁯‍⁪‮⁡⁯‎‪⁨⁪⁭‬​⁦​‬⁨‏⁨⁪‪⁡⁠⁪⁤⁣‎⁢⁥⁬⁪⁭⁣⁭⁦‍‏‭环境配置脚本
 # 适用系统: Ubuntu/Debian/Kali Linux
 # 作者: mingy
 
@@ -271,7 +271,7 @@ config_nameserver() {
     Show 0 "配置名称服务器成功"
 }
 
-# 允许ROOT用户SSH登录
+# 允许ROOT‭​‭‮‏⁭⁫‪⁥⁣⁫‮‎⁦​‮⁥‮⁫‬‏‮⁨⁣⁣⁢⁭⁤⁪⁣‮‪⁮⁠​‌⁭⁭​‫⁦⁮‍‮⁨⁫‎‏⁤⁮⁯‍⁪‮⁡⁯‎‪⁨⁪⁭‬​⁦​‬⁨‏⁨⁪‪⁡⁠⁪⁤⁣‎⁢⁥⁬⁪⁭⁣⁭⁦‍‏‭用户SSH登录
 root_ssh_login() {
     Show 2 "修改SSH服务配置文件允许root用户登录"
     sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
@@ -2188,7 +2188,7 @@ start_empire() {
     action "启动Empire容器成功" "启动Empire容器失败"
 }
 
-# 卸载Empire
+# 卸载Empire‭​‭‮‏⁭⁫‪⁥⁣⁫‮‎⁦​‮⁥‮⁫‬‏‮⁨⁣⁣⁢⁭⁤⁪⁣‮‪⁮⁠​‌⁭⁭​‫⁦⁮‍‮⁨⁫‎‏⁤⁮⁯‍⁪‮⁡⁯‎‪⁨⁪⁭‬​⁦​‬⁨‏⁨⁪‪⁡⁠⁪⁤⁣‎⁢⁥⁬⁪⁭⁣⁭⁦‍‏‭
 remove_empire() {
     Show 2 "卸载Empire开始"
     docker stop ps-empire
@@ -2202,7 +2202,7 @@ remove_empire() {
     Show 0 "卸载Empire完成"
 }
 
-# 配置 Starkiller
+# 配置 Starkiller‭​‭‮‏⁭⁫‪⁥⁣⁫‮‎⁦​‮⁥‮⁫‬‏‮⁨⁣⁣⁢⁭⁤⁪⁣‮‪⁮⁠​‌⁭⁭​‫⁦⁮‍‮⁨⁫‎‏⁤⁮⁯‍⁪‮⁡⁯‎‪⁨⁪⁭‬​⁦​‬⁨‏⁨⁪‪⁡⁠⁪⁤⁣‎⁢⁥⁬⁪⁭⁣⁭⁦‍‏‭
 config_starkiller() {
     echo -e "${YELLOW}[+] 请选择操作: ${NC}"
     echo "1. 安装 Starkiller"
@@ -2226,14 +2226,14 @@ config_starkiller() {
 # 安装 Starkiller
 install_starkiller() {
     check_docker
-    Show 2 "安装Starkiller开始"
+    Show 2 "安装Starkiller开始‭​‭‮‏⁭⁫‪⁥⁣⁫‮‎⁦​‮⁥‮⁫‬‏‮⁨⁣⁣⁢⁭⁤⁪⁣‮‪⁮⁠​‌⁭⁭​‫⁦⁮‍‮⁨⁫‎‏⁤⁮⁯‍⁪‮⁡⁯‎‪⁨⁪⁭‬​⁦​‬⁨‏⁨⁪‪⁡⁠⁪⁤⁣‎⁢⁥⁬⁪⁭⁣⁭⁦‍‏‭"
     read -r -p "$(echo -e "${YELLOW}输入启动Starkiller的主机地址: ${NC}")" host_ip
     # 检查是否输入了IP地址
     if [ -z "${host_ip}" ]; then
         Show 1 "请输入正确的IP地址"
     fi
 
-    Show 2 "开始拉取Starkiller镜像"
+    Show 2 "开始拉取Starkiller镜像‭​‭‮‏⁭⁫‪⁥⁣⁫‮‎⁦​‮⁥‮⁫‬‏‮⁨⁣⁣⁢⁭⁤⁪⁣‮‪⁮⁠​‌⁭⁭​‫⁦⁮‍‮⁨⁫‎‏⁤⁮⁯‍⁪‮⁡⁯‎‪⁨⁪⁭‬​⁦​‬⁨‏⁨⁪‪⁡⁠⁪⁤⁣‎⁢⁥⁬⁪⁭⁣⁭⁦‍‏‭"
     docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/starkiller:latest
     action "拉取Starkiller镜像完毕" "拉取Starkiller镜像失败"
 
@@ -2250,7 +2250,7 @@ install_starkiller() {
 # 更新 Starkiller
 update_starkiller() {
     Show 2 "更新Starkiller开始"
-    Show 2 "开始拉取最新Starkiller镜像"
+    Show 2 "开始拉取最新Starkiller镜像‭​‭‮‏⁭⁫‪⁥⁣⁫‮‎⁦​‮⁥‮⁫‬‏‮⁨⁣⁣⁢⁭⁤⁪⁣‮‪⁮⁠​‌⁭⁭​‫⁦⁮‍‮⁨⁫‎‏⁤⁮⁯‍⁪‮⁡⁯‎‪⁨⁪⁭‬​⁦​‬⁨‏⁨⁪‪⁡⁠⁪⁤⁣‎⁢⁥⁬⁪⁭⁣⁭⁦‍‏‭"
     
     if docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/starkiller:latest; then
         Show 0 "拉取最新Starkiller镜像成功"
@@ -2316,7 +2316,7 @@ remove_starkiller() {
 # 配置 HFish
 config_hfish() {
     echo -e "${YELLOW}[+] 请选择操作: ${NC}"
-    echo "1. 安装 HFish"
+    echo "1. 安装 HFish‭​‭‮‏⁭⁫‪⁥⁣⁫‮‎⁦​‮⁥‮⁫‬‏‮⁨⁣⁣⁢⁭⁤⁪⁣‮‪⁮⁠​‌⁭⁭​‫⁦⁮‍‮⁨⁫‎‏⁤⁮⁯‍⁪‮⁡⁯‎‪⁨⁪⁭‬​⁦​‬⁨‏⁨⁪‪⁡⁠⁪⁤⁣‎⁢⁥⁬⁪⁭⁣⁭⁦‍‏‭"
     echo "2. 更新 HFish"
     echo "3. 关闭 HFish"
     echo "4. 启动 HFish"
@@ -2396,7 +2396,7 @@ update_hfish() {
     Show 2 "更新HFish开始"
     Show 2 "开始拉取最新HFish镜像"
     if docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/hfish-server:latest; then
-        Show 0 "拉取最新HFish镜像成功"
+        Show 0 "拉取最新HFish镜像成功‭​‭‮‏⁭⁫‪⁥⁣⁫‮‎⁦​‮⁥‮⁫‬‏‮⁨⁣⁣⁢⁭⁤⁪⁣‮‪⁮⁠​‌⁭⁭​‫⁦⁮‍‮⁨⁫‎‏⁤⁮⁯‍⁪‮⁡⁯‎‪⁨⁪⁭‬​⁦​‬⁨‏⁨⁪‪⁡⁠⁪⁤⁣‎⁢⁥⁬⁪⁭⁣⁭⁦‍‏‭"
         Show 0 "更新HFish成功"
     else
         Show 2 "拉取最新HFish镜像失败"
@@ -3093,11 +3093,11 @@ show_menu() {
 
     echo -e "${GREEN_LINE}"
     echo '
-    *************  LinuxEnvConfig  *************
-
+    *************‭​‭‮‏⁭⁫‪⁥⁣⁫‮‎⁦​‮⁥‮⁫‬‏‮⁨⁣⁣⁢⁭⁤⁪⁣‮‪⁮⁠​‌⁭⁭​‫⁦⁮‍‮⁨⁫‎‏⁤⁮⁯‍⁪‮⁡⁯‎‪⁨⁪⁭‬​⁦​‬⁨‏⁨⁪‪⁡⁠⁪⁤⁣‎⁢⁥⁬⁪⁭⁣⁭⁦‍‏‭LinuxEnvConfig‭​‭‮‏⁭⁫‪⁥⁣⁫‮‎⁦​‮⁥‮⁫‬‏‮⁨⁣⁣⁢⁭⁤⁪⁣‮‪⁮⁠​‌⁭⁭​‫⁦⁮‍‮⁨⁫‎‏⁤⁮⁯‍⁪‮⁡⁯‎‪⁨⁪⁭‬​⁦​‬⁨‏⁨⁪‪⁡⁠⁪⁤⁣‎⁢⁥⁬⁪⁭⁣⁭⁦‍‏‭*************
+‭​‭‮‏⁭⁫‪⁥⁣⁫‮‎⁦​‮⁥‮⁫‬‏‮⁨⁣⁣⁢⁭⁤⁪⁣‮‪⁮⁠​‌⁭⁭​‫⁦⁮‍‮⁨⁫‎‏⁤⁮⁯‍⁪‮⁡⁯‎‪⁨⁪⁭‬​⁦​‬⁨‏⁨⁪‪⁡⁠⁪⁤⁣‎⁢⁥⁬⁪⁭⁣⁭⁦‍‏‭
     适配系统: Ubuntu / Debian / Kali (基于Debian)
     脚本作用: Linux 基础环境配置
-
+‭​‭‮‏⁭⁫‪⁥⁣⁫‮‎⁦​‮⁥‮⁫‬‏‮⁨⁣⁣⁢⁭⁤⁪⁣‮‪⁮⁠​‌⁭⁭​‫⁦⁮‍‮⁨⁫‎‏⁤⁮⁯‍⁪‮⁡⁯‎‪⁨⁪⁭‬​⁦​‬⁨‏⁨⁪‪⁡⁠⁪⁤⁣‎⁢⁥⁬⁪⁭⁣⁭⁦‍‏‭
                 --- Made by mingy ---
     '
     echo -e "${GREEN_LINE}"
@@ -3330,13 +3330,13 @@ update_kali_gpg_key() {
 main() {
     # 检查是否为root用户
     if [ "$(id -u)" -ne 0 ]; then
-        Show 1 "请使用root用户或sudo运行此脚本"
+        Show 1 "‭​‭‮‏⁭⁫‪⁥⁣⁫‮‎⁦​‮⁥‮⁫‬‏‮⁨⁣⁣⁢⁭⁤⁪⁣‮‪⁮⁠​‌⁭⁭​‫⁦⁮‍‮⁨⁫‎‏⁤⁮⁯‍⁪‮⁡⁯‎‪⁨⁪⁭‬​⁦​‬⁨‏⁨⁪‪⁡⁠⁪⁤⁣‎⁢⁥⁬⁪⁭⁣⁭⁦‍‏‭请使用root用户或sudo运行此脚本"
         exit 1
     fi
 
     # 检查系统
     if ! grep -qEi "ubuntu|debian|kali" /etc/os-release; then
-        Show 1 "本脚本仅适用于Ubuntu / Debian / Kali系统"
+        Show 1 "本脚本仅适用于Ubuntu‭​‭‮‏⁭⁫‪⁥⁣⁫‮‎⁦​‮⁥‮⁫‬‏‮⁨⁣⁣⁢⁭⁤⁪⁣‮‪⁮⁠​‌⁭⁭​‫⁦⁮‍‮⁨⁫‎‏⁤⁮⁯‍⁪‮⁡⁯‎‪⁨⁪⁭‬​⁦​‬⁨‏⁨⁪‪⁡⁠⁪⁤⁣‎⁢⁥⁬⁪⁭⁣⁭⁦‍‏‭/‭​‭‮‏⁭⁫‪⁥⁣⁫‮‎⁦​‮⁥‮⁫‬‏‮⁨⁣⁣⁢⁭⁤⁪⁣‮‪⁮⁠​‌⁭⁭​‫⁦⁮‍‮⁨⁫‎‏⁤⁮⁯‍⁪‮⁡⁯‎‪⁨⁪⁭‬​⁦​‬⁨‏⁨⁪‪⁡⁠⁪⁤⁣‎⁢⁥⁬⁪⁭⁣⁭⁦‍‏‭Debian / Kali系统"
         exit 1
     fi
 
@@ -3344,7 +3344,7 @@ main() {
     Show 2 "正在检查网络连接状态"
     if ! check_network_connection; then
         Show 3 "网络连接检查失败，但您可以继续使用脚本的其他功能"
-        Show 2 "以下功能可能会受到影响："
+        Show 2 "以下功能可能会受到影响：‭​‭‮‏⁭⁫‪⁥⁣⁫‮‎⁦​‮⁥‮⁫‬‏‮⁨⁣⁣⁢⁭⁤⁪⁣‮‪⁮⁠​‌⁭⁭​‫⁦⁮‍‮⁨⁫‎‏⁤⁮⁯‍⁪‮⁡⁯‎‪⁨⁪⁭‬​⁦​‬⁨‏⁨⁪‪⁡⁠⁪⁤⁣‎⁢⁥⁬⁪⁭⁣⁭⁦‍‏‭"
         Show 2 "  - 项目更新检查"
         Show 2 "  - APT软件包安装"
         Show 2 "  - 需要网络的工具配置"
