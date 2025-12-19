@@ -691,15 +691,6 @@ EOF
     Show 2 "更新APT源"
     sudo apt-get update
     action "APT源更新成功" "APT源更新失败"
-
-    Show 2 "安装软件源管理工具"
-    sudo apt-get install -y software-properties-common
-    action "软件源管理工具安装成功" "软件源管理工具安装失败"
-
-    Show 2 "添加Python源"
-    sudo add-apt-repository ppa:deadsnakes/ppa
-    action "Python源添加成功" "Python源添加失败"
-    Show 0 "APT源配置成功"
 }
 
 # 配置APT源
@@ -804,15 +795,6 @@ EOF
         Show 2 "更新APT源"
         sudo apt-get update >& /dev/null
         action "APT源更新成功" "APT源更新失败"
-
-        Show 2 "安装软件源管理工具"
-        sudo apt-get install -y software-properties-common >& /dev/null
-        action "软件源管理工具安装成功" "软件源管理工具安装失败"
-
-        Show 2 "添加Python源"
-        sudo add-apt-repository ppa:deadsnakes/ppa -y >& /dev/null
-        action "Python源添加成功" "Python源添加失败"
-        Show 0 "APT源配置成功"
     }
 
     Show 2 "根据当前系统版本类型, 自动配置APT源"
@@ -3282,6 +3264,8 @@ project_update_check() {
                 Show 1 "更新项目失败，请重试"
             fi
         fi
+    else
+        Show 0 "项目已是最新版本"
     fi
 }
 
