@@ -1696,11 +1696,11 @@ install_vulfocus() {
 
     # 安装vulfocus
     Show 2 "开始拉取vulfocus镜像"
-    sudo docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/vulfocus:latest
+    sudo docker pull swr.cn-south-1.myhuaweicloud.com/mingy/vulfocus:20251218
     action "拉取vulfocus镜像成功" "拉取vulfocus镜像失败"
 
     Show 2 "开始启动vulfocus"
-    sudo docker run -d -p 88:80 --name vulfocus --restart always -v /var/run/docker.sock:/var/run/docker.sock -e VUL_IP="${host_ip}" registry.cn-hangzhou.aliyuncs.com/mingy123/vulfocus:latest
+    sudo docker run -d -p 88:80 --name vulfocus --restart always -v /var/run/docker.sock:/var/run/docker.sock -e VUL_IP="${host_ip}" swr.cn-south-1.myhuaweicloud.com/mingy/vulfocus:20251218
     action "启动vulfocus成功" "启动vulfocus失败"
 
     # 打印访问信息
