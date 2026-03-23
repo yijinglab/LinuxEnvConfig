@@ -837,6 +837,34 @@ config_miniconda3() {
 install_miniconda3() {
     Show 2 "开始安装 miniconda3"
 
+    local arch
+    arch=$(uname -m)
+    case "$arch" in
+        x86_64)
+            local conda_arch="x86_64"
+            Show 2 "检测到系统架构: x86_64 (Intel/AMD 64位)"
+            ;;
+        aarch64|arm64)
+            local conda_arch="aarch64"
+            Show 2 "检测到系统架构: aarch64 (ARM 64位)"
+            ;;
+        armv7l)
+            local conda_arch="armv7l"
+            Show 2 "检测到系统架构: armv7l (ARM 32位)"
+            ;;
+        ppc64le)
+            local conda_arch="ppc64le"
+            Show 2 "检测到系统架构: ppc64le (IBM Power)"
+            ;;
+        s390x)
+            local conda_arch="s390x"
+            Show 2 "检测到系统架构: s390x (IBM System Z)"
+            ;;
+        *)
+            Show 1 "不支持的系统架构: $arch"
+            ;;
+    esac
+
     echo -e "${YELLOW}[+] 请选择要使用的软件源: ${NC}"
     echo "1. 中国科大 miniconda"
     echo "2. 哈工大 miniconda"
@@ -882,19 +910,21 @@ install_miniconda3() {
         rm -f "$install_script" >/dev/null 2>&1
     fi
 
-    # 临时禁用set -e，避免curl失败导致脚本退出
+    local conda_script_name="Miniconda3-latest-Linux-${conda_arch}.sh"
+    Show 2 "将下载安装脚本: $conda_script_name"
+
     set +e
     
     # 检查URL状态码
     local status_code
     Show 3 "正在检查镜像源状态..."
-    status_code=$(curl -s -m 10 -o /dev/null -w "%{http_code}" "${mirror_url}/miniconda/Miniconda3-latest-Linux-x86_64.sh" 2>/dev/null)
+    status_code=$(curl -s -m 10 -o /dev/null -w "%{http_code}" "${mirror_url}/miniconda/${conda_script_name}" 2>/dev/null)
     Show 3 "检测到HTTP状态码: '$status_code'"
     case $status_code in
         200)
             # 状态码为200则下载安装脚本
             Show 2 "下载miniconda3安装脚本"
-            if sudo wget --show-progress "${mirror_url}/miniconda/Miniconda3-latest-Linux-x86_64.sh" -O "$install_script"; then
+            if sudo wget --show-progress "${mirror_url}/miniconda/${conda_script_name}" -O "$install_script"; then
                 Show 0 "下载miniconda3安装脚本成功"
             else
                 echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[3]}FAILED$COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET 下载miniconda3安装脚本失败"
@@ -914,7 +944,8 @@ install_miniconda3() {
         404)
             echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[3]}FAILED$COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET 下载miniconda3安装脚本失败"
             Show 2 "错误详情：文件不存在 (404)"
-            Show 2 "建议：检查镜像源地址是否正确"
+            Show 2 "可能原因：该架构 ($conda_arch) 的安装包在此镜像源不可用"
+            Show 2 "建议：尝试使用其他镜像源或官方源"
             return 1
             ;;
         5**)
