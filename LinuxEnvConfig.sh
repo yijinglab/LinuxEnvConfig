@@ -2498,7 +2498,7 @@ config_dnscat2() {
 install_dnscat2() {
     check_docker
     Show 2 "开始安装Dnscat2"
-    if docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/dnscat2:v0.07; then
+    if docker pull registry.cn-hangzhou.aliyuncs.com/mingy123/dnscat2-fix:v0.07; then
         Show 0 "拉取最新Dnscat2镜像成功"
         Show 0 "安装Dnscat2成功, 请启动Dnscat2"
     else
