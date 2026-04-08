@@ -1941,9 +1941,9 @@ install_metasploit() {
     elif [[ "$(lsb_release -is)" == "Kali" ]]; then
         Show 2 "当前系统为 Kali"
         Show 2 "配置 Kali APT 源"
-        sudo echo "deb https://mirrors.tuna.tsinghua.edu.cn/kali kali-rolling main non-free contrib" | sudo tee -a /etc/apt/sources.list > /dev/null
+        echo "deb [signed-by=/usr/share/keyrings/kali-archive-keyring.gpg] https://mirrors.tuna.tsinghua.edu.cn/kali kali-rolling main non-free contrib" | sudo tee /etc/apt/sources.list.d/kali.list > /dev/null
         Show 2 "导入 Kali APT 源的 GPG 公钥"
-        wget -qO - https://archive.kali.org/archive-key.asc | sudo apt-key add -
+        wget -qO - https://archive.kali.org/archive-key.asc | sudo gpg --dearmor -o /usr/share/keyrings/kali-archive-keyring.gpg
         Show 2 "更新 APT 软件包列表"
         sudo apt-get update > /dev/null
         Show 2 "安装metasploit-framework"
