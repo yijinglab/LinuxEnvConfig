@@ -3216,14 +3216,12 @@ check_network_connection() {
         Show 2 "DNS解析正常"
     fi
 
-    # 第三步：验证HTTP连接是否正常
+    # 第三步：验证HTTP连接是否正常"https://www.google.com" "https://github.com"
     local failed_sites=()
     local success_sites=()
     local test_sites=(
         "https://www.baidu.com"
         "https://www.qq.com"
-        "https://www.google.com"
-        "https://github.com"
     )
     
     Show 2 "开始测试HTTP/HTTPS连接"
