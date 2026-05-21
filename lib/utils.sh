@@ -51,7 +51,7 @@ backup_file() {
 # ═══════════════════════════════════════════════════════════════
 
 get_arch() { dpkg --print-architecture 2>/dev/null || uname -m; }
-get_memory_info() { free -h 2>/dev/null | grep "^Mem:" | awk '{print $2}'; }
+get_memory_info() { LANG=C free -h 2>/dev/null | grep "^Mem:" | awk '{print $2}'; }
 get_disk_usage() { df -h / 2>/dev/null | tail -1 | awk '{print $5}'; }
 
 # ═══════════════════════════════════════════════════════════════
