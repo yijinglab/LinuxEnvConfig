@@ -288,23 +288,27 @@ init_config() {
         msg_info "APT配置模块未加载"
     fi
 
-    show_section "基础工具检查" "2" "3"
-    local required_tools=("curl" "wget" "git" "jq" "unzip")
-    local missing_count=0
-    for tool in "${required_tools[@]}"; do
-        command_exists "$tool" || ((missing_count++))
-    done
+  show_section "基础工具检查" "2" "3"
+  local required_tools=("curl" "wget" "git" "jq" "unzip")
+  local missing_tools=()
+  for tool in "${required_tools[@]}"; do
+     command_exists "$tool" || ((missing_count++))
+     if ! command_exists "$tool"; then
+         missing_tools+=("$tool")
+     fi
+  done
 
-    if [[ $missing_count -eq 0 ]]; then
-        msg_success "系统已安装所有必备组件 (${#required_tools[@]}/${#required_tools[@]})"
-        deps_result="ok"
-    else
-        if install_project_deps; then
-            deps_result="install"
-        else
-            deps_result="fail"
-        fi
-    fi
+  if [[ ${#missing_tools[@]} -eq 0 ]]; then
+      msg_success "系统已安装所有必备组件 (${#required_tools[@]}/${#required_tools[@]})"
+      deps_result="ok"
+  else
+     msg_info "共缺失 ${#missing_tools[@]} 个组件: ${missing_tools[*]}"
+      if install_project_deps; then
+          deps_result="install"
+      else
+          deps_result="fail"
+      fi
+  fi
 
     show_section "项目更新检查" "3" "3"
     if confirm "是否检查项目更新?"; then
