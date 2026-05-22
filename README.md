@@ -1,7 +1,7 @@
 # LinuxEnvConfig (LEC)
 
-[![Version](https://img.shields.io/badge/Version-2.0.0-brightgreen.svg)](https://gitee.com/yijingsec/LinuxEnvConfig)
-[![Platform](https://img.shields.io/badge/Platform-Ubuntu%20%7C%20Kali-blue.svg)](https://gitee.com/yijingsec/LinuxEnvConfig)
+[![Version](https://img.shields.io/badge/Version-2.0.0-brightgreen.svg)](https://github.com/yijinglab/LinuxEnvConfig)
+[![Platform](https://img.shields.io/badge/Platform-Ubuntu%20%7C%20Kali-blue.svg)](https://github.com/yijinglab/LinuxEnvConfig)
 [![License](https://img.shields.io/badge/License-Apache%202.0-orange.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
 Ubuntu/Kali Linux基础环境与安全工具自动化配置脚本。项目已完全重构为全新的 **v2.0模块化架构**，提供了更优雅的交互体验与更便捷的扩展机制。
@@ -23,7 +23,7 @@ curl -sSL https://github.com/yijinglab/LinuxEnvConfig/raw/master/install.sh | su
 
 或者使用 `wget` 命令：
 ```bash
-wget -qO- https://gitee.com/yijingsec/LinuxEnvConfig/raw/master/install.sh | sudo bash
+wget -qO- https://github.com/yijinglab/LinuxEnvConfig/raw/master/install.sh | sudo bash
 ```
 
 ### 方式二：本地克隆运行
@@ -60,7 +60,7 @@ sudo bash main.sh
 
 ```bash
 # 克隆 v1 分支代码
-git clone -b v1 https://gitee.com/yijingsec/LinuxEnvConfig.git
+git clone -b v1 https://github.com/yijinglab/LinuxEnvConfig.git
 
 # 运行单体配置脚本
 cd LinuxEnvConfig
