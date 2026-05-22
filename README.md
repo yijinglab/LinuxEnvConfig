@@ -18,7 +18,7 @@ Ubuntu/Kali Linux基础环境与安全工具自动化配置脚本。项目已完
 
 使用 `curl` 命令：
 ```bash
-curl -sSL https://gitee.com/yijingsec/LinuxEnvConfig/raw/master/install.sh | sudo bash
+curl -sSL https://github.com/yijinglab/LinuxEnvConfig/raw/master/install.sh | sudo bash
 ```
 
 或者使用 `wget` 命令：
@@ -31,7 +31,7 @@ wget -qO- https://gitee.com/yijingsec/LinuxEnvConfig/raw/master/install.sh | sud
 如果您想把项目克隆到本地直接运行：
 
 ```bash
-git clone https://gitee.com/yijingsec/LinuxEnvConfig.git
+git clone https://github.com/yijinglab/LinuxEnvConfig.git
 cd LinuxEnvConfig
 sudo bash main.sh
 ```
