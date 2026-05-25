@@ -109,7 +109,7 @@ else
         rm -rf "$INSTALL_DIR"
     fi
     msg_info "正在从远程仓库克隆项目代码..."
-    git clone https://gitee.com/yijingsec/LinuxEnvConfig.git "$INSTALL_DIR" 2>&1 | sed 's/^/  /'
+    git clone https://github.com/yijinglab/LinuxEnvConfig.git "$INSTALL_DIR" 2>&1 | sed 's/^/  /'
 fi
 
 msg_info "正在创建全局命令: ${BRIGHT_WHITE}${BIN_PATH}${NC} ..."
