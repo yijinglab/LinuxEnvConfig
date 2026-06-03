@@ -78,7 +78,7 @@ config_arl() {
             3) start_arl; pause ;;
             4) remove_arl; pause ;;
             5) add_fingerprint_to_arl; pause ;;
-            6) modify_arl_config ;;
+            6) modify_arl_config; pause ;;
             *) msg_error "无效选择"; pause ;;
         esac
     done
@@ -145,7 +145,7 @@ install_arl() {
 
     if [[ "${host_port}" != "${ARL_DEFAULT_PORT}" ]]; then
         msg_info "正在将ARL映射端口从${ARL_DEFAULT_PORT}修改为${host_port}..."
-        sudo sed -i "s/- ${ARL_DEFAULT_PORT}:443/- ${host_port}:443/g" docker-compose.yml
+        sudo sed -i -E "s/- [\"']?${ARL_DEFAULT_PORT}:443[\"']?/- \"${host_port}:443\"/g" docker-compose.yml
     fi
 
     if docker_compose_start "${ARL_DIR}" "灯塔ARL" "up"; then
@@ -195,11 +195,8 @@ start_arl() {
     prompt_host_port "灯塔ARL" "${current_port}" "host_port" || return 1
 
     if [[ "${host_port}" != "${current_port}" ]]; then
-        msg_info "正在停止现有ARL容器..."
-        docker_compose_stop "${ARL_DIR}" "灯塔ARL"
-        
         msg_info "正在将 ARL 映射端口从 ${current_port} 修改为 ${host_port}..."
-        sudo sed -i "s/- ${current_port}:443/- ${host_port}:443/g" "${ARL_DIR}/docker-compose.yml"
+        sudo sed -i -E "s/- [\"']?${current_port}:443[\"']?/- \"${host_port}:443\"/g" "${ARL_DIR}/docker-compose.yml"
     fi
 
     if docker_compose_start "${ARL_DIR}" "灯塔ARL" "up"; then
@@ -808,3 +805,4 @@ restart_arl_services() {
 }
 
 register_main_menu "配置ARL" "config_arl"
+
