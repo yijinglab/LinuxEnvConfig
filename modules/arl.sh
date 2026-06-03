@@ -195,6 +195,9 @@ start_arl() {
     prompt_host_port "灯塔ARL" "${current_port}" "host_port" || return 1
 
     if [[ "${host_port}" != "${current_port}" ]]; then
+        msg_info "正在停止现有ARL容器..."
+        docker_compose_stop "${ARL_DIR}" "灯塔ARL"
+        
         msg_info "正在将 ARL 映射端口从 ${current_port} 修改为 ${host_port}..."
         sudo sed -i "s/- ${current_port}:443/- ${host_port}:443/g" "${ARL_DIR}/docker-compose.yml"
     fi
