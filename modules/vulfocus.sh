@@ -26,7 +26,8 @@
 # ═══════════════════════════════════════════════════════════════
 
 readonly VULFOCUS_CONTAINER="vulfocus"
-readonly VULFOCUS_IMAGE="swr.cn-south-1.myhuaweicloud.com/mingy/vulfocus:20251218"
+readonly VULFOCUS_IMAGE="swr.cn-south-1.myhuaweicloud.com/mingy/vulfocus:20260529"
+readonly VULFOCUS_DEFAULT_PORT="88"
 
 # ═══════════════════════════════════════════════════════════════
 # Vulfocus 配置主菜单
@@ -60,13 +61,14 @@ install_vulfocus() {
         return 0
     fi
 
-    local host_ip
-    prompt_host_ip "Vulfocus" || return 1
+    local host_ip host_port
+    prompt_host_ip "Vulfocus" || return 1 
+    prompt_host_port "Vulfocus" "${VULFOCUS_DEFAULT_PORT}" "host_port" || return 1
 
     docker_pull_image "${VULFOCUS_IMAGE}"
 
     msg_info "正在启动Vulfocus容器..."
-    docker run -d -p 88:80 \
+    docker run -d -p "${host_port}:80" \
         --name "${VULFOCUS_CONTAINER}" --restart always \
         -v /var/run/docker.sock:/var/run/docker.sock \
         -e VUL_IP="${host_ip}" \
@@ -74,7 +76,7 @@ install_vulfocus() {
 
     if action "Vulfocus安装成功" "启动Vulfocus容器失败"; then
         show_access_info \
-            "访问地址: http://${host_ip}:88" \
+            "访问地址: http://${host_ip}:${host_port}" \
             "默认用户: admin" \
             "默认密码: admin"
     fi
@@ -89,10 +91,12 @@ start_vulfocus() {
     show_section "启动Vulfocus服务"
     local default_ip
     default_ip=$(get_best_ip)
+    local host_port
+    host_port=$(docker inspect --format='{{(index (index .NetworkSettings.Ports "80/tcp") 0).HostPort}}' "${VULFOCUS_CONTAINER}" 2>/dev/null || echo "${VULFOCUS_DEFAULT_PORT}")
 
     if docker_start_container "${VULFOCUS_CONTAINER}" "Vulfocus"; then
         show_access_info \
-            "访问地址: http://${default_ip}:88" \
+            "访问地址: http://${default_ip}:${host_port}" \
             "默认用户: admin" \
             "默认密码: admin"
     fi
