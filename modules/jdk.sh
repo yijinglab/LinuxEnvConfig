@@ -146,33 +146,70 @@ scan_injdk_versions() {
     return 0
 }
 
+# 镜像已下架版本的补充源: "主版本|下载URL|菜单标签"
+# Oracle 官方 17/21/22/23 为 NFTC 许可免登录直链; Oracle JDK 11 官方需登录,
+# 以华为镜像的 OpenJDK 11 GA 代替并在标签中注明
+readonly INJDK_EXTRA_SOURCES=(
+    "11|https://mirrors.huaweicloud.com/openjdk/11.0.2/openjdk-11.0.2_linux-x64_bin.tar.gz|JDK 11 (OpenJDK 11.0.2, 华为镜像)"
+    "17|https://download.oracle.com/java/17/archive/jdk-17.0.12_linux-x64_bin.tar.gz|Oracle JDK 17 (jdk-17.0.12, oracle.com)"
+    "22|https://download.oracle.com/java/22/archive/jdk-22.0.2_linux-x64_bin.tar.gz|Oracle JDK 22 (jdk-22.0.2, oracle.com)"
+    "23|https://download.oracle.com/java/23/archive/jdk-23_linux-x64_bin.tar.gz|Oracle JDK 23 (jdk-23, oracle.com)"
+)
+
+url_is_available() {
+    local code
+    code=$(curl -s -o /dev/null -w "%{http_code}" -IL --max-time 10 "$1" 2>/dev/null || true)
+    [[ "$code" == "200" ]]
+}
+
 install_oracle_from_injdk() {
     push_path "www.injdk.cn"
     show_section "从injdk安装OracleJDK"
 
     msg_info "正在扫描镜像可用版本..."
-    local entries=()
+    # 统一收集为 "主版本|URL|文件名|菜单标签"
+    local all_entries=() line major file
     while read -r major file; do
-        [[ -n $major && -n $file ]] && entries+=("$major $file")
+        [[ -n $major && -n $file ]] && all_entries+=("$major|$INJDK_MIRROR_BASE/$major/$file|$file|Oracle JDK $major ($file, injdk镜像)")
     done < <(scan_injdk_versions)
 
-    if [[ ${#entries[@]} -eq 0 ]]; then
+    # 镜像没有的主版本, 逐个探测补充源, 可用的才加入菜单
+    local cand cmajor c_url c_label covered
+    for cand in "${INJDK_EXTRA_SOURCES[@]}"; do
+        IFS='|' read -r cmajor c_url c_label <<< "$cand"
+        covered=false
+        for line in "${all_entries[@]}"; do
+            [[ ${line%%|*} == "$cmajor" ]] && covered=true
+        done
+        if [[ "$covered" == "false" ]] && url_is_available "$c_url"; then
+            all_entries+=("$cmajor|$c_url|$(basename "$c_url")|$c_label")
+        fi
+    done
+
+    if [[ ${#all_entries[@]} -eq 0 ]]; then
         msg_error "镜像连接失败或暂无可用的 linux-x64 版本"
         pop_path
         return 1
     fi
 
-    local labels=() entry major file
-    for entry in "${entries[@]}"; do
-        major=${entry%% *}
-        file=${entry#* }
-        labels+=("Oracle JDK $major  ($file)")
+    # 按主版本号升序排列
+    local sorted
+    sorted=$(printf '%s\n' "${all_entries[@]}" | sort -t'|' -k1,1n || true)
+    all_entries=()
+    while read -r line; do
+        [[ -n $line ]] && all_entries+=("$line")
+    done <<< "$sorted"
+
+    local labels=() entry
+    for entry in "${all_entries[@]}"; do
+        IFS='|' read -r _ _ _ elabel <<< "$entry"
+        labels+=("$elabel")
     done
 
     echo ""
     show_submenu "OracleJDK版本选择" "${labels[@]}"
     local version
-    msg_prompt "请选择版本 [1-${#entries[@]}, 0返回, q退出]" "version"
+    msg_prompt "请选择版本 [1-${#all_entries[@]}, 0返回, q退出]" "version"
 
     if [[ $version == "q" || $version == "Q" ]]; then
         exit 0
@@ -183,12 +220,11 @@ install_oracle_from_injdk() {
         return 1
     fi
 
-    if [[ $version =~ ^[0-9]+$ ]] && [[ $version -ge 1 && $version -le ${#entries[@]} ]]; then
-        entry=${entries[$((version - 1))]}
-        major=${entry%% *}
-        file=${entry#* }
+    if [[ $version =~ ^[0-9]+$ ]] && [[ $version -ge 1 && $version -le ${#all_entries[@]} ]]; then
+        local e_url e_file
+        IFS='|' read -r _ e_url e_file _ <<< "${all_entries[$((version - 1))]}"
 
-        install_manual_jdk_package "$INJDK_MIRROR_BASE/$major/$file" "$file"
+        install_manual_jdk_package "$e_url" "$e_file"
     else
         msg_error "无效选择"
     fi
