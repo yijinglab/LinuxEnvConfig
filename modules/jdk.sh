@@ -130,15 +130,17 @@ readonly INJDK_MIRROR_BASE="https://d10.injdk.cn/openjdk/oraclejdk"
 
 # 扫描 injdk 镜像当前实际可用的版本, 避免硬编码 URL 因镜像滚动更新而失效
 # 输出: 每行 "主版本号 文件名", 如 "8 jdk-8u491-linux-x64.tar.gz"
+# 注意: 本脚本运行在 set -euo pipefail 下, 空目录会让 grep 返回非零, 必须用 || true 兜底,
+#       否则扫描子进程会被 set -e 终止, 后续版本全部丢失
 scan_injdk_versions() {
     local majors major listing latest
     majors=$(curl -sL --max-time 15 "$INJDK_MIRROR_BASE/" 2>/dev/null \
-        | grep -oE 'href="\./[0-9]+/"' | grep -oE '[0-9]+' | sort -n -u)
+        | grep -oE 'href="\./[0-9]+/"' | grep -oE '[0-9]+' | sort -n -u || true)
     [[ -z $majors ]] && return 1
 
     for major in $majors; do
-        listing=$(curl -sL --max-time 15 "$INJDK_MIRROR_BASE/$major/" 2>/dev/null)
-        latest=$(echo "$listing" | grep -oE 'jdk-[0-9u.]+[-_]linux-x64([-_][a-z0-9]+)?\.tar\.gz' | sort -V | uniq | tail -n 1)
+        listing=$(curl -sL --max-time 15 "$INJDK_MIRROR_BASE/$major/" 2>/dev/null || true)
+        latest=$(echo "$listing" | grep -oE 'jdk-[0-9u.]+[-_]linux-x64([-_][a-z0-9]+)?\.tar\.gz' | sort -V | uniq | tail -n 1 || true)
         [[ -n $latest ]] && echo "$major $latest"
     done
     return 0
@@ -235,7 +237,7 @@ get_yijinglab_download_url() {
 install_manual_jdk_package() {
     local url="$1"
     local filename="$2"
-    local fallback_dir_name="$3"
+    local fallback_dir_name="${3:-}"
     local install_base="/usr/lib/jvm"
 
     [[ -f "$filename" ]] && rm -f "$filename"
@@ -257,7 +259,7 @@ install_manual_jdk_package() {
 
     # 从压缩包首条目探测解压后的顶层目录名 (如 jdk1.8.0_491), 探测失败时回退到传入值
     local target_dir_name
-    target_dir_name=$(tar -tzf "$filename" 2>/dev/null | head -n 1 | cut -d/ -f1)
+    target_dir_name=$(tar -tzf "$filename" 2>/dev/null | head -n 1 | cut -d/ -f1 || true)
     if [[ -z $target_dir_name ]]; then
         target_dir_name="$fallback_dir_name"
     fi
