@@ -317,7 +317,7 @@ download_file() {
     local filename; filename=$(basename "$output")
     if command_exists wget; then
         # 使用 PIPESTATUS 准确获取 wget 的退出状态
-        sudo wget -q --user-agent="$ua" --show-progress --progress=bar:force "$url" -O "$output" 2>&1 | while read -r -d $'\r' line; do
+        sudo wget -q --tries=3 --timeout=60 --user-agent="$ua" --show-progress --progress=bar:force "$url" -O "$output" 2>&1 | while read -r -d $'\r' line; do
             local percent
             percent=$(echo "$line" | grep -oE "[0-9]+%" | tail -n 1)
             [[ -n "$percent" ]] && printf "\r  ${BRIGHT_BLUE}➜${NC} ${CYAN}正在下载 [%s]: %-4s${NC}\033[K" "$filename" "$percent"
@@ -331,7 +331,8 @@ download_file() {
     
     if [[ "$success" == "false" ]] && command_exists curl; then
         msg_info "尝试使用 curl 备用下载..."
-        sudo curl -# -L -A "$ua" -o "$output" "$url" 2>&1 | while read -r -d $'\r' line; do
+        # -f: HTTP 4xx/5xx 时直接失败, 避免把错误页当成文件保存后误报"下载完成"
+        sudo curl -f -# -L --retry 3 -A "$ua" -o "$output" "$url" 2>&1 | while read -r -d $'\r' line; do
             local percent
             percent=$(echo "$line" | grep -oE "[0-9.]+(%)?" | tail -n 1)
             [[ -n "$percent" ]] && printf "\r  ${BRIGHT_BLUE}➜${NC} ${CYAN}正在下载 [%s]: %-6s${NC}\033[K" "$filename" "$percent"

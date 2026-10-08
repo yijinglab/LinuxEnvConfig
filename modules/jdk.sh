@@ -126,16 +126,51 @@ install_oracle_from_yijinglab() {
     pop_path
 }
 
+readonly INJDK_MIRROR_BASE="https://d10.injdk.cn/openjdk/oraclejdk"
+
+# 扫描 injdk 镜像当前实际可用的版本, 避免硬编码 URL 因镜像滚动更新而失效
+# 输出: 每行 "主版本号 文件名", 如 "8 jdk-8u491-linux-x64.tar.gz"
+scan_injdk_versions() {
+    local majors major listing latest
+    majors=$(curl -sL --max-time 15 "$INJDK_MIRROR_BASE/" 2>/dev/null \
+        | grep -oE 'href="\./[0-9]+/"' | grep -oE '[0-9]+' | sort -n -u)
+    [[ -z $majors ]] && return 1
+
+    for major in $majors; do
+        listing=$(curl -sL --max-time 15 "$INJDK_MIRROR_BASE/$major/" 2>/dev/null)
+        latest=$(echo "$listing" | grep -oE 'jdk-[0-9u.]+[-_]linux-x64([-_][a-z0-9]+)?\.tar\.gz' | sort -V | uniq | tail -n 1)
+        [[ -n $latest ]] && echo "$major $latest"
+    done
+    return 0
+}
+
 install_oracle_from_injdk() {
     push_path "www.injdk.cn"
     show_section "从injdk安装OracleJDK"
 
-    local JDK_URLS=("https://d10.injdk.cn/openjdk/oraclejdk/8/jdk-8u421-linux-x64.tar.gz" "https://d10.injdk.cn/openjdk/oraclejdk/11/jdk-11.0.24_linux-x64_bin.tar.gz" "https://d10.injdk.cn/openjdk/oraclejdk/17/jdk-17_linux-x64_bin.tar.gz" "https://d10.injdk.cn/openjdk/oraclejdk/21/jdk-21_linux-x64_bin.tar.gz" "https://d10.injdk.cn/openjdk/oraclejdk/22/jdk-22_linux-x64_bin.tar.gz" "https://d10.injdk.cn/openjdk/oraclejdk/23/jdk-23_linux-x64_bin.tar.gz")
+    msg_info "正在扫描镜像可用版本..."
+    local entries=()
+    while read -r major file; do
+        [[ -n $major && -n $file ]] && entries+=("$major $file")
+    done < <(scan_injdk_versions)
+
+    if [[ ${#entries[@]} -eq 0 ]]; then
+        msg_error "镜像连接失败或暂无可用的 linux-x64 版本"
+        pop_path
+        return 1
+    fi
+
+    local labels=() entry major file
+    for entry in "${entries[@]}"; do
+        major=${entry%% *}
+        file=${entry#* }
+        labels+=("Oracle JDK $major  ($file)")
+    done
 
     echo ""
-    show_submenu "OracleJDK版本选择" "${ORACLE_JDK_LABELS[@]}"
+    show_submenu "OracleJDK版本选择" "${labels[@]}"
     local version
-    msg_prompt "请选择版本 [1-6, 0返回, q退出]" "version"
+    msg_prompt "请选择版本 [1-${#entries[@]}, 0返回, q退出]" "version"
 
     if [[ $version == "q" || $version == "Q" ]]; then
         exit 0
@@ -146,13 +181,12 @@ install_oracle_from_injdk() {
         return 1
     fi
 
-    if [[ $version =~ ^[0-9]+$ ]] && [[ $version -ge 1 && $version -le 6 ]]; then
-        local index=$((version - 1))
-        local jdk_ver=${ORACLE_JDK_VERSIONS[$index]}
-        local jdk_name=${ORACLE_JDK_NAMES[$index]}
-        local jdk_url=${JDK_URLS[$index]}
+    if [[ $version =~ ^[0-9]+$ ]] && [[ $version -ge 1 && $version -le ${#entries[@]} ]]; then
+        entry=${entries[$((version - 1))]}
+        major=${entry%% *}
+        file=${entry#* }
 
-        install_manual_jdk_package "$jdk_url" "$jdk_name" "$jdk_ver"
+        install_manual_jdk_package "$INJDK_MIRROR_BASE/$major/$file" "$file"
     else
         msg_error "无效选择"
     fi
@@ -201,7 +235,7 @@ get_yijinglab_download_url() {
 install_manual_jdk_package() {
     local url="$1"
     local filename="$2"
-    local target_dir_name="$3"
+    local fallback_dir_name="$3"
     local install_base="/usr/lib/jvm"
 
     [[ -f "$filename" ]] && rm -f "$filename"
@@ -213,7 +247,25 @@ install_manual_jdk_package() {
         return 1
     fi
 
+    if ! gzip -t "$filename" 2>/dev/null; then
+        msg_error "下载的文件不完整或已损坏, 请重试"
+        rm -f "$filename"
+        return 1
+    fi
+
     msg_success "下载完成"
+
+    # 从压缩包首条目探测解压后的顶层目录名 (如 jdk1.8.0_491), 探测失败时回退到传入值
+    local target_dir_name
+    target_dir_name=$(tar -tzf "$filename" 2>/dev/null | head -n 1 | cut -d/ -f1)
+    if [[ -z $target_dir_name ]]; then
+        target_dir_name="$fallback_dir_name"
+    fi
+    if [[ -z $target_dir_name ]]; then
+        msg_error "无法确定解压目录名"
+        rm -f "$filename"
+        return 1
+    fi
 
     sudo mkdir -p "$install_base"
 
